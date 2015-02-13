@@ -1,5 +1,6 @@
 image: go
 script:
   - cd drone
+  - go get
   - go build
   - go test
