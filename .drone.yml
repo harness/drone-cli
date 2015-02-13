@@ -19,6 +19,7 @@ script:
   - GOOS=windows GOARCH=amd64 go build -o ../dist/windows/amd64/drone
   - apt-get update 1> /dev/null 2> /dev/null
   - apt-get -y install python-pip 1> /dev/null 2> /dev/null
+  - cd ..
 
 notify:
   webhook:
