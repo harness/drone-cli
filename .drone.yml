@@ -28,6 +28,14 @@ script:
   - tar -cvzf ./dist/drone_windows_386.tar.gz   ./bin/windows/386/drone
   - tar -cvzf ./dist/drone_windows_amd64.tar.gz ./bin/windows/amd64/drone
 
+  # generate shas for tar files
+  - sha256sum ./dist/drone_linux_amd64.tar.gz   > ./dist/drone_linux_amd64.sha256
+  - sha256sum ./dist/drone_linux_386.tar.gz     > ./dist/drone_linux_386.sha256
+  - sha256sum ./dist/drone_linux_arm.tar.gz     > ./dist/drone_linux_arm.sha256
+  - sha256sum ./dist/drone_darwin_amd64.tar.gz  > ./dist/drone_darwin_amd64.sha256
+  - sha256sum ./dist/drone_windows_386.tar.gz   > ./dist/drone_windows_386.sha256
+  - sha256sum ./dist/drone_windows_amd64.tar.gz > ./dist/drone_windows_amd64.sha256
+
   # install pip (required by s3 plugin to instal s3 cli)
   - apt-get update                1> /dev/null 2> /dev/null
   - apt-get -y install python-pip 1> /dev/null 2> /dev/null
@@ -45,3 +53,11 @@ publish:
     when:
       branch: master
       owner: drone
+
+notify:
+  webhook:
+    urls:
+      - https://webhooks.gitter.im/e/$$GITTER_KEY
+    on_started: false
+    on_success: true
+    on_failure: true
