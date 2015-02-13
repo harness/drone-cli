@@ -1,6 +1,21 @@
-image: go
+image: library/golang:1.4.1-cross
+git:
+  path: github.com/drone/drone-cli
+env:
+  - GOROOT=/usr/src/go
+  - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 script:
-  - cd drone
-  - go get
-  - go build
-  - go test
+  - go get ./...
+  - go test ./...
+  - mkdir -p ./dist/linux/386
+  - mkdir -p ./dist/linux/amd64
+  - mkdir -p ./dist/darwin/amd64
+  - mkdir -p ./dist/windows/386
+  - mkdir -p ./dist/windows/amd64
+  - cd ./drone
+  - GOOS=linux   GOARCH=amd64 go build -o ../dist/linux/amd64/drone
+  - GOOS=linux   GOARCH=386   go build -o ../dist/linux/386/drone
+  - GOOS=linux   GOARCH=arm   go build -o ../dist/linux/arm/drone
+  - GOOS=darwin  GOARCH=amd64 go build -o ../dist/darwin/amd64/drone
+  - GOOS=windows GOARCH=386   go build -o ../dist/windows/386/drone
+  - GOOS=windows GOARCH=amd64 go build -o ../dist/windows/amd64/drone
