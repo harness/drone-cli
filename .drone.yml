@@ -3,6 +3,9 @@ image: library/golang:1.4.1-cross
 git:
   path: github.com/drone/drone-cli
 
+branches:
+  - master
+
 env:
   - GOROOT=/usr/src/go
   - PATH=$PATH:$GOROOT/bin:$GOPATH/bin

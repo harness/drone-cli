@@ -1,6 +1,6 @@
 # drone-cli
 Drone command-line interface
 
-[![Build Status](http://test.drone.io/api/badge/github.com/drone/drone-cli/status.svg?style=flat&branch=master)](http://test.drone.io/github.com/drone/drone-cli)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/drone/drone?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
+**NOTE:** this is a special branch being used to test out matrix and parallel builds.
+It requires a patched version of the [samalba/dockerclient](https://github.com/samalba/dockerclient)
+package found at https://github.com/samalba/dockerclient/pull/74
