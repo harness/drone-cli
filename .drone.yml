@@ -8,16 +8,18 @@ env:
   - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 script:
-  - go get ./...
-  - go test ./...
+  - go get github.com/nitrous-io/goop
+  - goop install
+  - goop go get ./...
+  - goop go test ./...
 
   # compile drone for all architectures
-  - GOOS=linux   GOARCH=amd64 go build -o ./bin/linux/amd64/drone   github.com/drone/drone-cli/drone
-  - GOOS=linux   GOARCH=386   go build -o ./bin/linux/386/drone     github.com/drone/drone-cli/drone
-  - GOOS=linux   GOARCH=arm   go build -o ./bin/linux/arm/drone     github.com/drone/drone-cli/drone
-  - GOOS=darwin  GOARCH=amd64 go build -o ./bin/darwin/amd64/drone  github.com/drone/drone-cli/drone
-  - GOOS=windows GOARCH=386   go build -o ./bin/windows/386/drone   github.com/drone/drone-cli/drone
-  - GOOS=windows GOARCH=amd64 go build -o ./bin/windows/amd64/drone github.com/drone/drone-cli/drone
+  - GOOS=linux   GOARCH=amd64 goop go build -o ./bin/linux/amd64/drone   github.com/drone/drone-cli/drone
+  - GOOS=linux   GOARCH=386   goop go build -o ./bin/linux/386/drone     github.com/drone/drone-cli/drone
+  - GOOS=linux   GOARCH=arm   goop go build -o ./bin/linux/arm/drone     github.com/drone/drone-cli/drone
+  - GOOS=darwin  GOARCH=amd64 goop go build -o ./bin/darwin/amd64/drone  github.com/drone/drone-cli/drone
+  - GOOS=windows GOARCH=386   goop go build -o ./bin/windows/386/drone   github.com/drone/drone-cli/drone
+  - GOOS=windows GOARCH=amd64 goop go build -o ./bin/windows/amd64/drone github.com/drone/drone-cli/drone
 
   # tar binary files prior to upload
   - mkdir ./dist

@@ -26,3 +26,4 @@ _testmain.go
 # Binary file(s)
 drone/drone
 dist/
+.vendor

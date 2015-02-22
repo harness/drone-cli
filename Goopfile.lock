@@ -1,0 +1,16 @@
+code.google.com/p/go.net #937a34c9de13c766c814510f76bca091dee06028
+code.google.com/p/gosqlite #74691fb6f83716190870cde1b658538dd4b18eb0
+github.com/Sirupsen/logrus #6dcec6ed3bdf8559ac1696bc32d7dbd9aadaf5b6
+github.com/codegangsta/cli #50c77ecec0068c9aef9d90ae0fd0fdf410041da3
+github.com/coreos/go-systemd #2d21675230a81a503f4363f4aa3490af06d52bb8
+github.com/docker/docker #v1.5.0
+github.com/docker/libcontainer #v1.4.0
+github.com/docker/libtrust #c54fbb67c1f1e68d7d6f8d2ad7c9360404616a41
+github.com/go-fsnotify/fsnotify #96c060f6a6b7e0d6f75fddd10efeaca3e5d1bcb0
+github.com/godbus/dbus #88765d85c0fdadcd98a54e30694fa4e4f5b51133
+github.com/gorilla/context #215affda49addc4c8ef7e2534915df2c8c35c6cd
+github.com/gorilla/mux #8a875a034c69b940914d83ea03d3f1299b4d094b
+github.com/kr/pty #05017fcccf23c823bfdea560dcc958a136e54fb7
+github.com/syndtr/gocapability #e55e5833692b49e49a0073ad5baf7803f21bebf4
+github.com/tchap/go-patricia #f64d0a63cd3363481c898faa9339de04d12213f9
+github.com/tobi/airbrake-go #5b5e269e1bc398d43f67e43dafff3414a59cd5a2
