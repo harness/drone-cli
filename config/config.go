@@ -13,7 +13,7 @@ type Config struct {
 
 	Docker struct {
 		Volumes    []string
-		Privileged string
+		Privileged bool
 		Hostname   string
 		Net        string
 	}
@@ -24,3 +24,11 @@ type Config struct {
 
 	Matrix map[string][]string
 }
+
+// func (c *Config) GetEnv() string    { return c.Env }
+// func (c *Config) GetImage() string  { return c.Image }
+// func (c *Config) GetScript() string { return c.Script }
+
+//func (c *Config) GetDocker() {
+//	return
+//}
