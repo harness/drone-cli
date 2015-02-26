@@ -2,8 +2,8 @@ package config
 
 type Config struct {
 	Image    string
-	Env      []string
-	Script   []string
+	Env      []string `json:"env"`
+	Script   []string `json:"script"`
 	Branches []string
 	Services []string
 
@@ -24,11 +24,3 @@ type Config struct {
 
 	Matrix map[string][]string
 }
-
-// func (c *Config) GetEnv() string    { return c.Env }
-// func (c *Config) GetImage() string  { return c.Image }
-// func (c *Config) GetScript() string { return c.Script }
-
-//func (c *Config) GetDocker() {
-//	return
-//}
