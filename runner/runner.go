@@ -3,6 +3,8 @@ package runner
 import (
 	"fmt"
 	"io"
+
+	"github.com/drone/drone-cli/common/uuid"
 )
 
 const (
@@ -10,7 +12,7 @@ const (
 	ImageClone = "drone/drone-clone-git"
 )
 
-func Run(req *Request, resp *Response) error {
+func Run(req *Request, resp ResponseWriter) error {
 
 	var containers []*Container
 
@@ -26,7 +28,7 @@ func Run(req *Request, resp *Response) error {
 	// temporary name for the build container
 	//name := fmt.Sprintf("build-init-%s", createUID())
 	net := req.Config.Docker.Net
-	uid := createUID()
+	uid := uuid.CreateUUID()
 	cmd := []string{req.Encode()}
 
 	// init container

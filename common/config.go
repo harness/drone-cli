@@ -1,4 +1,4 @@
-package config
+package common
 
 type Config struct {
 	Image    string

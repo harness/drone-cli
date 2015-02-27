@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/drone/drone-cli/common"
 	"gopkg.in/yaml.v1"
 )
 
@@ -11,14 +12,14 @@ const (
 	LimitPerms = 25
 )
 
-func Parse(raw string) (*Config, error) {
-	config := Config{}
+func Parse(raw string) (*common.Config, error) {
+	config := common.Config{}
 	err := yaml.Unmarshal([]byte(raw), &config)
 	return &config, err
 }
 
-func ParseMatrix(raw string) ([]*Config, error) {
-	var matrix []*Config
+func ParseMatrix(raw string) ([]*common.Config, error) {
+	var matrix []*common.Config
 
 	config, err := Parse(raw)
 	if err != nil {
