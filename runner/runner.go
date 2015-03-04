@@ -27,7 +27,7 @@ func Run(req *Request, resp ResponseWriter) error {
 
 	// temporary name for the build container
 	//name := fmt.Sprintf("build-init-%s", createUID())
-	net := req.Config.Docker.Net
+	net := ""
 	uid := uuid.CreateUUID()
 	cmd := []string{req.Encode()}
 
@@ -48,35 +48,39 @@ func Run(req *Request, resp ResponseWriter) error {
 	})
 
 	// attached service containers
-	for i, service := range req.Config.Services {
-		containers = append(containers, &Container{
-			Name:        fmt.Sprintf("drone-%s-service-%v", uid, i),
-			Image:       service,
-			Env:         req.Config.Env,
-			NetworkMode: net,
-			Detached:    true,
-		})
+	i := 0
+	for _, service := range req.Config.Compose {
 
 		if i == 0 && len(net) == 0 {
 			net = fmt.Sprintf("container:drone-%s-service-%v", uid, i)
 		}
+
+		containers = append(containers, &Container{
+			Name:        fmt.Sprintf("drone-%s-service-%v", uid, i),
+			Image:       service.Image,
+			Env:         service.Environment,
+			NetworkMode: net, //service.NetworkMode,
+			Detached:    true,
+		})
+
+		i++
 	}
 
 	// build container
 	containers = append(containers, &Container{
 		Name:        fmt.Sprintf("drone-%s-build", uid),
-		Image:       req.Config.Image,
-		Env:         req.Config.Env,
+		Image:       req.Config.Build.Image,
+		Env:         req.Config.Build.Environment,
 		Cmd:         []string{"/drone/bin/build.sh"},
 		Entrypoint:  []string{"/bin/bash"},
 		WorkingDir:  req.Clone.Dir,
 		NetworkMode: net,
-		Privileged:  req.Config.Docker.Privileged,
+		Privileged:  req.Config.Build.Privileged,
 		VolumesFrom: []string{containers[0].Name},
 	})
 
 	//
-	// create the notify, publish, deploy containers
+	// TODO: create the notify, publish, deploy containers
 	//
 
 	// loop through and create containers
