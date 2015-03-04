@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/franela/goblin"
 	"testing"
+
+	"github.com/franela/goblin"
 )
 
 func Test_Inject(t *testing.T) {
@@ -42,24 +43,25 @@ func Test_InjectSafe(t *testing.T) {
 		c, _ := Parse(InjectSafe(yml, m))
 
 		g.It("Should replace vars in notify section", func() {
-			g.Assert(c.Deploy["my_service"].(map[interface{}]interface{})["token"]).Equal("FOO")
-			g.Assert(c.Deploy["my_service"].(map[interface{}]interface{})["secret"]).Equal("BAR")
+			g.Assert(c.Deploy["digital_ocean"].Config["token"]).Equal("FOO")
+			g.Assert(c.Deploy["digital_ocean"].Config["secret"]).Equal("BAR")
 		})
 
 		g.It("Should not replace vars in script section", func() {
-			g.Assert(c.Script[0]).Equal("echo $$TOKEN")
-			g.Assert(c.Script[1]).Equal("echo $$SECRET")
+			g.Assert(c.Build.Config["commands"].([]interface{})[0]).Equal("echo $$TOKEN")
+			g.Assert(c.Build.Config["commands"].([]interface{})[1]).Equal("echo $$SECRET")
 		})
 	})
 }
 
 var yml = `
-image: foo
-script:
-  - echo $$TOKEN
-  - echo $$SECRET
+build:
+  image: foo
+  commands:
+    - echo $$TOKEN
+    - echo $$SECRET
 deploy:
-  my_service:
+  digital_ocean:
     token: $$TOKEN
     secret: $$SECRET
 `

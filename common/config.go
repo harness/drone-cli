@@ -1,26 +1,35 @@
 package common
 
 type Config struct {
-	Image    string
-	Env      []string `json:"env"`
-	Script   []string `json:"script"`
-	Branches []string
-	Services []string
+	/*
+		Image    string
+		Env      []string `json:"env"`
+		Script   []string `json:"script"`
+		Branches []string
+		Services []string
 
-	Git struct {
-		Path string
-	}
+		Git struct {
+			Path string
+		}
 
-	Docker struct {
-		Volumes    []string
-		Privileged bool
-		Hostname   string
-		Net        string
-	}
+			Docker struct {
+				Volumes    []string
+				Privileged bool
+				Hostname   string
+				Net        string
+			}
+	*/
 
-	Notify  map[string]interface{}
-	Publish map[string]interface{}
-	Deploy  map[string]interface{}
+	//Clone   map[string]Step
+	//Build   map[string]Step
+
+	Clone Step
+	Build Step
+
+	Compose map[string]Step
+	Publish map[string]Step //interface{}
+	Deploy  map[string]Step //interface{}
+	Notify  map[string]Step //interface{}
 
 	Matrix map[string][]string
 }
@@ -34,10 +43,34 @@ type Step struct {
 	Privileged  bool     `json:"privileged"`
 	Net         string   `json:"net"`
 
-	Config map[string]interface{} `yaml:"config,inner" json:"config"`
+	// Config represents the unique configuration details
+	// for each plugin.
+	Config map[string]interface{} `yaml:"config,inline" json:"config"`
 }
 
 /*
+
+type Container interface {
+	Create()
+	Start()
+	Wait()
+	Logs()
+	Info()
+	Stop()
+	Kill()
+	Remove()
+}
+
+clone:
+  git:
+	  path: foo/bar
+
+build:
+  script:
+	  image: go:1.2
+	  commands:
+		  - go build
+			- go test
 
 type Step struct {
 	Image       string

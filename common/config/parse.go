@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/drone/drone-cli/common"
-	"gopkg.in/yaml.v1"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -73,7 +73,7 @@ func ParseMatrix(raw string) ([]*common.Config, error) {
 		// as an environment variable
 		for key, val := range axis {
 			env := fmt.Sprintf("%s=%s", key, val)
-			config.Env = append(config.Env, env)
+			config.Build.Environment = append(config.Build.Environment, env)
 		}
 
 		// enforce a maximum number of permutations

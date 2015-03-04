@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"gopkg.in/yaml.v1"
+	"gopkg.in/yaml.v2"
 )
 
 func Inject(raw string, params map[string]string) string {
@@ -27,7 +27,8 @@ func Inject(raw string, params map[string]string) string {
 func InjectSafe(raw string, params map[string]string) string {
 	before, _ := Parse(raw)
 	after, _ := Parse(Inject(raw, params))
-	after.Script = before.Script
+	after.Build = before.Build
+	after.Compose = before.Compose
 	scrubbed, _ := yaml.Marshal(after)
 	return string(scrubbed)
 }

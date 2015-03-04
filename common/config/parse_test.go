@@ -17,7 +17,7 @@ func Test_Parse(t *testing.T) {
 
 	unique := map[string]bool{}
 	for _, config := range confs {
-		unique[config.Image] = true
+		unique[config.Build.Image] = true
 	}
 
 	if len(unique) != 24 {
@@ -26,7 +26,8 @@ func Test_Parse(t *testing.T) {
 }
 
 var matrix = `
-image: $$python_version $$redis_version $$django_version $$go_version
+build:
+  image: $$python_version $$redis_version $$django_version $$go_version
 matrix:
   python_version:
     - 3.2
