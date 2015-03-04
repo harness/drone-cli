@@ -1,16 +1,21 @@
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
+	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/common/uuid"
 )
 
 const (
-	ImageInit  = "drone/drone-init"
-	ImageClone = "drone/drone-clone-git"
+	ImageInit  = "plugins/drone-build"
+	ImageClone = "plugins/drone-git"
 )
+
+// TODO(brydzews) use correct NetworkMode instead of hard-coded
+// TODO(brydzews) use privileged when specified for all containers
 
 func Run(req *Request, resp ResponseWriter) error {
 
@@ -26,17 +31,15 @@ func Run(req *Request, resp ResponseWriter) error {
 	}()
 
 	// temporary name for the build container
-	//name := fmt.Sprintf("build-init-%s", createUID())
 	net := ""
 	uid := uuid.CreateUUID()
-	cmd := []string{req.Encode()}
 
 	// init container
 	containers = append(containers, &Container{
 		Name:    fmt.Sprintf("drone-%s-init", uid),
 		Image:   ImageInit,
 		Volumes: []string{"/drone"},
-		Cmd:     cmd,
+		Cmd:     EncodeParams(req, req.Config.Build.Config),
 	})
 
 	// clone container
@@ -44,25 +47,25 @@ func Run(req *Request, resp ResponseWriter) error {
 		Name:        fmt.Sprintf("drone-%s-clone", uid),
 		Image:       ImageClone,
 		VolumesFrom: []string{containers[0].Name},
-		Cmd:         cmd,
+		Cmd:         EncodeParams(req, nil),
 	})
 
 	// attached service containers
 	i := 0
 	for _, service := range req.Config.Compose {
 
-		if i == 0 && len(net) == 0 {
-			net = fmt.Sprintf("container:drone-%s-service-%v", uid, i)
-		}
-
 		containers = append(containers, &Container{
 			Name:        fmt.Sprintf("drone-%s-service-%v", uid, i),
 			Image:       service.Image,
 			Env:         service.Environment,
+			Privileged:  service.Privileged,
 			NetworkMode: net, //service.NetworkMode,
 			Detached:    true,
 		})
 
+		if i == 0 && len(net) == 0 {
+			net = fmt.Sprintf("container:drone-%s-service-%v", uid, i)
+		}
 		i++
 	}
 
@@ -121,4 +124,16 @@ func Run(req *Request, resp ResponseWriter) error {
 	}
 
 	return nil
+}
+
+func EncodeParams(req *Request, args map[string]interface{}) []string {
+	out := struct {
+		Clone  *common.Clone          `json:"clone"`
+		Commit *common.Commit         `json:"commit"`
+		Repo   *common.Repo           `json:"repo"`
+		User   *common.User           `json:"user"`
+		Vargs  map[string]interface{} `json:"vargs"`
+	}{req.Clone, req.Commit, req.Repo, req.User, args}
+	raw, _ := json.Marshal(out)
+	return []string{string(raw)}
 }

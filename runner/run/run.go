@@ -10,18 +10,21 @@ import (
 )
 
 var yaml = `
-image: golang:$$go_version
-script:
-  - add-apt-repository ppa:git-core/ppa 1> /dev/null 2> /dev/null
-  - apt-get update 1> /dev/null 2> /dev/null
-  - apt-get update 1> /dev/null 2> /dev/null
-  - apt-get -y install git zip libsqlite3-dev sqlite3 rpm 1> /dev/null 2> /dev/null
-  - make docker
-  - make deps
+build:
+  image: golang:$$go_version
+  script:
+    - add-apt-repository ppa:git-core/ppa 1> /dev/null 2> /dev/null
+    - apt-get update 1> /dev/null 2> /dev/null
+    - apt-get update 1> /dev/null 2> /dev/null
+    - apt-get -y install git zip libsqlite3-dev sqlite3 rpm 1> /dev/null 2> /dev/null
+    - make docker
+    - make deps
 
-services:
-  - bradrydzewski/mysql:5.5
-  - bradrydzewski/postgres:9.1
+compose:
+  mysql:
+    image: bradrydzewski/mysql:5.5
+  postgres:
+    image: bradrydzewski/postgres:9.1
 
 matrix:
   go_version:
@@ -30,10 +33,11 @@ matrix:
 `
 
 var yaml_alt = `
-image: golang:$$go_version
-script:
-  - ls -la /drone/src/github.com/drone/drone
-  - go version
+build:
+  image: golang:$$go_version
+  commands:
+    - ls -la /drone/src/github.com/drone/drone
+    - go version
 
 matrix:
   go_version:

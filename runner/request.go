@@ -10,9 +10,10 @@ import (
 // A Request represents a build request.
 type Request struct {
 	Repo   *common.Repo   `json:"repo"`
-	Commit *common.Repo   `json:"commit"`
-	Config *common.Config `json:"config"`
+	Commit *common.Commit `json:"commit"`
+	Config *common.Config `json:"-"`
 	Clone  *common.Clone  `json:"clone"`
+	User   *common.User   `json:"user"`
 
 	Client dockerclient.Client `json:"-"`
 }
