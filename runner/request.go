@@ -1,24 +1,23 @@
 package runner
 
 import (
-	"encoding/json"
-
 	"github.com/drone/drone-cli/common"
 	"github.com/samalba/dockerclient"
 )
 
-// A Request represents a build request.
+// A Request represents a build request received by
+// a build runner.
 type Request struct {
-	Repo   *common.Repo   `json:"repo"`
-	Commit *common.Commit `json:"commit"`
-	Config *common.Config `json:"-"`
 	Clone  *common.Clone  `json:"clone"`
+	Commit *common.Commit `json:"commit"`
+	Repo   *common.Repo   `json:"repo"`
 	User   *common.User   `json:"user"`
 
-	Client dockerclient.Client `json:"-"`
-}
+	// Config specifies the build configuration and execution
+	// instructions to use when exeucting a build.
+	Config *common.Config `json:"-"`
 
-func (r *Request) Encode() string {
-	out, _ := json.Marshal(r)
-	return string(out)
+	// Client specifies the Docker client to use when executing
+	// a build.
+	Client dockerclient.Client `json:"-"`
 }
