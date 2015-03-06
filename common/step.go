@@ -5,6 +5,7 @@ package common
 type Step struct {
 	Name        string
 	Image       string
+	Pull        bool
 	Environment []string
 	Volumes     []string
 	Hostname    string
