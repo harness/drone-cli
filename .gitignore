@@ -27,3 +27,5 @@ _testmain.go
 drone/drone
 dist/
 runner/run/run
+
+NOTES.md
