@@ -1,4 +1,4 @@
-package builder
+package runner
 
 import "github.com/drone/drone-cli/common"
 

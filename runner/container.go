@@ -7,9 +7,16 @@ import (
 	"github.com/samalba/dockerclient"
 )
 
+const (
+	ContainerTypeBatch      = "batch"
+	ContainerTypeService    = "service"
+	ContainerTypeAmbassador = "ambassador"
+)
+
 type Container struct {
 	Name        string
 	Image       string
+	Pull        bool
 	Detached    bool
 	Privileged  bool
 	Env         []string
@@ -45,6 +52,14 @@ func (c *Container) Create() error {
 		}
 	}
 
+	// TODO: we should inspect the image first. We should
+	// run `docker pull` if inspect returns an error or pull == true
+	if c.Pull {
+		if err := c.client.PullImage(c.Image, nil); err != nil {
+			return err
+		}
+	}
+
 	id, err := c.client.CreateContainer(&config, c.Name)
 	if err != nil {
 		return err
@@ -71,6 +86,10 @@ func (c *Container) Kill() error {
 }
 
 func (c *Container) Remove() error {
+	return c.client.RemoveContainer(c.info.Id, true, false)
+}
+
+func (c *Container) RemoveVolume() error {
 	return c.client.RemoveContainer(c.info.Id, true, true)
 }
 
