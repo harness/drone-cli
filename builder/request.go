@@ -1,9 +1,11 @@
 package builder
 
-import "github.com/drone/drone-cli/common"
+import (
+	"github.com/drone/drone-cli/common"
+)
 
 // A Request represents a build request received by
-// a build runner.
+// a build handler.
 type Request struct {
 	Clone  *common.Clone
 	Commit *common.Commit

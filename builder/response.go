@@ -2,9 +2,9 @@ package builder
 
 import "io"
 
-// A ResultWriter interface is used by the builder to
+// A ResponseWriter interface is used by the builder to
 // construct a build repsonse.
-type ResultWriter interface {
+type ResponseWriter interface {
 	// Write writes the build stdout and stderr to the response.
 	Write([]byte) (int, error)
 
@@ -18,24 +18,24 @@ type ResultWriter interface {
 	ExitCode() int
 }
 
-// Result represents the response resulting from
+// Response represents the response resulting from
 // build execution.
-type Result struct {
-	writer   io.Writer
+type Response struct {
+	Writer   io.Writer
 	exitCode int
 }
 
-func (r *Result) Write(p []byte) (n int, err error) {
+func (r *Response) Write(p []byte) (n int, err error) {
 	// TODO(brydzews) this is the perfect spot to parse
 	// the Docker log format and convert to a standard
 	// plain text stream.
-	return r.writer.Write(p)
+	return r.Writer.Write(p)
 }
 
-func (r *Result) WriteExitCode(code int) {
+func (r *Response) WriteExitCode(code int) {
 	r.exitCode = code
 }
 
-func (r *Result) ExitCode() int {
+func (r *Response) ExitCode() int {
 	return r.exitCode
 }

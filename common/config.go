@@ -2,6 +2,7 @@ package common
 
 // A config structure is used to configure a build.
 type Config struct {
+	Setup Step
 	Clone Step
 	Build Step
 

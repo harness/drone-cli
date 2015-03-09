@@ -12,6 +12,9 @@ type Step struct {
 	Privileged  bool
 	Net         string
 
+	Entrypoint []string
+	Command    []string
+
 	// Config represents the unique configuration details
 	// for each plugin.
 	Config map[string]interface{} `yaml:"config,inline"`
