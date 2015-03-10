@@ -16,6 +16,7 @@ type Handler interface {
 
 type handler struct {
 	name   string
+	pull   bool
 	detach bool
 	client dockerclient.Client
 	host   *dockerclient.HostConfig
@@ -25,7 +26,10 @@ type handler struct {
 func (h *handler) Build(rw *ResultWriter) error {
 	name, err := h.client.CreateContainer(h.config, "")
 	if err != nil {
-		return err
+		perr := h.client.PullImage(h.config.Image, nil)
+		if perr != nil {
+			return err
+		}
 	}
 	h.name = name
 	err = h.client.StartContainer(h.name, h.host)
@@ -70,6 +74,7 @@ func Batch(build *Build, step *common.Step) Handler {
 	conf.Cmd = toCommand(build, step)
 	conf.Entrypoint = []string{}
 	return &handler{
+		pull:   step.Pull,
 		client: build.Client,
 		config: conf,
 		host:   host,
@@ -100,7 +105,7 @@ func Script(build *Build, step *common.Step) Handler {
 // the build script.
 func Setup(build *Build, step *common.Step) Handler {
 	setup := &common.Step{
-		Name: "plugins/drone-build",
+		Image: "plugins/drone-build",
 	}
 	host := toHostConfig(setup)
 	conf := toContainerConfig(setup)
@@ -121,6 +126,7 @@ func Service(build *Build, step *common.Step) Handler {
 	host := toHostConfig(step)
 	conf := toContainerConfig(step)
 	return &handler{
+		pull:   step.Pull,
 		client: build.Client,
 		detach: true,
 		config: conf,

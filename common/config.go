@@ -1,8 +1,7 @@
 package common
 
-// A config structure is used to configure a build.
+// Config represents a repository build configuration.
 type Config struct {
-	Init  Step
 	Clone Step
 	Build Step
 

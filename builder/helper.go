@@ -31,7 +31,7 @@ func toHostConfig(step *common.Step) *dockerclient.HostConfig {
 // a containerConfig for use with the dockerclient
 func toContainerConfig(step *common.Step) *dockerclient.ContainerConfig {
 	config := &dockerclient.ContainerConfig{
-		Image:      step.Name,
+		Image:      step.Image,
 		Env:        step.Environment,
 		Cmd:        step.Command,
 		Entrypoint: step.Entrypoint,
