@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/drone/drone-cli/builder"
+	"github.com/drone/drone-cli/builder/ambassador"
+	"github.com/drone/drone-cli/builder/runner"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/common/config"
 	"github.com/samalba/dockerclient"
@@ -66,9 +69,17 @@ func main() {
 	clone.Sha = "4fbcc1dd41c5e2792c034d31e350f521890ad723"
 	clone.Remote = "git://github.com/drone/drone.git"
 
+	// client
 	client, err := dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err)
+		return
+	}
+
+	// ambassador
+	amb, err := ambassador.Create(client)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -77,24 +88,35 @@ func main() {
 
 	// context
 	build := &builder.Build{
+		Repo:   nil,
 		Clone:  clone,
-		Client: client,
+		Commit: nil,
 		Config: matrix[0],
+		Client: amb,
 	}
 
 	// builder
-	b := builder.Builder{}
-	for _, step := range build.Config.Compose {
-		b.Handle(builder.Service(build, &step))
-	}
-	b.Handle(builder.Setup(build, &build.Config.Build))
-	b.Handle(builder.Batch(build, &build.Config.Clone))
-	b.Handle(builder.Script(build, &build.Config.Build))
+	b := runner.Builder(build)
 	defer b.Cancel()
-
 	err = b.Build(res)
 	if err != nil {
-		println(err.Error())
+		fmt.Println(err)
+	}
+
+	// deployer
+	d := runner.Deployer(build)
+	defer d.Cancel()
+	err = d.Build(res)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// notifier
+	n := runner.Deployer(build)
+	defer n.Cancel()
+	err = n.Build(res)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	// for _, conf := range matrix {

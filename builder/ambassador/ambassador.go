@@ -16,6 +16,42 @@ type Ambassador struct {
 	client dockerclient.Client
 }
 
+// Create creates a new ambassador container.
+func Create(client dockerclient.Client) (_ *Ambassador, err error) {
+	amb := &Ambassador{
+		client: client,
+	}
+
+	conf := &dockerclient.ContainerConfig{}
+	host := &dockerclient.HostConfig{}
+	conf.Entrypoint = []string{"/bin/sleep"}
+	conf.Cmd = []string{"1d"}
+	conf.Image = "busybox"
+
+	// creates the ambassador container
+	amb.name, err = client.CreateContainer(conf, "")
+	if err != nil {
+
+		// on failure attempts to pull the image
+		client.PullImage(conf.Image, nil)
+
+		// then attempts to re-create the container
+		amb.name, err = client.CreateContainer(conf, "")
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = client.StartContainer(amb.name, host)
+	return amb, err
+}
+
+// Destroy stops and deletes the ambassador container.
+func (c *Ambassador) Destroy() error {
+	c.client.StopContainer(c.name, 5)
+	c.client.KillContainer(c.name, "SIGKILL")
+	return c.client.RemoveContainer(c.name, true, true)
+}
+
 // CreateContainer creates a container.
 func (c *Ambassador) CreateContainer(config *dockerclient.ContainerConfig, name string) (string, error) {
 	return c.client.CreateContainer(config, name)

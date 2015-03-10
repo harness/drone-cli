@@ -29,8 +29,11 @@ func (h *handler) Build(rw *ResultWriter) error {
 		// on error try to pull the Docker image.
 		// note that this may not be the cause of
 		// the error, but we'll try just in case.
-		perr := h.client.PullImage(h.config.Image, nil)
-		if perr != nil {
+		h.client.PullImage(h.config.Image, nil)
+
+		// then try to re-create
+		name, err = h.client.CreateContainer(h.config, "")
+		if err != nil {
 			return err
 		}
 	}
