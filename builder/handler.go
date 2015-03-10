@@ -26,6 +26,9 @@ type handler struct {
 func (h *handler) Build(rw *ResultWriter) error {
 	name, err := h.client.CreateContainer(h.config, "")
 	if err != nil {
+		// on error try to pull the Docker image.
+		// note that this may not be the cause of
+		// the error, but we'll try just in case.
 		perr := h.client.PullImage(h.config.Image, nil)
 		if perr != nil {
 			return err
@@ -36,9 +39,14 @@ func (h *handler) Build(rw *ResultWriter) error {
 	if err != nil {
 		return err
 	}
+
+	// if we are running a service container we
+	// can just exit right here.
 	if h.detach {
 		return nil
 	}
+
+	// get the docker logs and write to the resposne.
 	logs := &dockerclient.LogOptions{
 		Follow:     true,
 		Stderr:     true,
@@ -50,6 +58,9 @@ func (h *handler) Build(rw *ResultWriter) error {
 		return err
 	}
 	io.Copy(rw, rc)
+
+	// get the container state and write the exit status
+	// to the response.
 	info, err := h.client.InspectContainer(h.name)
 	if err != nil {
 		return err
