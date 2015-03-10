@@ -9,11 +9,11 @@ import (
 func Builder(build *builder.Build) *builder.Builder {
 	b := builder.Builder{}
 	for _, step := range build.Config.Compose {
-		b.Handle(builder.Service(build, &step))
+		b.Handle(builder.Service(build, step))
 	}
-	b.Handle(builder.Setup(build, &build.Config.Build))
-	b.Handle(builder.Batch(build, &build.Config.Clone))
-	b.Handle(builder.Script(build, &build.Config.Build))
+	b.Handle(builder.Setup(build, build.Config.Build))
+	b.Handle(builder.Batch(build, build.Config.Clone))
+	b.Handle(builder.Script(build, build.Config.Build))
 	return &b
 }
 
@@ -22,10 +22,10 @@ func Builder(build *builder.Build) *builder.Builder {
 func Deployer(build *builder.Build) *builder.Builder {
 	b := builder.Builder{}
 	for _, step := range build.Config.Publish {
-		b.Handle(builder.Service(build, &step))
+		b.Handle(builder.Service(build, step))
 	}
 	for _, step := range build.Config.Deploy {
-		b.Handle(builder.Service(build, &step))
+		b.Handle(builder.Service(build, step))
 	}
 	return &b
 }
@@ -35,7 +35,7 @@ func Deployer(build *builder.Build) *builder.Builder {
 func Notifier(build *builder.Build) *builder.Builder {
 	b := builder.Builder{}
 	for _, step := range build.Config.Notify {
-		b.Handle(builder.Service(build, &step))
+		b.Handle(builder.Service(build, step))
 	}
 	return &b
 }

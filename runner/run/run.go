@@ -82,6 +82,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	defer amb.Destroy()
 
 	// response writer
 	res := builder.NewResultWriter(os.Stdout)
