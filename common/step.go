@@ -1,15 +1,17 @@
 package common
 
-// A step represents a step in the build process, including
+// Step represents a step in the build process, including
 // the execution environment and parameters.
 type Step struct {
 	Name        string
-	Image       string
-	Environment []string
-	Volumes     []string
-	Hostname    string
+	Pull        bool
 	Privileged  bool
-	Net         string
+	Environment []string
+	Entrypoint  []string
+	Command     []string
+	Volumes     []string
+	WorkingDir  string
+	NetworkMode string
 
 	// Config represents the unique configuration details
 	// for each plugin.

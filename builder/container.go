@@ -1,39 +1,117 @@
 package builder
 
 import (
-	"io"
-	"io/ioutil"
-
+	"github.com/drone/drone-cli/common"
 	"github.com/samalba/dockerclient"
 )
 
+// Container represents a Docker Container used
+// to execute a build step.
 type Container struct {
-	Name        string
+	ID          string
 	Image       string
+	Pull        bool
 	Detached    bool
 	Privileged  bool
-	Env         []string
-	Cmd         []string
+	Environment []string
 	Entrypoint  []string
-	WorkingDir  string
-	NetworkMode string
+	Command     []string
 	Volumes     []string
 	VolumesFrom []string
-	Links       []string
-
-	client dockerclient.Client
-	info   *dockerclient.ContainerInfo
+	WorkingDir  string
+	NetworkMode string
 }
 
-func (c *Container) SetClient(client dockerclient.Client) {
-	c.client = client
+// helper function to create a container from a step.
+func fromStep(step *common.Step) *Container {
+	return &Container{
+		Image:       step.Name,
+		Pull:        step.Pull,
+		Privileged:  step.Privileged,
+		Volumes:     step.Volumes,
+		WorkingDir:  step.WorkingDir,
+		NetworkMode: step.NetworkMode,
+		Entrypoint:  step.Entrypoint,
+		Environment: step.Environment,
+		Command:     step.Command,
+	}
 }
 
-func (c *Container) Create() error {
-	config := dockerclient.ContainerConfig{
+// helper function to create a container from a build
+// step. The build task will invoke a shell script
+// at an expected path.
+func fromBuild(build *Build, step *common.Step) *Container {
+	c := fromStep(step)
+	c.Entrypoint = []string{"/bin/bash"}
+	c.Command = []string{"/drone/bin/build.sh"}
+	return c
+}
+
+// helper function to create a container from a setup
+// step. This is a special container. It is used to
+// bootstrap the environment, create build directories,
+// and generate the build script.
+//
+// see https://github.com/drone-plugins/drone-build
+func fromSetup(build *Build, step *common.Step) *Container {
+	c := fromStep(step)
+	c.Image = "plugins/drone-build"
+	c.Entrypoint = []string{"/go/bin/drone-build"}
+	c.Command = toCommand(build, step)
+	return c
+}
+
+// helper function to create a container from any plugin
+// step, including notification, deployment and publish steps.
+// It is used to create the plugin payload (JSON) and pass
+// to the container as arg[1]
+func fromPlugin(build *Build, step *common.Step) *Container {
+	c := fromStep(step)
+	c.Entrypoint = []string{}
+	c.Command = toCommand(build, step)
+	return c
+}
+
+// helper function to create a container from a compose
+// step. This creates the container almost verbatim. It only
+// adds a --detached flag to the container. This instructure
+// the build not to block and wait for this container to
+// finish execution.
+func fromCompose(build *Build, step *common.Step) *Container {
+	c := fromStep(step)
+	c.Detached = true
+	return c
+}
+
+// helper function to encode the container arguments
+// in a json string. Primarily used for plugins, which
+// expect a json encoded string in stdin or arg[1].
+func toCommand(build *Build, step *common.Step) []string {
+	payload := BuildPayload{
+		build.Repo,
+		build.Commit,
+		build.Clone,
+		step.Config,
+	}
+	return []string{payload.Encode()}
+}
+
+// helper function that converts the container to
+// a hostConfig for use with the dockerclient
+func (c *Container) toHostConfig() *dockerclient.HostConfig {
+	return &dockerclient.HostConfig{
+		Privileged:  c.Privileged,
+		NetworkMode: c.NetworkMode,
+	}
+}
+
+// helper function that converts the container to
+// a containerConfig for use with the dockerclient
+func (c *Container) toContainerConfig() *dockerclient.ContainerConfig {
+	config := &dockerclient.ContainerConfig{
 		Image:      c.Image,
-		Env:        c.Env,
-		Cmd:        c.Cmd,
+		Env:        c.Environment,
+		Cmd:        c.Command,
 		Entrypoint: c.Entrypoint,
 		WorkingDir: c.WorkingDir,
 	}
@@ -45,56 +123,5 @@ func (c *Container) Create() error {
 		}
 	}
 
-	id, err := c.client.CreateContainer(&config, c.Name)
-	if err != nil {
-		return err
-	}
-	c.info, err = c.client.InspectContainer(id)
-	return err
-}
-
-func (c *Container) Start() error {
-	config := dockerclient.HostConfig{
-		Privileged:  c.Privileged,
-		NetworkMode: c.NetworkMode,
-		VolumesFrom: c.VolumesFrom,
-	}
-	return c.client.StartContainer(c.info.Id, &config)
-}
-
-func (c *Container) Stop() error {
-	return c.client.StopContainer(c.info.Id, 10)
-}
-
-func (c *Container) Kill() error {
-	return c.client.KillContainer(c.info.Id, "SIGKILL")
-}
-
-func (c *Container) Remove() error {
-	return c.client.RemoveContainer(c.info.Id, true, true)
-}
-
-func (c *Container) Wait() error {
-	src, err := c.Logs()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-	_, err = io.Copy(ioutil.Discard, src)
-	return nil
-}
-
-func (c *Container) Logs() (io.ReadCloser, error) {
-	opts := dockerclient.LogOptions{
-		Follow:     true,
-		Stderr:     true,
-		Stdout:     true,
-		Tail:       10000,
-		Timestamps: true,
-	}
-	return c.client.ContainerLogs(c.info.Id, &opts)
-}
-
-func (c *Container) Inspect() (*dockerclient.ContainerInfo, error) {
-	return c.client.InspectContainer(c.info.Id)
+	return config
 }

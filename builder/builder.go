@@ -1,120 +1,118 @@
 package builder
 
-import (
-	"fmt"
-	"io"
+type Builder struct {
+	handlers []Handler
+}
 
-	"github.com/drone/drone-cli/common/uuid"
-)
+// Handle adds a build step handler to be processed
+// when running the build.
+func (b *Builder) Handle(h Handler) {
+	b.handlers = append(b.handlers, h)
+}
 
-const (
-	ImageInit  = "drone/drone-init"
-	ImageClone = "drone/drone-clone-git"
-)
-
-func Run(req *Request, resp ResponseWriter) error {
-
-	var containers []*Container
-
-	defer func() {
-		for i := len(containers) - 1; i >= 0; i-- {
-			container := containers[i]
-			container.Stop()
-			container.Kill()
-			container.Remove()
-		}
-	}()
-
-	// temporary name for the build container
-	//name := fmt.Sprintf("build-init-%s", createUID())
-	net := req.Config.Docker.Net
-	uid := uuid.CreateUUID()
-	cmd := []string{req.Encode()}
-
-	// init container
-	containers = append(containers, &Container{
-		Name:    fmt.Sprintf("drone-%s-init", uid),
-		Image:   ImageInit,
-		Volumes: []string{"/drone"},
-		Cmd:     cmd,
-	})
-
-	// clone container
-	containers = append(containers, &Container{
-		Name:        fmt.Sprintf("drone-%s-clone", uid),
-		Image:       ImageClone,
-		VolumesFrom: []string{containers[0].Name},
-		Cmd:         cmd,
-	})
-
-	// attached service containers
-	for i, service := range req.Config.Services {
-		containers = append(containers, &Container{
-			Name:        fmt.Sprintf("drone-%s-service-%v", uid, i),
-			Image:       service,
-			Env:         req.Config.Env,
-			NetworkMode: net,
-			Detached:    true,
-		})
-
-		if i == 0 && len(net) == 0 {
-			net = fmt.Sprintf("container:drone-%s-service-%v", uid, i)
-		}
-	}
-
-	// build container
-	containers = append(containers, &Container{
-		Name:        fmt.Sprintf("drone-%s-build", uid),
-		Image:       req.Config.Image,
-		Env:         req.Config.Env,
-		Cmd:         []string{"/drone/bin/build.sh"},
-		Entrypoint:  []string{"/bin/bash"},
-		WorkingDir:  req.Clone.Dir,
-		NetworkMode: net,
-		Privileged:  req.Config.Docker.Privileged,
-		VolumesFrom: []string{containers[0].Name},
-	})
-
-	//
-	// create the notify, publish, deploy containers
-	//
-
-	// loop through and create containers
-	for _, container := range containers {
-		container.SetClient(req.Client)
-		if err := container.Create(); err != nil {
-			return err
-		}
-	}
-
-	// loop through and start containers
-	for _, container := range containers {
-		if err := container.Start(); err != nil {
-			return err
-		}
-		if container.Detached { // if a detached (daemon) just continue
-			continue
-		}
-		r, err := container.Logs()
-		if err != nil {
-			return err
-		}
-		io.Copy(resp, r)
-		r.Close()
-		info, err := container.Inspect()
-		if err != nil {
-			return err
-		}
-
-		if info.State.Running != false {
-			fmt.Println("ERROR: container still running")
-		}
-
-		resp.WriteExitCode(info.State.ExitCode)
-		if info.State.ExitCode != 0 {
+// Build runs all build step handlers.
+func (b *Builder) Build(r *Result) (err error) {
+	for _, h := range b.handlers {
+		err = h.Build(r)
+		if err != nil || r.exitCode != 0 {
 			break
 		}
 	}
-
 	return nil
 }
+
+// Cancel cancels any running build processes and
+// removes and build containers.
+func (b *Builder) Cancel() {
+	for _, h := range b.handlers {
+		h.Cancel() // TODO use channel to signal cancel
+	}
+}
+
+// type Builder struct {
+// 	containers []*Container
+// 	client     dockerclient.Client
+// }
+//
+// // New creates a new builder
+// func New(client dockerclient.Client) *Builder {
+// 	return &Builder{client: client}
+// }
+//
+// func (r *Builder) Add(c *Container) {
+// 	r.containers = append(r.containers, c)
+// }
+//
+// func (r *Builder) Cancel() {
+// 	for _, c := range r.containers {
+// 		// TODO cancel using environment
+// 		if c != nil {
+// 			// TODO remove
+// 		}
+// 	}
+// }
+//
+// func (b *Builder) Build(res *Result) error {
+// 	for _, c := range b.containers {
+// 		err := b.run(c, res)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		if res.ExitCode() != 0 {
+// 			return nil
+// 		}
+// 	}
+// 	return nil
+// }
+//
+// // helper function to run a single build container.
+// func (b *Builder) run(c *Container, res *Result) error {
+// 	// create container
+// 	//    err: failed creating
+// 	// start continer
+// 	//    err: failed starting container
+// 	if c.Detached == false {
+// 		return nil
+// 	}
+// 	// get log reader
+// 	//    err: failed getting logs
+//
+// 	// copy logs to writer
+// 	//    err: failed copying logs
+//
+// 	// write response
+// 	return nil
+// }
+
+/*
+func NewBuilder(build *Build) *Builder {
+	b := New(build.Client)
+	for _, step := range build.Config.Compose {
+		b.Add(fromCompose(build, &step))
+	}
+	b.Add(fromSetup(build, &build.Config.Build))
+	b.Add(fromPlugin(build, &build.Config.Clone))
+	b.Add(fromBuild(build, &build.Config.Build))
+
+	return b
+}
+
+func NewDeployer(build *Build) *Builder {
+	b := New(build.Client)
+	for _, step := range build.Config.Publish {
+		b.Add(fromPlugin(build, &step))
+	}
+	for _, step := range build.Config.Deploy {
+		b.Add(fromPlugin(build, &step))
+	}
+	return b
+}
+
+func NewNotifier(build *Build) *Builder {
+	b := New(build.Client)
+	for _, step := range build.Config.Notify {
+		b.Add(fromPlugin(build, &step))
+	}
+	return b
+}
+*/
