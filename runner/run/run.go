@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/drone/drone-cli/builder"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/common/config"
-	"github.com/drone/drone-cli/runner"
 	"github.com/samalba/dockerclient"
 )
 
@@ -32,22 +32,29 @@ matrix:
     - 1.4.2
 `
 
-var yaml_alt = `
+var yamlAlt = `
+clone:
+  image: plugin/drone-git
+
 build:
-  image: golang:$$go_version
+  image: golang:1.4.2
   commands:
     - ls -la /drone/src/github.com/drone/drone
     - go version
 
-matrix:
-  go_version:
-    - 1.3.3
-    - 1.4.2
+compose:
+  database:
+	  image: postgres:9.2
+
+#matrix:
+#  go_version:
+#    - 1.3.3
+#    - 1.4.2
 `
 
 func main() {
 
-	matrix, err := config.ParseMatrix(yaml_alt)
+	matrix, err := config.ParseMatrix(yamlAlt)
 	if err != nil {
 		println(err.Error())
 		return
@@ -59,23 +66,54 @@ func main() {
 	clone.Sha = "4fbcc1dd41c5e2792c034d31e350f521890ad723"
 	clone.Remote = "git://github.com/drone/drone.git"
 
-	for _, conf := range matrix {
-		req := runner.Request{}
-		req.Clone = clone
-		req.Config = conf
-		req.Client, err = dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
-		if err != nil {
-			println(err.Error())
-			return
-		}
-
-		resp := runner.Response{}
-		resp.Writer = os.Stdout
-		runner.Run(&req, &resp)
-
-		if resp.ExitCode != 0 {
-			os.Exit(resp.ExitCode)
-		}
-
+	client, err := dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
+	if err != nil {
+		println(err.Error())
+		return
 	}
+
+	// response writer
+	res := builder.NewResultWriter(os.Stdout)
+
+	// context
+	build := &builder.Build{
+		Clone:  clone,
+		Client: client,
+		Config: matrix[0],
+	}
+
+	// builder
+	b := builder.Builder{}
+	for _, step := range build.Config.Compose {
+		b.Handle(builder.Service(build, &step))
+	}
+	b.Handle(builder.Setup(build, &build.Config.Build))
+	b.Handle(builder.Batch(build, &build.Config.Clone))
+	b.Handle(builder.Script(build, &build.Config.Build))
+	defer b.Cancel()
+
+	err = b.Build(res)
+	if err != nil {
+		println(err.Error())
+	}
+
+	// for _, conf := range matrix {
+	// 	req := runner.Request{}
+	// 	req.Clone = clone
+	// 	req.Config = conf
+	// 	req.Client, err = dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
+	// 	if err != nil {
+	// 		println(err.Error())
+	// 		return
+	// 	}
+	//
+	// 	resp := runner.Response{}
+	// 	resp.Writer = os.Stdout
+	// 	runner.Run(&req, &resp)
+	//
+	// 	if resp.ExitCode != 0 {
+	// 		os.Exit(resp.ExitCode)
+	// 	}
+	//
+	// }
 }

@@ -8,6 +8,11 @@ type ResultWriter struct {
 	exitCode int
 }
 
+// NewResultWriter returns a new ResultWriter.
+func NewResultWriter(w io.Writer) *ResultWriter {
+	return &ResultWriter{writer: w}
+}
+
 // Write writes the build stdout and stderr to the result.
 func (r *ResultWriter) Write(p []byte) (n int, err error) {
 	return r.writer.Write(p)
