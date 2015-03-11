@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	limitRows = 10
+	limitTags = 10
 	limitAxis = 25
 )
 
@@ -48,16 +48,16 @@ func Parse(raw string) ([]Axis, error) {
 	}
 
 	// calculate number of permutations and
-	// extract the list of label values
+	// extract the list of tags
 	// (ie go_version, redis_version, etc)
 	var perm int
-	var labels []string
+	var tags []string
 	for k, v := range matrix {
 		perm *= len(v)
 		if perm == 0 {
 			perm = len(v)
 		}
-		labels = append(labels, k)
+		tags = append(tags, k)
 	}
 
 	// structure to hold the transformed
@@ -69,15 +69,15 @@ func Parse(raw string) ([]Axis, error) {
 	for p := 0; p < perm; p++ {
 		axis := map[string]string{}
 		decr := perm
-		for i, label := range labels {
-			elems := matrix[label]
+		for i, tag := range tags {
+			elems := matrix[tag]
 			decr = decr / len(elems)
 			elem := p / decr % len(elems)
-			axis[label] = elems[elem]
+			axis[tag] = elems[elem]
 
 			// enforce a maximum number of rows
 			// in the build matrix.
-			if i > limitRows {
+			if i > limitTags {
 				break
 			}
 		}
