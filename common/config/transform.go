@@ -66,6 +66,7 @@ func normalizeBuild(c *common.Config) {
 // step has an image and uses a fully-qualified
 // image name.
 func normalizeImages(c *common.Config) {
+	c.Setup.Image = imageName(c.Setup.Image)
 	c.Clone.Image = imageName(c.Clone.Image)
 	c.Build.Image = imageName(c.Build.Image)
 	for name, step := range c.Publish {
@@ -114,6 +115,7 @@ func rmNotify(c *common.Config) {
 // rmPrivileged is a transformer that ensures every
 // step is executed in non-privileged mode.
 func rmPrivileged(c *common.Config) {
+	c.Setup.Privileged = false
 	c.Clone.Privileged = false
 	c.Build.Privileged = false
 	for _, step := range c.Publish {
@@ -136,6 +138,7 @@ func rmPrivileged(c *common.Config) {
 // rmVolumes is a transformer that ensures every
 // step is executed without volumes.
 func rmVolumes(c *common.Config) {
+	c.Setup.Volumes = []string{}
 	c.Clone.Volumes = []string{}
 	c.Build.Volumes = []string{}
 	for _, step := range c.Publish {
@@ -155,6 +158,7 @@ func rmVolumes(c *common.Config) {
 // rmNetwork is a transformer that ensures every
 // step is executed with default bridge networking.
 func rmNetwork(c *common.Config) {
+	c.Setup.NetworkMode = ""
 	c.Clone.NetworkMode = ""
 	c.Build.NetworkMode = ""
 	for _, step := range c.Publish {
