@@ -52,6 +52,8 @@ func addClone(c *common.Config) {
 	}
 	if len(c.Clone.Image) == 0 {
 		c.Clone.Image = "plugins/drone-git"
+		c.Clone.Volumes = nil
+		c.Clone.NetworkMode = ""
 	}
 }
 
@@ -87,7 +89,7 @@ func normalizeDockerPlugin(c *common.Config) {
 	for _, step := range c.Publish {
 		if step.Image == "plugins/drone-docker" {
 			step.Privileged = true
-			step.Volumes = []string{}
+			step.Volumes = nil
 			step.NetworkMode = ""
 			break
 		}
@@ -97,19 +99,19 @@ func normalizeDockerPlugin(c *common.Config) {
 // rmPublish is a transformer that removes all
 // publish steps.
 func rmPublish(c *common.Config) {
-	c.Publish = map[string]*common.Step{}
+	c.Publish = nil
 }
 
 // rmDeploy is a transformer that removes all
 // publish steps.
 func rmDeploy(c *common.Config) {
-	c.Deploy = map[string]*common.Step{}
+	c.Deploy = nil
 }
 
 // rmNotify is a transformer that removes all
 // notify steps.
 func rmNotify(c *common.Config) {
-	c.Notify = map[string]*common.Step{}
+	c.Notify = nil
 }
 
 // rmPrivileged is a transformer that ensures every
@@ -138,20 +140,20 @@ func rmPrivileged(c *common.Config) {
 // rmVolumes is a transformer that ensures every
 // step is executed without volumes.
 func rmVolumes(c *common.Config) {
-	c.Setup.Volumes = []string{}
-	c.Clone.Volumes = []string{}
-	c.Build.Volumes = []string{}
+	c.Setup.Volumes = nil
+	c.Clone.Volumes = nil
+	c.Build.Volumes = nil
 	for _, step := range c.Publish {
-		step.Volumes = []string{}
+		step.Volumes = nil
 	}
 	for _, step := range c.Deploy {
-		step.Volumes = []string{}
+		step.Volumes = nil
 	}
 	for _, step := range c.Notify {
-		step.Volumes = []string{}
+		step.Volumes = nil
 	}
 	for _, step := range c.Compose {
-		step.Volumes = []string{}
+		step.Volumes = nil
 	}
 }
 
