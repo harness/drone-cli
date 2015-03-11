@@ -6,15 +6,41 @@ import (
 	"github.com/drone/drone-cli/common"
 )
 
-// Rule applies a check or transformation rule to
-// the build configuration.
-type Rule func(*common.Config)
+// transformRule applies a check or transformation rule
+// to the build configuration.
+type transformRule func(*common.Config)
+
+// Transform executes the default transformers that
+// ensure the minimal Yaml configuration is in place
+// and correctly configured.
+func Transform(c *common.Config) {
+	addSetup(c)
+	addClone(c)
+	normalizeBuild(c)
+	normalizeImages(c)
+	normalizeDockerPlugin(c)
+}
+
+// TransformSafe executes all transformers that remove
+// privileged options from the Yaml.
+func TransformSafe(c *common.Config) {
+	rmPrivileged(c)
+	rmVolumes(c)
+	rmNetwork(c)
+}
+
+// TransformBuild executes all transformers that remove
+// non-build and non-notfiy steps from the Yaml.
+func TransformBuild(c *common.Config) {
+	rmPublish(c)
+	rmDeploy(c)
+}
 
 // addSetup is a transformer that adds a default
 // setup step if none exists.
 func addSetup(c *common.Config) {
 	c.Setup = &common.Step{}
-	c.Setup.Image = "plugins/drone-setup"
+	c.Setup.Image = "plugins/drone-build"
 	c.Setup.Config = c.Build.Config
 }
 
@@ -33,7 +59,7 @@ func addClone(c *common.Config) {
 // build configuration vargs. They should have
 // already been transferred to the Setup step.
 func normalizeBuild(c *common.Config) {
-	c.Build.Config = nil
+	c.Build.Config = map[string]interface{}{}
 }
 
 // normalizeImages is a transformer that ensures every
@@ -70,13 +96,19 @@ func normalizeDockerPlugin(c *common.Config) {
 // rmPublish is a transformer that removes all
 // publish steps.
 func rmPublish(c *common.Config) {
-	c.Deploy = map[string]*common.Step{}
+	c.Publish = map[string]*common.Step{}
 }
 
 // rmDeploy is a transformer that removes all
 // publish steps.
 func rmDeploy(c *common.Config) {
-	c.Publish = map[string]*common.Step{}
+	c.Deploy = map[string]*common.Step{}
+}
+
+// rmNotify is a transformer that removes all
+// notify steps.
+func rmNotify(c *common.Config) {
+	c.Notify = map[string]*common.Step{}
 }
 
 // rmPrivileged is a transformer that ensures every
@@ -85,12 +117,18 @@ func rmPrivileged(c *common.Config) {
 	c.Clone.Privileged = false
 	c.Build.Privileged = false
 	for _, step := range c.Publish {
+		if step.Image == "plugins/drone-docker" {
+			continue // the official docker plugin is the only exception here
+		}
 		step.Privileged = false
 	}
 	for _, step := range c.Deploy {
 		step.Privileged = false
 	}
 	for _, step := range c.Notify {
+		step.Privileged = false
+	}
+	for _, step := range c.Compose {
 		step.Privileged = false
 	}
 }
@@ -109,6 +147,9 @@ func rmVolumes(c *common.Config) {
 	for _, step := range c.Notify {
 		step.Volumes = []string{}
 	}
+	for _, step := range c.Compose {
+		step.Volumes = []string{}
+	}
 }
 
 // rmNetwork is a transformer that ensures every
@@ -123,6 +164,9 @@ func rmNetwork(c *common.Config) {
 		step.NetworkMode = ""
 	}
 	for _, step := range c.Notify {
+		step.NetworkMode = ""
+	}
+	for _, step := range c.Compose {
 		step.NetworkMode = ""
 	}
 }

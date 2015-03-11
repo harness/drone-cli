@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/drone/drone-cli/common"
 )
@@ -11,8 +12,15 @@ import (
 // fails it should return an error message.
 type lintRule func(*common.Config) error
 
-var lintRules = []lintRule{
-	expectBuild, expectImage, expectCommand,
+var lintRules = [...]lintRule{
+	expectBuild,
+	expectImage,
+	expectCommand,
+	expectTrustedSetup,
+	expectTrustedClone,
+	expectTrustedPublish,
+	expectTrustedDeploy,
+	expectTrustedNotify,
 }
 
 // Lint runs all lint rules against the Yaml Config.
@@ -46,6 +54,52 @@ func expectImage(c *common.Config) error {
 func expectCommand(c *common.Config) error {
 	if c.Build.Config == nil || c.Build.Config["commands"] == nil {
 		return fmt.Errorf("Yaml must define build commands")
+	}
+	return nil
+}
+
+// lint rule that fails when a non-trusted clone plugin is used.
+func expectTrustedClone(c *common.Config) error {
+	if c.Clone != nil && strings.Contains(c.Clone.Image, "/") {
+		return fmt.Errorf("Yaml must use trusted clone plugins")
+	}
+	return nil
+}
+
+// lint rule that fails when a non-trusted clone plugin is used.
+func expectTrustedSetup(c *common.Config) error {
+	if c.Setup != nil && strings.Contains(c.Setup.Image, "/") {
+		return fmt.Errorf("Yaml must use trusted setup plugins")
+	}
+	return nil
+}
+
+// lint rule that fails when a non-trusted publish plugin is used.
+func expectTrustedPublish(c *common.Config) error {
+	for _, step := range c.Publish {
+		if strings.Contains(step.Image, "/") {
+			return fmt.Errorf("Yaml must use trusted publish plugins")
+		}
+	}
+	return nil
+}
+
+// lint rule that fails when a non-trusted deploy plugin is used.
+func expectTrustedDeploy(c *common.Config) error {
+	for _, step := range c.Deploy {
+		if strings.Contains(step.Image, "/") {
+			return fmt.Errorf("Yaml must use trusted deploy plugins")
+		}
+	}
+	return nil
+}
+
+// lint rule that fails when a non-trusted notify plugin is used.
+func expectTrustedNotify(c *common.Config) error {
+	for _, step := range c.Notify {
+		if strings.Contains(step.Image, "/") {
+			return fmt.Errorf("Yaml must use trusted notify plugins")
+		}
 	}
 	return nil
 }
