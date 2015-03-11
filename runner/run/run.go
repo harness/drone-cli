@@ -9,7 +9,15 @@ import (
 	"github.com/drone/drone-cli/builder/runner"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/common/config"
+
+	log "github.com/Sirupsen/logrus"
 )
+
+func init() {
+	log.SetOutput(os.Stderr)
+	log.SetLevel(log.DebugLevel)
+	log.SetFormatter(&log.TextFormatter{})
+}
 
 func main() {
 
@@ -25,10 +33,12 @@ func main() {
 		return
 	}
 
-	for _, conf := range matrix {
+	for axis, conf := range matrix {
 		config.Transform(conf)
 		build.Client = client
 		build.Config = conf
+
+		log.Debugf("Starting %s", axis)
 		run(build)
 	}
 }
@@ -87,7 +97,7 @@ var build = &builder.Build{
 
 var testYaml = `
 build:
-  image: golang:1.4.2
+  image: golang:$go_version
   commands:
     - ls -la /drone/src/github.com/drone/drone
     - go version
@@ -102,16 +112,16 @@ compose:
     image: bradrydzewski/mysql:5.5
   postgres:
     image: bradrydzewski/postgres:9.1
+
+matrix:
+  go_version:
+    - 1.3.3
+    - 1.4.2
 `
 
 // compose:
 //   database:
 // 	  image: postgres:9.2
-
-// matrix:
-//   go_version:
-//     - 1.3.3
-//     - 1.4.2
 
 var droneYaml = `
 build:
