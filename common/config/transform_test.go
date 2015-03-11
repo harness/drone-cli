@@ -36,6 +36,8 @@ func Test_Transform(t *testing.T) {
 			c.Build.Config["commands"] = []string{"echo hello"}
 			normalizeBuild(c)
 			g.Assert(len(c.Build.Config)).Equal(0)
+			g.Assert(c.Build.Entrypoint[0]).Equal("/bin/bash")
+			g.Assert(c.Build.Command[0]).Equal("/drone/bin/build.sh")
 		})
 
 		g.It("Should normalize images", func() {

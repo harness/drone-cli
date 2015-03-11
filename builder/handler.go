@@ -85,8 +85,10 @@ func (h *handler) Cancel() {
 func Batch(build *Build, step *common.Step) Handler {
 	host := toHostConfig(step)
 	conf := toContainerConfig(step)
-	conf.Cmd = toCommand(build, step)
-	conf.Entrypoint = []string{}
+	if step.Config != nil {
+		conf.Cmd = toCommand(build, step)
+		conf.Entrypoint = []string{}
+	}
 	return &handler{
 		pull:   step.Pull,
 		client: build.Client,

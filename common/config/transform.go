@@ -55,6 +55,11 @@ func addClone(c *common.Config) {
 		c.Clone.Volumes = nil
 		c.Clone.NetworkMode = ""
 	}
+	if c.Clone.Config == nil {
+		c.Clone.Config = map[string]interface{}{}
+		c.Clone.Config["depth"] = 50
+		c.Clone.Config["recursive"] = true
+	}
 }
 
 // normalizeBuild is a transformer that removes the
@@ -62,6 +67,8 @@ func addClone(c *common.Config) {
 // already been transferred to the Setup step.
 func normalizeBuild(c *common.Config) {
 	c.Build.Config = nil
+	c.Build.Entrypoint = []string{"/bin/bash"}
+	c.Build.Command = []string{"/drone/bin/build.sh"}
 }
 
 // normalizeImages is a transformer that ensures every

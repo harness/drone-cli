@@ -9,34 +9,26 @@ import (
 	"github.com/drone/drone-cli/builder/runner"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/common/config"
-	"github.com/samalba/dockerclient"
 )
-
-var yaml = `
-
-`
-
-var yamlAlt = `
-
-`
 
 func main() {
 
-	matrix, err := config.ParseMatrix(yamlAlt)
+	matrix, err := config.ParseMatrix(testYaml)
 	if err != nil {
 		println(err.Error())
 		return
 	}
 
-	client, err := dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
+	client, err := newMockClient() //dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	for _, config := range matrix {
+	for _, conf := range matrix {
+		config.Transform(conf)
 		build.Client = client
-		build.Config = config
+		build.Config = conf
 		run(build)
 	}
 }
@@ -49,6 +41,7 @@ func run(build *builder.Build) {
 		return
 	}
 	defer amb.Destroy()
+	build.Client = amb // TODO remove this
 
 	// response writer
 	res := builder.NewResultWriter(os.Stdout)
@@ -93,24 +86,32 @@ var build = &builder.Build{
 }
 
 var testYaml = `
-clone:
-  image: plugin/drone-git
-
 build:
   image: golang:1.4.2
   commands:
     - ls -la /drone/src/github.com/drone/drone
     - go version
 
-compose:
-  database:
-	  image: postgres:9.2
+notify:
+  slack:
+    channel: dev
+    usernae: drone
 
-#matrix:
-#  go_version:
-#    - 1.3.3
-#    - 1.4.2
+compose:
+  mysql:
+    image: bradrydzewski/mysql:5.5
+  postgres:
+    image: bradrydzewski/postgres:9.1
 `
+
+// compose:
+//   database:
+// 	  image: postgres:9.2
+
+// matrix:
+//   go_version:
+//     - 1.3.3
+//     - 1.4.2
 
 var droneYaml = `
 build:

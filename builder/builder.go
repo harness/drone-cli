@@ -11,8 +11,8 @@ type Builder struct {
 // Handle registers the build step handler.
 func (b *Builder) Handle(h Handler) {
 	b.Lock()
-	defer b.Unlock()
 	b.handlers = append(b.handlers, h)
+	b.Unlock()
 }
 
 // Build runs all build step handlers.
@@ -31,7 +31,8 @@ func (b *Builder) Cancel() {
 	b.Lock()
 	defer b.Unlock()
 
-	for _, h := range b.handlers {
+	for i := len(b.handlers) - 1; i >= 0; i-- {
+		h := b.handlers[i]
 		h.Cancel()
 	}
 }

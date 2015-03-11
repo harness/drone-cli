@@ -27,6 +27,8 @@ func Create(client dockerclient.Client) (_ *Ambassador, err error) {
 	conf.Entrypoint = []string{"/bin/sleep"}
 	conf.Cmd = []string{"1d"}
 	conf.Image = "busybox"
+	conf.Volumes = map[string]struct{}{}
+	conf.Volumes["/drone"] = struct{}{}
 
 	// creates the ambassador container
 	amb.name, err = client.CreateContainer(conf, "")

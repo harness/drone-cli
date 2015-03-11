@@ -21,6 +21,15 @@ func ParseMatrix(raw string) (map[string]*common.Config, error) {
 		return nil, err
 	}
 	confs := map[string]*common.Config{}
+
+	// when no matrix values exist we should return
+	// a single config value with an empty label.
+	if len(axis) == 0 {
+		conf, err := Parse(raw)
+		confs[""] = conf
+		return confs, err
+	}
+
 	for _, a := range axis {
 		// inject the matrix values into the raw script
 		injected := Inject(raw, a)
