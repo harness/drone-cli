@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/samalba/dockerclient"
 )
@@ -20,11 +20,6 @@ func newMockClient() (dockerclient.Client, error) {
 
 // CreateContainer creates a container.
 func (c *mockClient) CreateContainer(config *dockerclient.ContainerConfig, name string) (string, error) {
-	fmt.Println("CREATE --------------------------------------------------------")
-	fmt.Println("  Image :", config.Image)
-	fmt.Println("  Env   :", config.Env)
-	fmt.Println("  Cmd   :", config.Cmd)
-	fmt.Println("  Entry :", config.Entrypoint)
 	return config.Image, nil
 }
 
@@ -38,7 +33,12 @@ func (c *mockClient) InspectContainer(id string) (*dockerclient.ContainerInfo, e
 // container logs.
 func (c *mockClient) ContainerLogs(id string, options *dockerclient.LogOptions) (io.ReadCloser, error) {
 	var buf bytes.Buffer
-	buf.WriteString("")
+	if strings.HasPrefix(id, "plugins/drone-git") {
+		buf.WriteString(out1)
+	}
+	if strings.HasPrefix(id, "golang") {
+		buf.WriteString(out2)
+	}
 	return ioutil.NopCloser(&buf), nil
 }
 
@@ -46,18 +46,11 @@ func (c *mockClient) ContainerLogs(id string, options *dockerclient.LogOptions) 
 // is automatically linked. The mockClient network is linked
 // iff a network mode is not already specified.
 func (c *mockClient) StartContainer(id string, config *dockerclient.HostConfig) error {
-	fmt.Println("START ---------------------------------------------------------")
-	fmt.Println("  ID   :", id)
-	fmt.Println("  Net  :", config.NetworkMode)
-	fmt.Println("  Priv :", config.Privileged)
-	fmt.Println("  Vols :", config.VolumesFrom)
 	return nil
 }
 
 // StopContainer stops a container.
 func (c *mockClient) StopContainer(id string, timeout int) error {
-	fmt.Println("STOP ----------------------------------------------------------")
-	fmt.Println("  ID :", id)
 	return nil
 }
 
@@ -68,16 +61,11 @@ func (c *mockClient) PullImage(name string, auth *dockerclient.AuthConfig) error
 
 // RemoveContainer removes a container.
 func (c *mockClient) RemoveContainer(id string, force, volumes bool) error {
-	fmt.Println("REMOVE --------------------------------------------------------")
-	fmt.Println("  ID :", id)
 	return nil
 }
 
 // KillContainer kills a running container.
 func (c *mockClient) KillContainer(id, signal string) error {
-	fmt.Println("KILL ----------------------------------------------------------")
-	fmt.Println("  ID  :", id)
-	fmt.Println("  SIG :", signal)
 	return nil
 }
 
@@ -140,3 +128,23 @@ func (c *mockClient) Exec(config *dockerclient.ExecConfig) (string, error) {
 	var empty string
 	return empty, errNop
 }
+
+var out1 = `$ git clone --depth=50 git://github.com/drone/drone.git /drone/src/github.com/drone/drone`
+var out2 = `$ go test -short
+
+  Filter
+    ✓ Should remove steps that don't match condition
+
+
+ 1 tests complete (0 ms)
+
+  Inject params
+    ✓ Should replace vars with $$
+    ✓ Should not replace vars with single $
+    ✓ Should not replace vars in nil map
+
+
+ 3 tests complete (0 ms)
+PASS
+ok  	github.com/drone/drone-cli/common/config	0.006s
+`

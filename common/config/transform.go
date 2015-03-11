@@ -77,7 +77,6 @@ func normalizeBuild(c *common.Config) {
 func normalizeImages(c *common.Config) {
 	c.Setup.Image = imageName(c.Setup.Image)
 	c.Clone.Image = imageName(c.Clone.Image)
-	c.Build.Image = imageName(c.Build.Image)
 	for name, step := range c.Publish {
 		step.Image = imageNameDefault(step.Image, name)
 	}

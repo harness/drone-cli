@@ -43,16 +43,16 @@ func Test_Transform(t *testing.T) {
 		g.It("Should normalize images", func() {
 			c := &common.Config{}
 			c.Setup = &common.Step{Image: "foo"}
-			c.Clone = &common.Step{Image: "bar"}
-			c.Build = &common.Step{Image: "foo/bar"}
+			c.Clone = &common.Step{Image: "foo/bar"}
+			c.Build = &common.Step{Image: "golang"}
 			c.Publish = map[string]*common.Step{"google_compute": &common.Step{}}
 			c.Deploy = map[string]*common.Step{"amazon": &common.Step{}}
 			c.Notify = map[string]*common.Step{"slack": &common.Step{}}
 			normalizeImages(c)
 
 			g.Assert(c.Setup.Image).Equal("plugins/drone-foo")
-			g.Assert(c.Clone.Image).Equal("plugins/drone-bar")
-			g.Assert(c.Build.Image).Equal("foo/bar")
+			g.Assert(c.Clone.Image).Equal("foo/bar")
+			g.Assert(c.Build.Image).Equal("golang")
 			g.Assert(c.Publish["google_compute"].Image).Equal("plugins/drone-google-compute")
 			g.Assert(c.Deploy["amazon"].Image).Equal("plugins/drone-amazon")
 			g.Assert(c.Notify["slack"].Image).Equal("plugins/drone-slack")

@@ -97,42 +97,6 @@ func Batch(build *Build, step *common.Step) Handler {
 	}
 }
 
-// Script returns a handler that launches the build script
-// container. The setup or bootstrap container is a pre-requisite.
-//
-// The shell script generated in the setup or bootstrap step
-// will be used as the container entrypoint.
-func Script(build *Build, step *common.Step) Handler {
-	host := toHostConfig(step)
-	conf := toContainerConfig(step)
-	conf.Entrypoint = []string{"/bin/bash"}
-	conf.Cmd = []string{"/drone/bin/build.sh"}
-	return &handler{
-		client: build.Client,
-		config: conf,
-		host:   host,
-	}
-}
-
-// Setup returns a handler that launches a special type of
-// container used to setup or bootstrap a build environment.
-//
-// This container will setup the project workspace and generate
-// the build script.
-func Setup(build *Build, step *common.Step) Handler {
-	setup := &common.Step{
-		Image: "plugins/drone-build",
-	}
-	host := toHostConfig(setup)
-	conf := toContainerConfig(setup)
-	conf.Cmd = toCommand(build, step)
-	return &handler{
-		client: build.Client,
-		config: conf,
-		host:   host,
-	}
-}
-
 // Service returns a handler that launches a service container as
 // a daemon. The the container will start and then exit immediately,
 // without blocking.
