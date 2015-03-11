@@ -1,87 +1,38 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/drone/drone-cli/common"
+	"github.com/drone/drone-cli/common/matrix"
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	LimitAxis  = 10
-	LimitPerms = 25
-)
-
+// Parse parses a yaml configuration file.
 func Parse(raw string) (*common.Config, error) {
-	config := common.Config{}
-	err := yaml.Unmarshal([]byte(raw), &config)
-	return &config, err
+	cfg := common.Config{}
+	err := yaml.Unmarshal([]byte(raw), &cfg)
+	return &cfg, err
 }
 
-func ParseMatrix(raw string) ([]*common.Config, error) {
-	var matrix []*common.Config
-
-	config, err := Parse(raw)
+// ParseMatrix parses a build matrix and returns
+// a list of build configurations for each axis.
+func ParseMatrix(raw string) (map[string]*common.Config, error) {
+	axis, err := matrix.Parse(raw)
 	if err != nil {
-		return matrix, err
+		return nil, err
 	}
-
-	// if not a matrix build return an array
-	// with just the single axis.
-	if len(config.Matrix) == 0 {
-		matrix = append(matrix, config)
-		return matrix, nil
-	}
-
-	// calculate number of permutations and
-	// extract the list of keys.
-	var perm int
-	var keys []string
-	for k, v := range config.Matrix {
-		perm *= len(v)
-		if perm == 0 {
-			perm = len(v)
-		}
-		keys = append(keys, k)
-	}
-
-	// for each axis calculate the values the uniqe
-	// set of values that should be used.
-	for p := 0; p < perm; p++ {
-		axis := map[string]string{}
-		decr := perm
-		for i, key := range keys {
-			vals := config.Matrix[key]
-			decr = decr / len(vals)
-			item := p / decr % len(vals)
-			axis[key] = vals[item]
-
-			// enforce a maximum number of axis
-			// in the build matrix.
-			if i > LimitAxis {
-				break
-			}
-		}
-
-		config, err = Parse(Inject(raw, axis))
+	confs := map[string]*common.Config{}
+	for _, a := range axis {
+		// inject the matrix values into the raw script
+		injected := Inject(raw, a)
+		cfg, err := Parse(injected)
 		if err != nil {
 			return nil, err
 		}
-		matrix = append(matrix, config)
-
-		// each axis value should also be added
-		// as an environment variable
-		for key, val := range axis {
-			env := fmt.Sprintf("%s=%s", key, val)
-			config.Build.Environment = append(config.Build.Environment, env)
-		}
-
-		// enforce a maximum number of permutations
-		// in the build matrix.
-		if p > LimitPerms {
-			break
-		}
+		// append the matrix values to the env variables
+		// for k, v := range a {
+		// 	cfg.Environment[k] = v
+		// }
+		confs[a.String()] = cfg
 	}
-
-	return matrix, nil
+	return confs, nil
 }
