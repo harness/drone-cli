@@ -38,8 +38,9 @@ func Inject(raw string, params map[string]string) string {
 func InjectSafe(raw string, params map[string]string) string {
 	before, _ := Parse(raw)
 	after, _ := Parse(Inject(raw, params))
-	after.Build = before.Build
-	after.Compose = before.Compose
-	scrubbed, _ := yaml.Marshal(after)
+	before.Notify = after.Notify
+	before.Publish = after.Publish
+	before.Deploy = after.Deploy
+	scrubbed, _ := yaml.Marshal(before)
 	return string(scrubbed)
 }

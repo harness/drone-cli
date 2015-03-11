@@ -32,6 +32,6 @@ func (b *Builder) Cancel() {
 	defer b.Unlock()
 
 	for _, h := range b.handlers {
-		h.Cancel() // TODO use channel to signal cancel
+		h.Cancel()
 	}
 }

@@ -59,7 +59,7 @@ func addClone(c *common.Config) {
 // build configuration vargs. They should have
 // already been transferred to the Setup step.
 func normalizeBuild(c *common.Config) {
-	c.Build.Config = map[string]interface{}{}
+	c.Build.Config = nil
 }
 
 // normalizeImages is a transformer that ensures every

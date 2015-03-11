@@ -13,6 +13,106 @@ import (
 )
 
 var yaml = `
+
+`
+
+var yamlAlt = `
+
+`
+
+func main() {
+
+	matrix, err := config.ParseMatrix(yamlAlt)
+	if err != nil {
+		println(err.Error())
+		return
+	}
+
+	client, err := dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, config := range matrix {
+		build.Client = client
+		build.Config = config
+		run(build)
+	}
+}
+
+func run(build *builder.Build) {
+
+	amb, err := ambassador.Create(build.Client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer amb.Destroy()
+
+	// response writer
+	res := builder.NewResultWriter(os.Stdout)
+
+	// builder
+	b := runner.Builder(build)
+	defer b.Cancel()
+	err = b.Build(res)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// deployer
+	d := runner.Deployer(build)
+	defer d.Cancel()
+	err = d.Build(res)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// notifier
+	n := runner.Notifier(build)
+	defer n.Cancel()
+	err = n.Build(res)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+var build = &builder.Build{
+	Repo: &common.Repo{
+		Remote: "github.com",
+		Host:   "github.com",
+		Owner:  "bradrydzewski",
+	},
+	Clone: &common.Clone{
+		Dir:    "/drone/src/github.com/drone/drone",
+		Sha:    "4fbcc1dd41c5e2792c034d31e350f521890ad723",
+		Branch: "master",
+		Remote: "git://github.com/drone/drone.git",
+	},
+}
+
+var testYaml = `
+clone:
+  image: plugin/drone-git
+
+build:
+  image: golang:1.4.2
+  commands:
+    - ls -la /drone/src/github.com/drone/drone
+    - go version
+
+compose:
+  database:
+	  image: postgres:9.2
+
+#matrix:
+#  go_version:
+#    - 1.3.3
+#    - 1.4.2
+`
+
+var droneYaml = `
 build:
   image: golang:$$go_version
   script:
@@ -34,109 +134,3 @@ matrix:
     - 1.3.3
     - 1.4.2
 `
-
-var yamlAlt = `
-clone:
-  image: plugin/drone-git
-
-build:
-  image: golang:1.4.2
-  commands:
-    - ls -la /drone/src/github.com/drone/drone
-    - go version
-
-compose:
-  database:
-	  image: postgres:9.2
-
-#matrix:
-#  go_version:
-#    - 1.3.3
-#    - 1.4.2
-`
-
-func main() {
-
-	matrix, err := config.ParseMatrix(yamlAlt)
-	if err != nil {
-		println(err.Error())
-		return
-	}
-
-	clone := &common.Clone{}
-	clone.Dir = "/drone/src/github.com/drone/drone"
-	clone.Branch = "master"
-	clone.Sha = "4fbcc1dd41c5e2792c034d31e350f521890ad723"
-	clone.Remote = "git://github.com/drone/drone.git"
-
-	// client
-	client, err := dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// ambassador
-	amb, err := ambassador.Create(client)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer amb.Destroy()
-
-	// response writer
-	res := builder.NewResultWriter(os.Stdout)
-
-	// context
-	build := &builder.Build{
-		Repo:   nil,
-		Clone:  clone,
-		Commit: nil,
-		Config: matrix[0],
-		Client: amb,
-	}
-
-	// builder
-	b := runner.Builder(build)
-	defer b.Cancel()
-	err = b.Build(res)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// deployer
-	d := runner.Deployer(build)
-	defer d.Cancel()
-	err = d.Build(res)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// notifier
-	n := runner.Deployer(build)
-	defer n.Cancel()
-	err = n.Build(res)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// for _, conf := range matrix {
-	// 	req := runner.Request{}
-	// 	req.Clone = clone
-	// 	req.Config = conf
-	// 	req.Client, err = dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
-	// 	if err != nil {
-	// 		println(err.Error())
-	// 		return
-	// 	}
-	//
-	// 	resp := runner.Response{}
-	// 	resp.Writer = os.Stdout
-	// 	runner.Run(&req, &resp)
-	//
-	// 	if resp.ExitCode != 0 {
-	// 		os.Exit(resp.ExitCode)
-	// 	}
-	//
-	// }
-}
