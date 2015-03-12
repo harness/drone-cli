@@ -31,10 +31,6 @@ func (a Axis) String() string {
 
 // ParseMatrix parses the Matrix section of the yaml
 // file and returns a list of axis.
-//
-// Note that this method will cap the result set to
-// avoid caclulating permutations on too large of a
-// dataset and consuming too many system resources.
 func ParseMatrix(raw string) ([]Axis, error) {
 	matrix, err := parseMatrix(raw)
 	if err != nil {
@@ -47,6 +43,16 @@ func ParseMatrix(raw string) ([]Axis, error) {
 		return nil, nil
 	}
 
+	return CalcMatrix(matrix), nil
+}
+
+// CalcMatrix calculates the permutations for the
+// build matrix.
+//
+// Note that this method will cap the number of
+// permutations to 25 to prevent an overly
+// expensive calculation.
+func CalcMatrix(matrix Matrix) []Axis {
 	// calculate number of permutations and
 	// extract the list of tags
 	// (ie go_version, redis_version, etc)
@@ -75,7 +81,7 @@ func ParseMatrix(raw string) ([]Axis, error) {
 			elem := p / decr % len(elems)
 			axis[tag] = elems[elem]
 
-			// enforce a maximum number of rows
+			// enforce a maximum number of tags
 			// in the build matrix.
 			if i > limitTags {
 				break
@@ -92,7 +98,7 @@ func ParseMatrix(raw string) ([]Axis, error) {
 		}
 	}
 
-	return axisList, nil
+	return axisList
 }
 
 // helper function to parse the Matrix data from
