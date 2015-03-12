@@ -17,6 +17,7 @@ import (
 )
 
 const EXIT_STATUS = 1
+var dockerTlsVerify = os.Getenv("DOCKER_TLS_VERIFY") != ""
 
 // NewBuildCommand returns the CLI command for "build".
 func NewBuildCommand() cli.Command {
@@ -58,7 +59,11 @@ func NewBuildCommand() cli.Command {
 			},
 			cli.BoolFlag{
 				Name:  "tls",
-				Usage: "runs drone build with docker arguments using tls",
+				Usage: "runs drone build with docker arguments use TLS",
+			},
+			cli.BoolFlag{
+				Name:  "tlsverify",
+				Usage: "runs drone build with docker arguments use TLS and verify the remote",
 			},
 			cli.StringFlag{
 				Name:  "tlscacert",
@@ -219,7 +224,7 @@ func getHost() string {
 }
 
 func getCert() string {
-	if os.Getenv("DOCKER_CERT_PATH") != "" && os.Getenv("DOCKER_TLS_VERIFY") == "1" {
+	if os.Getenv("DOCKER_CERT_PATH") != "" && dockerTlsVerify {
 		return filepath.Join(os.Getenv("DOCKER_CERT_PATH"), "cert.pem")
 	} else {
 		return ""
@@ -227,7 +232,7 @@ func getCert() string {
 }
 
 func getKey() string {
-	if os.Getenv("DOCKER_CERT_PATH") != "" && os.Getenv("DOCKER_TLS_VERIFY") == "1" {
+	if os.Getenv("DOCKER_CERT_PATH") != "" && dockerTlsVerify {
 		return filepath.Join(os.Getenv("DOCKER_CERT_PATH"), "key.pem")
 	} else {
 		return ""
