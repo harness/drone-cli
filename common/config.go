@@ -12,4 +12,5 @@ type Config struct {
 	Notify  map[string]*Step
 
 	Matrix map[string][]string
+	Axis   map[string]string
 }

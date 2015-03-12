@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/samalba/dockerclient"
 )
 
@@ -40,10 +41,14 @@ func Create(client dockerclient.Client) (_ *Ambassador, err error) {
 		// then attempts to re-create the container
 		amb.name, err = client.CreateContainer(conf, "")
 		if err != nil {
+			log.WithField("image", conf.Image).Errorln(err)
 			return nil, err
 		}
 	}
 	err = client.StartContainer(amb.name, host)
+	if err != nil {
+		log.WithField("image", conf.Image).Errorln(err)
+	}
 	return amb, err
 }
 
@@ -55,8 +60,14 @@ func (c *Ambassador) Destroy() error {
 }
 
 // CreateContainer creates a container.
-func (c *Ambassador) CreateContainer(config *dockerclient.ContainerConfig, name string) (string, error) {
-	return c.client.CreateContainer(config, name)
+func (c *Ambassador) CreateContainer(conf *dockerclient.ContainerConfig, name string) (string, error) {
+	log.WithField("image", conf.Image).Debugln("create container")
+
+	id, err := c.client.CreateContainer(conf, name)
+	if err != nil {
+		log.WithField("image", conf.Image).Errorln(err)
+	}
+	return id, err
 }
 
 // InspectContainer returns container details.
@@ -73,22 +84,38 @@ func (c *Ambassador) ContainerLogs(id string, options *dockerclient.LogOptions) 
 // StartContainer starts a container. The ambassador volume
 // is automatically linked. The ambassador network is linked
 // iff a network mode is not already specified.
-func (c *Ambassador) StartContainer(id string, config *dockerclient.HostConfig) error {
-	config.VolumesFrom = append(config.VolumesFrom, "container:"+c.name)
-	if len(config.NetworkMode) == 0 {
-		config.NetworkMode = "container:" + c.name
+func (c *Ambassador) StartContainer(id string, conf *dockerclient.HostConfig) error {
+	log.WithField("container", id).Debugln("start container")
+
+	conf.VolumesFrom = append(conf.VolumesFrom, "container:"+c.name)
+	if len(conf.NetworkMode) == 0 {
+		conf.NetworkMode = "container:" + c.name
 	}
-	return c.client.StartContainer(id, config)
+	err := c.client.StartContainer(id, conf)
+	if err != nil {
+		log.WithField("container", id).Errorln(err)
+	}
+	return err
 }
 
 // StopContainer stops a container.
 func (c *Ambassador) StopContainer(id string, timeout int) error {
-	return c.client.StopContainer(id, timeout)
+	log.WithField("container", id).Debugln("stop container")
+	err := c.client.StopContainer(id, timeout)
+	if err != nil {
+		log.WithField("container", id).Errorln(err)
+	}
+	return err
 }
 
 // PullImage pulls an image.
 func (c *Ambassador) PullImage(name string, auth *dockerclient.AuthConfig) error {
-	return c.client.PullImage(name, auth)
+	log.WithField("image", name).Debugln("pull image")
+	err := c.client.PullImage(name, auth)
+	if err != nil {
+		log.WithField("image", name).Errorln(err)
+	}
+	return err
 }
 
 // RemoveContainer removes a container.

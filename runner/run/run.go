@@ -16,7 +16,7 @@ import (
 func init() {
 	log.SetOutput(os.Stderr)
 	log.SetLevel(log.DebugLevel)
-	log.SetFormatter(&log.TextFormatter{})
+	log.SetFormatter(&formatter{})
 }
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 
 	client, err := newMockClient() //dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorln(err)
 		return
 	}
 
@@ -38,9 +38,16 @@ func main() {
 		build.Client = client
 		build.Config = conf
 
-		log.Debugf("Starting %s", axis)
+		log.Printf("start build %s", axis)
 		run(build)
+
 	}
+
+	log.Println("")
+	for axis := range matrix {
+		log.Printf(" ✓ %s", axis)
+	}
+	log.Println("")
 }
 
 func run(build *builder.Build) {
@@ -97,7 +104,7 @@ var build = &builder.Build{
 
 var testYaml = `
 build:
-  image: golang:$go_version
+  image: golang:$$go_version
   commands:
     - ls -la /drone/src/github.com/drone/drone
     - go version
