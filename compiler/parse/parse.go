@@ -3,8 +3,6 @@ package parser
 import (
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/common/matrix"
-	"github.com/drone/drone-cli/parser/inject"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,7 +27,7 @@ func Parse(raw string) ([]*common.Config, error) {
 
 	for _, ax := range axis {
 		// inject the matrix values into the raw script
-		injected := inject.Inject(raw, ax)
+		injected := Inject(raw, ax)
 		conf, err := parse(injected)
 		if err != nil {
 			return nil, err
