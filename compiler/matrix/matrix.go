@@ -1,4 +1,4 @@
-package matrix
+package parser
 
 import (
 	"strings"
@@ -18,9 +18,8 @@ type Matrix map[string][]string
 // from the build matrix.
 type Axis map[string]string
 
-// String returns a string representation of an
-// Axis as a comma-separated list of environment
-// variables.
+// String returns a string representation of an Axis as
+// a comma-separated list of environment variables.
 func (a Axis) String() string {
 	var envs []string
 	for k, v := range a {
@@ -31,12 +30,8 @@ func (a Axis) String() string {
 
 // Parse parses the Matrix section of the yaml file and
 // returns a list of axis.
-//
-// Note that this method will cap the result set to
-// avoid caclulating permutations on too large of a
-// dataset and consuming too many system resources.
 func Parse(raw string) ([]Axis, error) {
-	matrix, err := parse(raw)
+	matrix, err := parseMatrix(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +42,14 @@ func Parse(raw string) ([]Axis, error) {
 		return nil, nil
 	}
 
+	return Calc(matrix), nil
+}
+
+// Calc calculates the permutations for th build matrix.
+//
+// Note that this method will cap the number of permutations
+// to 25 to prevent an overly expensive calculation.
+func Calc(matrix Matrix) []Axis {
 	// calculate number of permutations and
 	// extract the list of tags
 	// (ie go_version, redis_version, etc)
@@ -75,7 +78,7 @@ func Parse(raw string) ([]Axis, error) {
 			elem := p / decr % len(elems)
 			axis[tag] = elems[elem]
 
-			// enforce a maximum number of rows
+			// enforce a maximum number of tags
 			// in the build matrix.
 			if i > limitTags {
 				break
@@ -92,12 +95,12 @@ func Parse(raw string) ([]Axis, error) {
 		}
 	}
 
-	return axisList, nil
+	return axisList
 }
 
 // helper function to parse the Matrix data from
 // the raw yaml file.
-func parse(raw string) (Matrix, error) {
+func parseMatrix(raw string) (Matrix, error) {
 	data := struct {
 		Matrix map[string][]string
 	}{}

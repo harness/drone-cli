@@ -1,45 +1,33 @@
-package matrix
+package parser
 
 import (
 	"testing"
+
+	"github.com/franela/goblin"
 )
 
-func Test_Parse(t *testing.T) {
-	axis, err := Parse(matrix)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+func Test_Matrix(t *testing.T) {
 
-	if len(axis) != 24 {
-		t.Errorf("Expected 24 axis, got %d", len(axis))
-	}
+	g := goblin.Goblin(t)
+	g.Describe("Calculate matrix", func() {
 
-	unique := map[string]bool{}
-	for _, a := range axis {
-		unique[a.String()] = true
-	}
+		m := map[string][]string{}
+		m["go_version"] = []string{"go1", "go1.2"}
+		m["python_version"] = []string{"3.2", "3.3"}
+		m["django_version"] = []string{"1.7", "1.7.1", "1.7.2"}
+		m["redis_version"] = []string{"2.6", "2.8"}
+		axis := Calc(m)
 
-	if len(unique) != 24 {
-		t.Errorf("Expected 24 unique permutations in matrix, got %d", len(unique))
-	}
+		g.It("Should calculate permutations", func() {
+			g.Assert(len(axis)).Equal(24)
+		})
+
+		g.It("Should not duplicate permutations", func() {
+			set := map[string]bool{}
+			for _, perm := range axis {
+				set[perm.String()] = true
+			}
+			g.Assert(len(set)).Equal(24)
+		})
+	})
 }
-
-var matrix = `
-build:
-  image: $$python_version $$redis_version $$django_version $$go_version
-matrix:
-  python_version:
-    - 3.2
-    - 3.3
-  redis_version:
-    - 2.6
-    - 2.8
-  django_version:
-    - 1.7
-    - 1.7.1
-    - 1.7.2
-  go_version:
-    - go1
-    - go1.2
-`
