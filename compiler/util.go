@@ -7,19 +7,6 @@ import (
 	"github.com/samalba/dockerclient"
 )
 
-// helper function to encode the build step to
-// a json string. Primarily used for plugins, which
-// expect a json encoded string in stdin or arg[1].
-func toCommand(state *State, step *common.Step) []string {
-	p := payload{
-		state.Repo,
-		state.Commit,
-		state.Clone,
-		step.Config,
-	}
-	return []string{p.Encode()}
-}
-
 // helper function that converts a build step to
 // a hostConfig for use with the dockerclient
 func toHostConfig(step *common.Step) *dockerclient.HostConfig {
@@ -50,13 +37,26 @@ func toContainerConfig(step *common.Step) *dockerclient.ContainerConfig {
 	return config
 }
 
+// helper function to encode the build step to
+// a json string. Primarily used for plugins, which
+// expect a json encoded string in stdin or arg[1].
+func toCommand(state *State, step *common.Step) []string {
+	p := payload{
+		state.Repo,
+		state.Commit,
+		state.Clone,
+		step.Config,
+	}
+	return []string{p.Encode()}
+}
+
 // payload represents the payload of a plugin
 // that is serialized and sent to the plugin in JSON
 // format via stdin or arg[1].
 type payload struct {
-	Repo   *common.Repo  `json:"repo"`
-	Commit *common.Repo  `json:"commit"`
-	Clone  *common.Clone `json:"clone"`
+	Repo   *common.Repo   `json:"repo"`
+	Commit *common.Commit `json:"commit"`
+	Clone  *common.Clone  `json:"clone"`
 
 	Config map[string]interface{} `json:"vargs"`
 }

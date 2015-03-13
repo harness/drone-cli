@@ -11,7 +11,7 @@ import (
 // running build.
 type State struct {
 	Repo   *common.Repo
-	Commit *common.Repo
+	Commit *common.Commit
 	Config *common.Config
 	Clone  *common.Clone
 

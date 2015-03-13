@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/drone/drone-cli/common"
-	"github.com/samalba/dockerclient"
 )
 
 // Node is an element in the build execution tree.
@@ -48,14 +47,38 @@ func (n serialNode) Run(s *State, rw *ResultWriter) error {
 // batchNode runs a container and blocks until complete.
 type batchNode struct {
 	step *common.Step
+	// host *dockerclient.HostConfig
+	// conf *dockerclient.ContainerConfig
 }
 
 func (n *batchNode) Run(s *State, rw *ResultWriter) error {
-	host := toHostConfig(n.step)
-	conf := toContainerConfig(n.step)
-	if n.step.Config != nil {
-		conf.Cmd = toCommand(s, n.step)
-		conf.Entrypoint = []string{}
+	// host := toHostConfig(n.step)
+	// conf := toContainerConfig(n.step)
+	// if step.Config != nil {
+	// 	conf.Cmd = toCommand(s, n.step)
+	// }
+	// name, err := s.Run(conf, host)
+	// if err != nil {
+	// 	return nil
+	// }
+	//
+	// rc, err := s.Logs(name)
+	// if err != nil {
+	// 	return err
+	// }
+	// io.Copy(rw, rc)
+	//
+	// info, err := c.Info(name)
+	// if err != nil {
+	// 	return err
+	// }
+	// rw.WriteExitCode(info.State.ExitCode)
+	switch {
+	case n.step.Condition == nil:
+	case n.step.Condition.MatchBranch(s.Commit.Branch) == false:
+		return nil
+	case n.step.Condition.MatchOwner(s.Repo.Owner) == false:
+		return nil
 	}
 
 	return nil
@@ -67,44 +90,10 @@ type serviceNode struct {
 }
 
 func (n *serviceNode) Run(s *State, rw *ResultWriter) error {
-	host := toHostConfig(n.step)
-	conf := toContainerConfig(n.step)
+	// host := toHostConfig(n.step)
+	// conf := toContainerConfig(n.step)
 
-	return nil
-}
-
-// cloneNode runs a clone container, blocking, uses build section
-type cloneNode struct {
-	step *common.Step
-}
-
-func (n *cloneNode) Run(s *State, rw *ResultWriter) error {
-	return nil
-}
-
-// buildNode runs a build container, discards the step.config section
-type buildNode struct {
-	host *dockerclient.HostConfig
-	conf *dockerclient.ContainerConfig
-}
-
-func newBuildNode(step *common.Step) *buildNode {
-	host := toHostConfig(step)
-	conf := toContainerConfig(step)
-	conf.Entrypoint = []string{"/bin/bash"}
-	conf.Cmd = []string{"/drone/bin/build.sh"}
-	return &buildNode{host, conf}
-}
-
-func (n *buildNode) Run(s *State, rw *ResultWriter) error {
-	return nil
-}
-
-// setupNode container, discards the step.config section
-type setupNode struct {
-	step *common.Step
-}
-
-func (n *setupNode) Run(s *State, rw *ResultWriter) error {
+	// _, err := s.Run(conf, host)
+	// return err
 	return nil
 }

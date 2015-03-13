@@ -2,12 +2,6 @@ package compiler
 
 import "github.com/drone/drone-cli/common"
 
-// Flags holds flags for loading a builder.
-type Flags struct {
-	Lint bool
-	Safe bool
-}
-
 // Builder represents a build execution tree.
 type Builder struct {
 	Build  Node
@@ -46,7 +40,7 @@ func (b *Builder) RunNotify() error {
 }
 
 // Load loads a build configuration file.
-func Load(conf *common.Config, flags *Flags) *Builder {
+func Load(conf *common.Config) *Builder {
 	var (
 		builds  []Node
 		deploys []Node
