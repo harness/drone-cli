@@ -25,7 +25,7 @@ func (a Axis) String() string {
 	for k, v := range a {
 		envs = append(envs, k+"="+v)
 	}
-	return strings.Join(envs, ",")
+	return strings.Join(envs, " ")
 }
 
 // Parse parses the Matrix section of the yaml file and
