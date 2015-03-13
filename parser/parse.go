@@ -26,7 +26,7 @@ var defaultOpts = &Opts{
 // a list of build configurations for each axis
 // using the default parsing options.
 func Parse(raw string, opts *Opts) ([]*common.Config, error) {
-	return Parse(raw, defaultOpts)
+	return ParseOpts(raw, defaultOpts)
 }
 
 // ParseOpts parses a build matrix and returns
