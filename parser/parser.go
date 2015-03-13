@@ -1,16 +1,17 @@
 package parser
 
 import (
-	"io/ioutil"
-
 	"github.com/drone/drone-cli/common"
+	"github.com/drone/drone-cli/common/matrix"
+	"github.com/drone/drone-cli/parser/inject"
+
 	"gopkg.in/yaml.v2"
 )
 
 // Parse parses a build matrix and returns
 // a list of build configurations for each axis.
 func Parse(raw string) ([]*common.Config, error) {
-	axis, err := ParseMatrix(raw)
+	axis, err := matrix.Parse(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func Parse(raw string) ([]*common.Config, error) {
 
 	for _, ax := range axis {
 		// inject the matrix values into the raw script
-		injected := Inject(raw, ax)
+		injected := inject.Inject(raw, ax)
 		conf, err := parse(injected)
 		if err != nil {
 			return nil, err
@@ -37,13 +38,6 @@ func Parse(raw string) ([]*common.Config, error) {
 		confs = append(confs, conf)
 	}
 	return confs, nil
-}
-
-// ParseFile parses a build matrix from a file and returns
-// a list of build configurations for each axis.
-func ParseFile(name string) ([]*common.Config, error) {
-	raw, _ := ioutil.ReadFile(name)
-	return Parse(string(raw))
 }
 
 // helper funtion to parse a yaml configuration file.

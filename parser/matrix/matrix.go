@@ -18,9 +18,8 @@ type Matrix map[string][]string
 // from the build matrix.
 type Axis map[string]string
 
-// String returns a string representation of an
-// Axis as a comma-separated list of environment
-// variables.
+// String returns a string representation of an Axis as
+// a comma-separated list of environment variables.
 func (a Axis) String() string {
 	var envs []string
 	for k, v := range a {
@@ -29,9 +28,9 @@ func (a Axis) String() string {
 	return strings.Join(envs, ",")
 }
 
-// ParseMatrix parses the Matrix section of the yaml
-// file and returns a list of axis.
-func ParseMatrix(raw string) ([]Axis, error) {
+// Parse parses the Matrix section of the yaml file and
+// returns a list of axis.
+func Parse(raw string) ([]Axis, error) {
 	matrix, err := parseMatrix(raw)
 	if err != nil {
 		return nil, err
@@ -43,16 +42,14 @@ func ParseMatrix(raw string) ([]Axis, error) {
 		return nil, nil
 	}
 
-	return CalcMatrix(matrix), nil
+	return Calc(matrix), nil
 }
 
-// CalcMatrix calculates the permutations for the
-// build matrix.
+// Calc calculates the permutations for th build matrix.
 //
-// Note that this method will cap the number of
-// permutations to 25 to prevent an overly
-// expensive calculation.
-func CalcMatrix(matrix Matrix) []Axis {
+// Note that this method will cap the number of permutations
+// to 25 to prevent an overly expensive calculation.
+func Calc(matrix Matrix) []Axis {
 	// calculate number of permutations and
 	// extract the list of tags
 	// (ie go_version, redis_version, etc)

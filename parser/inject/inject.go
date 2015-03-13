@@ -1,9 +1,10 @@
-package parser
+package inject
 
 import (
 	"sort"
 	"strings"
 
+	"github.com/drone/drone-cli/common"
 	"gopkg.in/yaml.v2"
 )
 
@@ -43,4 +44,11 @@ func InjectSafe(raw string, params map[string]string) string {
 	before.Deploy = after.Deploy
 	result, _ := yaml.Marshal(before)
 	return string(result)
+}
+
+// helper funtion to parse a yaml configuration file.
+func parse(raw string) (*common.Config, error) {
+	cfg := common.Config{}
+	err := yaml.Unmarshal([]byte(raw), &cfg)
+	return &cfg, err
 }

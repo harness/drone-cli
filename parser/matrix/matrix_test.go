@@ -16,7 +16,7 @@ func Test_Matrix(t *testing.T) {
 		m["python_version"] = []string{"3.2", "3.3"}
 		m["django_version"] = []string{"1.7", "1.7.1", "1.7.2"}
 		m["redis_version"] = []string{"2.6", "2.8"}
-		axis := CalcMatrix(m)
+		axis := Calc(m)
 
 		g.It("Should calculate permutations", func() {
 			g.Assert(len(axis)).Equal(24)
