@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"io"
 	"sync"
 
 	"github.com/drone/drone-cli/common"
@@ -8,20 +9,20 @@ import (
 
 // Node is an element in the build execution tree.
 type Node interface {
-	Run(*State, *ResultWriter) error
+	Run(*B) error
 }
 
 // parallelNode runs a set of build nodes in parallel.
 type parallelNode []Node
 
-func (n parallelNode) Run(s *State, rw *ResultWriter) error {
+func (n parallelNode) Run(b *B) error {
 	var wg sync.WaitGroup
 	for _, node := range n {
 		wg.Add(1)
 
 		go func(node Node) {
 			defer wg.Done()
-			node.Run(s, rw)
+			node.Run(b)
 		}(node)
 	}
 	wg.Wait()
@@ -31,13 +32,13 @@ func (n parallelNode) Run(s *State, rw *ResultWriter) error {
 // serialNode runs a set of build nodes in sequential order.
 type serialNode []Node
 
-func (n serialNode) Run(s *State, rw *ResultWriter) error {
+func (n serialNode) Run(b *B) error {
 	for _, node := range n {
-		err := node.Run(s, rw)
+		err := node.Run(b)
 		if err != nil {
 			return err
 		}
-		if rw.ExitCode() != 0 {
+		if b.ExitCode() != 0 {
 			return nil
 		}
 	}
@@ -47,40 +48,42 @@ func (n serialNode) Run(s *State, rw *ResultWriter) error {
 // batchNode runs a container and blocks until complete.
 type batchNode struct {
 	step *common.Step
-	// host *dockerclient.HostConfig
-	// conf *dockerclient.ContainerConfig
 }
 
-func (n *batchNode) Run(s *State, rw *ResultWriter) error {
-	// host := toHostConfig(n.step)
-	// conf := toContainerConfig(n.step)
-	// if step.Config != nil {
-	// 	conf.Cmd = toCommand(s, n.step)
-	// }
-	// name, err := s.Run(conf, host)
-	// if err != nil {
+func (n *batchNode) Run(b *B) error {
+
+	// switch {
+	// case n.step.Condition == nil:
+	// case n.step.Condition.MatchBranch(b.Commit.Branch) == false:
+	// 	return nil
+	// case n.step.Condition.MatchOwner(b.Repo.Owner) == false:
 	// 	return nil
 	// }
-	//
-	// rc, err := s.Logs(name)
-	// if err != nil {
-	// 	return err
-	// }
-	// io.Copy(rw, rc)
-	//
-	// info, err := c.Info(name)
-	// if err != nil {
-	// 	return err
-	// }
-	// rw.WriteExitCode(info.State.ExitCode)
-	switch {
-	case n.step.Condition == nil:
-	case n.step.Condition.MatchBranch(s.Commit.Branch) == false:
-		return nil
-	case n.step.Condition.MatchOwner(s.Repo.Owner) == false:
-		return nil
+
+	// runs the container
+	conf := toContainerConfig(n.step)
+	if n.step.Config != nil {
+		conf.Cmd = toCommand(b, n.step)
+	}
+	name, err := b.Run(conf)
+	if err != nil {
+		return err
 	}
 
+	// streams the logs to the build results
+	rc, err := b.Logs(name)
+	if err != nil {
+		return err
+	}
+	io.Copy(b, rc)
+
+	// inspects the results and writes the
+	// build result exit code
+	info, err := b.Inspect(name)
+	if err != nil {
+		return err
+	}
+	b.Exit(info.State.ExitCode)
 	return nil
 }
 
@@ -89,11 +92,8 @@ type serviceNode struct {
 	step *common.Step
 }
 
-func (n *serviceNode) Run(s *State, rw *ResultWriter) error {
-	// host := toHostConfig(n.step)
-	// conf := toContainerConfig(n.step)
-
-	// _, err := s.Run(conf, host)
-	// return err
-	return nil
+func (n *serviceNode) Run(b *B) error {
+	conf := toContainerConfig(n.step)
+	_, err := b.Run(conf)
+	return err
 }

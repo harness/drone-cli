@@ -25,7 +25,7 @@ var defaultOpts = &Opts{
 // Parse parses a build matrix and returns
 // a list of build configurations for each axis
 // using the default parsing options.
-func Parse(raw string, opts *Opts) ([]*common.Config, error) {
+func Parse(raw string) ([]*common.Config, error) {
 	return ParseOpts(raw, defaultOpts)
 }
 
@@ -42,7 +42,11 @@ func ParseOpts(raw string, opts *Opts) ([]*common.Config, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		transformSetup(conf)
+		transformClone(conf)
+		transformBuild(conf)
+		transformImages(conf)
+		transformDockerPlugin(conf)
 		if !opts.Network {
 			rmNetwork(conf)
 		}
@@ -52,11 +56,6 @@ func ParseOpts(raw string, opts *Opts) ([]*common.Config, error) {
 		if !opts.Privileged {
 			rmPrivileged(conf)
 		}
-		transformSetup(conf)
-		transformClone(conf)
-		transformBuild(conf)
-		transformImages(conf)
-		transformDockerPlugin(conf)
 	}
 	return confs, nil
 }
@@ -86,7 +85,7 @@ func parse(raw string) ([]*common.Config, error) {
 		if err != nil {
 			return nil, err
 		}
-		conf.Axis = ax
+		conf.Axis = common.Axis(ax)
 		confs = append(confs, conf)
 	}
 	return confs, nil

@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/drone/drone-cli/builder"
-	"github.com/drone/drone-cli/builder/ambassador"
-	"github.com/drone/drone-cli/builder/runner"
 	"github.com/drone/drone-cli/common"
-	"github.com/drone/drone-cli/common/config"
+	builder "github.com/drone/drone-cli/compiler"
+	"github.com/drone/drone-cli/parser"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -20,8 +17,7 @@ func init() {
 }
 
 func main() {
-
-	matrix, err := config.ParseMatrix(testYaml)
+	matrix, err := parser.Parse(testYaml)
 	if err != nil {
 		println(err.Error())
 		return
@@ -32,74 +28,97 @@ func main() {
 		log.Errorln(err)
 		return
 	}
+	// TODO DEFER AMABASSADOR DESTROY
 
-	for axis, conf := range matrix {
-		config.Transform(conf)
-		build.Client = client
-		build.Config = conf
+	var builds []*builder.B
+	var builders []*builder.Builder
 
-		log.Printf("start build %s", axis)
-		run(build)
+	// must cleanup after our build
+	defer func() {
+		for _, build := range builds {
+			build.RemoveAll()
+		}
+	}()
 
+	// list of builds and builders for each item
+	// in the matrix
+	for _, conf := range matrix {
+		b := builder.NewB(client, os.Stdout)
+		b.Repo = repo
+		b.Clone = clone
+		b.Config = conf
+		builds = append(builds, b)
+		builders = append(builders, builder.Load(conf))
 	}
 
+	// run the builds
+	for i, builder := range builders {
+		log.Printf("starting build %s", builds[i].Config.Axis)
+		err := builder.RunBuild(builds[i])
+		if err != nil {
+			// TODO need a 255 exit code if the build errors
+		}
+	}
+
+	// run the deploy steps
+	// run the notify steps
+
 	log.Println("")
-	for axis := range matrix {
-		log.Printf(" ✓ %s", axis)
+	for _, b := range builds {
+		log.Printf(" ✓ %s", b.Config.Axis)
 	}
 	log.Println("")
 }
 
-func run(build *builder.Build) {
+//
+// func run(build *builder.Build) {
+//
+// 	amb, err := ambassador.Create(build.Client)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return
+// 	}
+// 	defer amb.Destroy()
+// 	build.Client = amb // TODO remove this
+//
+// 	// response writer
+// 	res := builder.NewResultWriter(os.Stdout)
+//
+// 	// builder
+// 	b := runner.Builder(build)
+// 	defer b.Cancel()
+// 	err = b.Build(res)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+//
+// 	// deployer
+// 	d := runner.Deployer(build)
+// 	defer d.Cancel()
+// 	err = d.Build(res)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+//
+// 	// notifier
+// 	n := runner.Notifier(build)
+// 	defer n.Cancel()
+// 	err = n.Build(res)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// }
 
-	amb, err := ambassador.Create(build.Client)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer amb.Destroy()
-	build.Client = amb // TODO remove this
-
-	// response writer
-	res := builder.NewResultWriter(os.Stdout)
-
-	// builder
-	b := runner.Builder(build)
-	defer b.Cancel()
-	err = b.Build(res)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// deployer
-	d := runner.Deployer(build)
-	defer d.Cancel()
-	err = d.Build(res)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// notifier
-	n := runner.Notifier(build)
-	defer n.Cancel()
-	err = n.Build(res)
-	if err != nil {
-		fmt.Println(err)
-	}
+var repo = &common.Repo{
+	Remote: "github.com",
+	Host:   "github.com",
+	Owner:  "bradrydzewski",
 }
-
-var build = &builder.Build{
-	Repo: &common.Repo{
-		Remote: "github.com",
-		Host:   "github.com",
-		Owner:  "bradrydzewski",
-	},
-	Clone: &common.Clone{
-		Dir:    "/drone/src/github.com/drone/drone",
-		Sha:    "4fbcc1dd41c5e2792c034d31e350f521890ad723",
-		Branch: "master",
-		Remote: "git://github.com/drone/drone.git",
-	},
+var clone = &common.Clone{
+	Dir:    "/drone/src/github.com/drone/drone",
+	Sha:    "4fbcc1dd41c5e2792c034d31e350f521890ad723",
+	Branch: "master",
+	Remote: "git://github.com/drone/drone.git",
 }
 
 var testYaml = `

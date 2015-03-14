@@ -4,39 +4,39 @@ import "github.com/drone/drone-cli/common"
 
 // Builder represents a build execution tree.
 type Builder struct {
-	Build  Node
-	Deploy Node
-	Notify Node
+	builds Node
+	deploy Node
+	notify Node
 }
 
 // Run runs the build, deploy and notify nodes
 // in the build tree.
-func (b *Builder) Run() error {
+func (b *Builder) Run(build *B) error {
 	var err error
-	err = b.RunBuild()
+	err = b.RunBuild(build)
 	if err != nil {
 		return err
 	}
-	err = b.RunDeploy()
+	err = b.RunDeploy(build)
 	if err != nil {
 		return err
 	}
-	return b.RunNotify()
+	return b.RunNotify(build)
 }
 
 // RunBuild runs only the build node.
-func (b *Builder) RunBuild() error {
-	return nil
+func (b *Builder) RunBuild(build *B) error {
+	return b.builds.Run(build)
 }
 
 // RunDeploy runs only the deploy node.
-func (b *Builder) RunDeploy() error {
-	return nil
+func (b *Builder) RunDeploy(build *B) error {
+	return b.notify.Run(build)
 }
 
 // RunNotify runs on the notify node.
-func (b *Builder) RunNotify() error {
-	return nil
+func (b *Builder) RunNotify(build *B) error {
+	return b.notify.Run(build)
 }
 
 // Load loads a build configuration file.
@@ -50,9 +50,9 @@ func Load(conf *common.Config) *Builder {
 	for _, step := range conf.Compose {
 		builds = append(builds, &batchNode{step}) // compose
 	}
-	builds = append(builds, &batchNode{}) // setup
-	builds = append(builds, &batchNode{}) // clone
-	builds = append(builds, &batchNode{}) // build
+	builds = append(builds, &batchNode{conf.Setup}) // setup
+	builds = append(builds, &batchNode{conf.Clone}) // clone
+	builds = append(builds, &batchNode{conf.Build}) // build
 
 	for _, step := range conf.Publish {
 		deploys = append(deploys, &batchNode{step}) // publish

@@ -25,6 +25,10 @@ func toContainerConfig(step *common.Step) *dockerclient.ContainerConfig {
 		Cmd:        step.Command,
 		Entrypoint: step.Entrypoint,
 		WorkingDir: step.WorkingDir,
+		HostConfig: dockerclient.HostConfig{
+			Privileged:  step.Privileged,
+			NetworkMode: step.NetworkMode,
+		},
 	}
 
 	if len(step.Volumes) != 0 {
@@ -40,11 +44,11 @@ func toContainerConfig(step *common.Step) *dockerclient.ContainerConfig {
 // helper function to encode the build step to
 // a json string. Primarily used for plugins, which
 // expect a json encoded string in stdin or arg[1].
-func toCommand(state *State, step *common.Step) []string {
+func toCommand(b *B, step *common.Step) []string {
 	p := payload{
-		state.Repo,
-		state.Commit,
-		state.Clone,
+		b.Repo,
+		b.Commit,
+		b.Clone,
 		step.Config,
 	}
 	return []string{p.Encode()}
