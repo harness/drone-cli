@@ -1,38 +1,71 @@
 package builder
 
-import "sync"
+import "github.com/drone/drone-cli/common"
 
-// Builder executes a set of build step handlers.
+// Builder represents a build execution tree.
 type Builder struct {
-	sync.Mutex
-	handlers []Handler
+	builds Node
+	deploy Node
+	notify Node
 }
 
-// Handle registers the build step handler.
-func (b *Builder) Handle(h Handler) {
-	b.Lock()
-	b.handlers = append(b.handlers, h)
-	b.Unlock()
-}
-
-// Build runs all build step handlers.
-func (b *Builder) Build(rw *ResultWriter) (err error) {
-	for _, h := range b.handlers {
-		err = h.Build(rw)
-		if err != nil || rw.exitCode != 0 {
-			break
-		}
+// Run runs the build, deploy and notify nodes
+// in the build tree.
+func (b *Builder) Run(build *B) error {
+	var err error
+	err = b.RunBuild(build)
+	if err != nil {
+		return err
 	}
-	return nil
+	err = b.RunDeploy(build)
+	if err != nil {
+		return err
+	}
+	return b.RunNotify(build)
 }
 
-// Cancel cancels all running build steps.
-func (b *Builder) Cancel() {
-	b.Lock()
-	defer b.Unlock()
+// RunBuild runs only the build node.
+func (b *Builder) RunBuild(build *B) error {
+	return b.builds.Run(build)
+}
 
-	for i := len(b.handlers) - 1; i >= 0; i-- {
-		h := b.handlers[i]
-		h.Cancel()
+// RunDeploy runs only the deploy node.
+func (b *Builder) RunDeploy(build *B) error {
+	return b.notify.Run(build)
+}
+
+// RunNotify runs on the notify node.
+func (b *Builder) RunNotify(build *B) error {
+	return b.notify.Run(build)
+}
+
+// Load loads a build configuration file.
+func Load(conf *common.Config) *Builder {
+	var (
+		builds  []Node
+		deploys []Node
+		notifys []Node
+	)
+
+	for _, step := range conf.Compose {
+		builds = append(builds, &batchNode{step}) // compose
+	}
+	builds = append(builds, &batchNode{conf.Setup}) // setup
+	builds = append(builds, &batchNode{conf.Clone}) // clone
+	builds = append(builds, &batchNode{conf.Build}) // build
+
+	for _, step := range conf.Publish {
+		deploys = append(deploys, &batchNode{step}) // publish
+	}
+	for _, step := range conf.Deploy {
+		deploys = append(deploys, &batchNode{step}) // deploy
+	}
+	for _, step := range conf.Notify {
+		notifys = append(notifys, &batchNode{step}) // notify
+	}
+	return &Builder{
+		serialNode(builds),
+		serialNode(deploys),
+		serialNode(notifys),
 	}
 }

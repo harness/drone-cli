@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/drone/drone-cli/builder"
 	"github.com/drone/drone-cli/common"
-	builder "github.com/drone/drone-cli/compiler"
 	"github.com/drone/drone-cli/parser"
 
 	log "github.com/Sirupsen/logrus"
