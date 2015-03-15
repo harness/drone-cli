@@ -14,7 +14,7 @@ import (
 
 func init() {
 	log.SetOutput(os.Stderr)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 	log.SetFormatter(&formatter{})
 }
 
@@ -71,6 +71,7 @@ func main() {
 		log.Printf("starting build %s", c.config.Axis)
 		err := c.builder.RunBuild(c.build)
 		if err != nil {
+			c.build.Exit(255)
 			// TODO need a 255 exit code if the build errors
 		}
 	}
@@ -78,11 +79,11 @@ func main() {
 	// run the deploy steps
 	// run the notify steps
 
-	log.Println("")
+	log.Println("build complete")
 	for _, c := range contexts {
-		log.Printf(" ✓ %s", c.config.Axis)
+		log.WithField("exit_code", c.build.ExitCode()).Infoln(c.config.Axis)
 	}
-	log.Println("")
+
 }
 
 var repo = &common.Repo{
