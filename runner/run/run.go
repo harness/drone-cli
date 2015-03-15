@@ -4,10 +4,9 @@ import (
 	"os"
 
 	"github.com/drone/drone-cli/builder"
-	"github.com/drone/drone-cli/builder/ambassador"
+	"github.com/drone/drone-cli/builder/docker"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/parser"
-	"github.com/samalba/dockerclient"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -23,7 +22,7 @@ type Context struct {
 	builder *builder.Builder
 	config  *common.Config
 
-	client dockerclient.Client
+	client *docker.Ambassador
 }
 
 func main() {
@@ -45,7 +44,7 @@ func main() {
 	// list of builds and builders for each item
 	// in the matrix
 	for _, conf := range matrix {
-		client, err := ambassador.Create(&mockClient{})
+		client, err := docker.NewAmbassador(&mockClient{})
 		if err != nil {
 			return
 		}
