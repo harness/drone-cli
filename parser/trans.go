@@ -60,7 +60,7 @@ func transformClone(c *common.Config) {
 // already been transferred to the Setup step.
 func transformBuild(c *common.Config) {
 	c.Build.Config = nil
-	c.Build.Entrypoint = []string{"/bin/bash"}
+	c.Build.Entrypoint = []string{"/bin/bash", "-e"}
 	c.Build.Command = []string{"/drone/bin/build.sh"}
 }
 

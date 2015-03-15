@@ -23,9 +23,9 @@ func (f *formatter) Format(entry *logrus.Entry) ([]byte, error) {
 		}
 
 		if v == 0 {
-			buf.WriteString("\033[32m \u2713\033[0m")
+			buf.WriteString("\033[1;32m SUCCESS\033[0m")
 		} else {
-			buf.WriteString("\033[31m \u2717\033[0m")
+			buf.WriteString("\033[1;31m FAILURE\033[0m")
 		}
 	}
 

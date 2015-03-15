@@ -84,6 +84,12 @@ func main() {
 		log.WithField("exit_code", c.build.ExitCode()).Infoln(c.config.Axis)
 	}
 
+	// write exit code
+	for _, c := range contexts {
+		if c.build.ExitCode() != 0 {
+			os.Exit(c.build.ExitCode())
+		}
+	}
 }
 
 var repo = &common.Repo{
