@@ -14,10 +14,6 @@ var errNop = errors.New("Operation not supported")
 
 type mockClient struct{}
 
-func newMockClient() (dockerclient.Client, error) {
-	return &mockClient{}, nil
-}
-
 // CreateContainer creates a container.
 func (c *mockClient) CreateContainer(config *dockerclient.ContainerConfig, name string) (string, error) {
 	return config.Image, nil

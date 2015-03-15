@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/drone/drone-cli/builder"
+	"github.com/drone/drone-cli/builder/ambassador"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/parser"
 
@@ -23,13 +24,6 @@ func main() {
 		return
 	}
 
-	client, err := newMockClient() //dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
-	if err != nil {
-		log.Errorln(err)
-		return
-	}
-	// TODO DEFER AMABASSADOR DESTROY
-
 	var builds []*builder.B
 	var builders []*builder.Builder
 
@@ -43,6 +37,10 @@ func main() {
 	// list of builds and builders for each item
 	// in the matrix
 	for _, conf := range matrix {
+		client, err := ambassador.Create(&mockClient{})
+		if err != nil {
+			return
+		}
 		b := builder.NewB(client, os.Stdout)
 		b.Repo = repo
 		b.Clone = clone
@@ -69,45 +67,6 @@ func main() {
 	}
 	log.Println("")
 }
-
-//
-// func run(build *builder.Build) {
-//
-// 	amb, err := ambassador.Create(build.Client)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return
-// 	}
-// 	defer amb.Destroy()
-// 	build.Client = amb // TODO remove this
-//
-// 	// response writer
-// 	res := builder.NewResultWriter(os.Stdout)
-//
-// 	// builder
-// 	b := runner.Builder(build)
-// 	defer b.Cancel()
-// 	err = b.Build(res)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-//
-// 	// deployer
-// 	d := runner.Deployer(build)
-// 	defer d.Cancel()
-// 	err = d.Build(res)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-//
-// 	// notifier
-// 	n := runner.Notifier(build)
-// 	defer n.Cancel()
-// 	err = n.Build(res)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// }
 
 var repo = &common.Repo{
 	Remote: "github.com",

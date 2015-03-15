@@ -2,6 +2,7 @@ package builder
 
 import (
 	"io"
+	"sync"
 	"time"
 
 	"github.com/drone/drone-cli/common"
@@ -11,6 +12,8 @@ import (
 // B is a type passed to build nodes. B implements an io.Writer
 // and will accumulate build output during execution.
 type B struct {
+	sync.Mutex
+
 	Repo   *common.Repo
 	Commit *common.Commit
 	Config *common.Config
@@ -39,6 +42,9 @@ func NewB(client dockerclient.Client, w io.Writer) *B {
 
 // Run creates and runs a Docker container.
 func (b *B) Run(conf *dockerclient.ContainerConfig) (string, error) {
+	b.Lock()
+	defer b.Unlock()
+
 	name, err := b.client.CreateContainer(conf, "")
 	if err != nil {
 		// on error try to pull the Docker image.
@@ -77,6 +83,9 @@ func (b *B) Remove(name string) {
 // RemoveAll stops and removes all Docker containers that were
 // created and started during the build process.
 func (b *B) RemoveAll() {
+	b.Lock()
+	defer b.Unlock()
+
 	for _, name := range b.containers {
 		b.Remove(name)
 	}
@@ -98,6 +107,9 @@ func (b *B) Logs(name string) (io.ReadCloser, error) {
 // before a build starts, but it can also used to resume timing after
 // a call to StopTimer.
 func (b *B) StartTimer() {
+	b.Lock()
+	defer b.Unlock()
+
 	if !b.timerOn {
 		b.start = time.Now()
 		b.timerOn = true
@@ -107,6 +119,9 @@ func (b *B) StartTimer() {
 // StopTimer stops timing a build. This can be used to pause the timer
 // while performing complex initialization that you don't want to measure.
 func (b *B) StopTimer() {
+	b.Lock()
+	defer b.Unlock()
+
 	if b.timerOn {
 		b.duration += time.Now().Sub(b.start)
 		b.timerOn = false
@@ -120,6 +135,9 @@ func (b *B) Write(p []byte) (n int, err error) {
 
 // Exit writes the function as having failed but continues execution.
 func (b *B) Exit(code int) {
+	b.Lock()
+	defer b.Unlock()
+
 	if code != 0 { // never override non-zero exit
 		b.exitCode = code
 	}
@@ -128,5 +146,8 @@ func (b *B) Exit(code int) {
 // ExitCode reports the build exit code. A non-zero value indicates
 // the build exited with errors.
 func (b *B) ExitCode() int {
+	b.Lock()
+	defer b.Unlock()
+
 	return b.exitCode
 }
