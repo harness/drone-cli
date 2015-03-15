@@ -61,6 +61,9 @@ func (c *Ambassador) Destroy() error {
 func (c *Ambassador) CreateContainer(conf *dockerclient.ContainerConfig, name string) (string, error) {
 	log.WithField("image", conf.Image).Debugln("create container")
 
+	// add the affinity flag for swarm
+	conf.Env = append(conf.Env, "affinity:container=="+c.name)
+
 	id, err := c.Client.CreateContainer(conf, name)
 	if err != nil {
 		log.WithField("image", conf.Image).Errorln(err)

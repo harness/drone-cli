@@ -26,6 +26,7 @@ type Context struct {
 }
 
 func main() {
+	// parse the build matrix
 	matrix, err := parser.Parse(testYaml)
 	if err != nil {
 		println(err.Error())
@@ -44,18 +45,20 @@ func main() {
 	// list of builds and builders for each item
 	// in the matrix
 	for _, conf := range matrix {
-		client, err := docker.NewAmbassador(&mockClient{})
+		client := &mockClient{}
+		ambassador, err := docker.NewAmbassador(client)
 		if err != nil {
 			return
 		}
 
 		c := Context{}
 		c.builder = builder.Load(conf)
-		c.build = builder.NewB(client, os.Stdout)
+		c.build = builder.NewB(ambassador, os.Stdout)
 		c.build.Repo = repo
 		c.build.Clone = clone
+		c.build.Commit = commit
 		c.config = conf
-		c.client = client
+		c.client = ambassador
 
 		contexts = append(contexts, &c)
 	}
@@ -90,6 +93,8 @@ var clone = &common.Clone{
 	Branch: "master",
 	Remote: "git://github.com/drone/drone.git",
 }
+
+var commit = &common.Commit{}
 
 var testYaml = `
 build:
