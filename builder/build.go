@@ -97,7 +97,7 @@ func (b *B) Logs(name string) (io.ReadCloser, error) {
 		Follow:     true,
 		Stderr:     true,
 		Stdout:     true,
-		Timestamps: true,
+		Timestamps: false,
 	}
 	return b.client.ContainerLogs(name, &opts)
 }

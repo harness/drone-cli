@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"io"
 	"sync"
 
 	"github.com/drone/drone-cli/common"
@@ -79,7 +78,8 @@ func (n *batchNode) Run(b *B) error {
 	if err != nil {
 		return err
 	}
-	io.Copy(b, rc)
+	StdCopy(b, b, rc)
+	//io.Copy(b, rc)
 
 	// inspects the results and writes the
 	// build result exit code
