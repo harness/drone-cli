@@ -24,7 +24,7 @@ func NewAmbassador(client dockerclient.Client) (_ *Ambassador, err error) {
 	conf := &dockerclient.ContainerConfig{}
 	host := &dockerclient.HostConfig{}
 	conf.Entrypoint = []string{"/bin/sleep"}
-	conf.Cmd = []string{"1d"}
+	conf.Cmd = []string{"86400"}
 	conf.Image = "busybox"
 	conf.Volumes = map[string]struct{}{}
 	conf.Volumes["/drone"] = struct{}{}
@@ -32,6 +32,7 @@ func NewAmbassador(client dockerclient.Client) (_ *Ambassador, err error) {
 	// creates the ambassador container
 	amb.name, err = client.CreateContainer(conf, "")
 	if err != nil {
+		log.WithField("ambassador", conf.Image).Errorln(err)
 
 		// on failure attempts to pull the image
 		client.PullImage(conf.Image, nil)
@@ -39,13 +40,13 @@ func NewAmbassador(client dockerclient.Client) (_ *Ambassador, err error) {
 		// then attempts to re-create the container
 		amb.name, err = client.CreateContainer(conf, "")
 		if err != nil {
-			log.WithField("image", conf.Image).Errorln(err)
+			log.WithField("ambassador", conf.Image).Errorln(err)
 			return nil, err
 		}
 	}
 	err = client.StartContainer(amb.name, host)
 	if err != nil {
-		log.WithField("image", conf.Image).Errorln(err)
+		log.WithField("ambassador", conf.Image).Errorln(err)
 	}
 	return amb, err
 }
@@ -77,7 +78,7 @@ func (c *Ambassador) CreateContainer(conf *dockerclient.ContainerConfig, name st
 func (c *Ambassador) StartContainer(id string, conf *dockerclient.HostConfig) error {
 	log.WithField("container", id).Debugln("start container")
 
-	conf.VolumesFrom = append(conf.VolumesFrom, "container:"+c.name)
+	conf.VolumesFrom = append(conf.VolumesFrom, c.name)
 	if len(conf.NetworkMode) == 0 {
 		conf.NetworkMode = "container:" + c.name
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/drone/drone-cli/parser"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/samalba/dockerclient"
 )
 
 func init() {
@@ -39,13 +40,15 @@ func main() {
 	defer func() {
 		for _, c := range contexts {
 			c.build.RemoveAll()
+			c.client.Destroy()
 		}
 	}()
 
 	// list of builds and builders for each item
 	// in the matrix
 	for _, conf := range matrix {
-		client := &mockClient{}
+		//client := &mockClient{}
+		client, _ := dockerclient.NewDockerClient("unix:///var/run/docker.sock", nil)
 		ambassador, err := docker.NewAmbassador(client)
 		if err != nil {
 			return
@@ -88,10 +91,10 @@ var repo = &common.Repo{
 	Owner:  "bradrydzewski",
 }
 var clone = &common.Clone{
-	Dir:    "/drone/src/github.com/drone/drone",
-	Sha:    "4fbcc1dd41c5e2792c034d31e350f521890ad723",
+	Dir:    "/drone/src/github.com/garyburd/redigo",
+	Sha:    "535138d7bcd717d6531c701ef5933d98b1866257",
 	Branch: "master",
-	Remote: "git://github.com/drone/drone.git",
+	Remote: "git://github.com/garyburd/redigo.git",
 }
 
 var commit = &common.Commit{}
@@ -99,20 +102,17 @@ var commit = &common.Commit{}
 var testYaml = `
 build:
   image: golang:$$go_version
+  environment:
+    - GOPATH=/drone
   commands:
-    - ls -la /drone/src/github.com/drone/drone
+    - cd redis
     - go version
-
-notify:
-  slack:
-    channel: dev
-    usernae: drone
+    - go build
+    - go test -v
 
 compose:
-  mysql:
-    image: bradrydzewski/mysql:5.5
-  postgres:
-    image: bradrydzewski/postgres:9.1
+  redis:
+    image: redis
 
 matrix:
   go_version:
