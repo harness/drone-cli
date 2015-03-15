@@ -7,6 +7,7 @@ import (
 	"github.com/drone/drone-cli/builder/ambassador"
 	"github.com/drone/drone-cli/common"
 	"github.com/drone/drone-cli/parser"
+	"github.com/samalba/dockerclient"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -17,6 +18,14 @@ func init() {
 	log.SetFormatter(&formatter{})
 }
 
+type Context struct {
+	build   *builder.B
+	builder *builder.Builder
+	config  *common.Config
+
+	client dockerclient.Client
+}
+
 func main() {
 	matrix, err := parser.Parse(testYaml)
 	if err != nil {
@@ -24,13 +33,12 @@ func main() {
 		return
 	}
 
-	var builds []*builder.B
-	var builders []*builder.Builder
+	var contexts []*Context
 
 	// must cleanup after our build
 	defer func() {
-		for _, build := range builds {
-			build.RemoveAll()
+		for _, c := range contexts {
+			c.build.RemoveAll()
 		}
 	}()
 
@@ -41,18 +49,22 @@ func main() {
 		if err != nil {
 			return
 		}
-		b := builder.NewB(client, os.Stdout)
-		b.Repo = repo
-		b.Clone = clone
-		b.Config = conf
-		builds = append(builds, b)
-		builders = append(builders, builder.Load(conf))
+
+		c := Context{}
+		c.builder = builder.Load(conf)
+		c.build = builder.NewB(client, os.Stdout)
+		c.build.Repo = repo
+		c.build.Clone = clone
+		c.config = conf
+		c.client = client
+
+		contexts = append(contexts, &c)
 	}
 
 	// run the builds
-	for i, builder := range builders {
-		log.Printf("starting build %s", builds[i].Config.Axis)
-		err := builder.RunBuild(builds[i])
+	for _, c := range contexts {
+		log.Printf("starting build %s", c.config.Axis)
+		err := c.builder.RunBuild(c.build)
 		if err != nil {
 			// TODO need a 255 exit code if the build errors
 		}
@@ -62,8 +74,8 @@ func main() {
 	// run the notify steps
 
 	log.Println("")
-	for _, b := range builds {
-		log.Printf(" ✓ %s", b.Config.Axis)
+	for _, c := range contexts {
+		log.Printf(" ✓ %s", c.config.Axis)
 	}
 	log.Println("")
 }
@@ -103,10 +115,6 @@ matrix:
     - 1.3.3
     - 1.4.2
 `
-
-// compose:
-//   database:
-// 	  image: postgres:9.2
 
 var droneYaml = `
 build:

@@ -16,7 +16,6 @@ type B struct {
 
 	Repo   *common.Repo
 	Commit *common.Commit
-	Config *common.Config
 	Clone  *common.Clone
 
 	client dockerclient.Client
