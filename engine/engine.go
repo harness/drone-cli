@@ -10,4 +10,7 @@ type Engine interface {
 	Wait(*Container) error
 	Logs(*Container) (io.ReadCloser, error)
 	State(*Container) (*State, error)
+
+	Setup() error
+	Teardown() error
 }
