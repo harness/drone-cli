@@ -60,11 +60,15 @@ func (n *batchNode) Run(b *B) error {
 	// 	return nil
 	// }
 
-	// runs the container
+	// creates the container conf
 	conf := toContainerConfig(n.step)
 	if n.step.Config != nil {
 		conf.Cmd = toCommand(b, n.step)
 	}
+
+	// inject environment vars
+	injectEnv(b, conf)
+
 	name, err := b.Run(conf)
 	if err != nil {
 		return err

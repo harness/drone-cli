@@ -2,6 +2,7 @@ package builder
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/drone/drone-cli/common"
 	"github.com/samalba/dockerclient"
@@ -39,6 +40,26 @@ func toContainerConfig(step *common.Step) *dockerclient.ContainerConfig {
 	}
 
 	return config
+}
+
+// helper function to inject drone-specific environment
+// variables into the container.
+func injectEnv(b *B, conf *dockerclient.ContainerConfig) {
+	conf.Env = append(conf.Env, "DRONE=true")
+	conf.Env = append(conf.Env, fmt.Sprintf("DRONE_BRANCH=%s", b.Commit.Branch))
+	conf.Env = append(conf.Env, fmt.Sprintf("DRONE_COMMIT=%s", b.Commit.Sha))
+
+	// for jenkins campatibility
+	conf.Env = append(conf.Env, "CI=true")
+	conf.Env = append(conf.Env, fmt.Sprintf("WORKSPACE=%s", b.Clone.Dir))
+	conf.Env = append(conf.Env, fmt.Sprintf("GIT_BRANCH=%s", b.Commit.Branch))
+	conf.Env = append(conf.Env, fmt.Sprintf("GIT_COMMIT=%s", b.Commit.Sha))
+	conf.Env = append(conf.Env, fmt.Sprintf("JOB_NAME=%s/%s/%s", b.Repo.Host, b.Repo.Owner, b.Repo.Name))
+	conf.Env = append(conf.Env, fmt.Sprintf("BUILD_DIR=%s", b.Clone.Dir))
+
+	// for internal use only
+	conf.Env = append(conf.Env, fmt.Sprintf("_drone_repo_id=%d", b.Repo.ID))
+	conf.Env = append(conf.Env, fmt.Sprintf("_drone_commit_id=%d", b.Commit.ID))
 }
 
 // helper function to encode the build step to

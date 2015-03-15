@@ -90,6 +90,7 @@ func transformDockerPlugin(c *common.Config) {
 			step.Privileged = true
 			step.Volumes = nil
 			step.NetworkMode = ""
+			step.Entrypoint = []string{}
 			break
 		}
 	}
