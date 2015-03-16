@@ -3,19 +3,11 @@ package builder
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/drone/drone-cli/common"
 	"github.com/samalba/dockerclient"
 )
-
-// helper function that converts a build step to
-// a hostConfig for use with the dockerclient
-func toHostConfig(step *common.Step) *dockerclient.HostConfig {
-	return &dockerclient.HostConfig{
-		Privileged:  step.Privileged,
-		NetworkMode: step.NetworkMode,
-	}
-}
 
 // helper function that converts the build step to
 // a containerConfig for use with the dockerclient
@@ -32,11 +24,14 @@ func toContainerConfig(step *common.Step) *dockerclient.ContainerConfig {
 		},
 	}
 
-	if len(step.Volumes) != 0 {
-		config.Volumes = map[string]struct{}{}
-		for _, path := range step.Volumes {
-			config.Volumes[path] = struct{}{}
+	config.Volumes = map[string]struct{}{}
+	for _, path := range step.Volumes {
+		if strings.Index(path, ":") == -1 {
+			continue
 		}
+		parts := strings.Split(path, ":")
+		config.Volumes[parts[1]] = struct{}{}
+		config.HostConfig.Binds = append(config.HostConfig.Binds, path)
 	}
 
 	return config

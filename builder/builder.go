@@ -59,7 +59,9 @@ func Load(conf *common.Config) *Builder {
 		builds = append(builds, &serviceNode{step}) // compose
 	}
 	builds = append(builds, &batchNode{conf.Setup}) // setup
-	builds = append(builds, &batchNode{conf.Clone}) // clone
+	if conf.Clone != nil {
+		builds = append(builds, &batchNode{conf.Clone}) // clone
+	}
 	builds = append(builds, &batchNode{conf.Build}) // build
 
 	for _, step := range conf.Publish {
