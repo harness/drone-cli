@@ -37,12 +37,13 @@ func main() {
 	var contexts []*Context
 
 	// must cleanup after our build
-	defer func() {
+	var cleanup = func(contexts []*Context) {
 		for _, c := range contexts {
 			c.build.RemoveAll()
 			c.client.Destroy()
 		}
-	}()
+	}
+	defer cleanup(contexts)
 
 	// list of builds and builders for each item
 	// in the matrix
@@ -67,6 +68,7 @@ func main() {
 	}
 
 	// run the builds
+	var exit int
 	for _, c := range contexts {
 		log.Printf("starting build %s", c.config.Axis)
 		err := c.builder.RunBuild(c.build)
@@ -74,22 +76,49 @@ func main() {
 			c.build.Exit(255)
 			// TODO need a 255 exit code if the build errors
 		}
+		if c.build.ExitCode() != 0 {
+			exit = c.build.ExitCode()
+		}
 	}
 
 	// run the deploy steps
+	if exit == 0 {
+		for _, c := range contexts {
+			if !c.builder.HasDeploy() {
+				continue
+			}
+			log.Printf("starting post-build tasks %s", c.config.Axis)
+			err := c.builder.RunDeploy(c.build)
+			if err != nil {
+				c.build.Exit(255)
+				// TODO need a 255 exit code if the build errors
+			}
+			if c.build.ExitCode() != 0 {
+				exit = c.build.ExitCode()
+			}
+		}
+	}
+
 	// run the notify steps
+	for _, c := range contexts {
+		if !c.builder.HasNotify() {
+			continue
+		}
+		log.Printf("staring notification tasks %s", c.config.Axis)
+		c.builder.RunNotify(c.build)
+		break
+	}
 
 	log.Println("build complete")
 	for _, c := range contexts {
 		log.WithField("exit_code", c.build.ExitCode()).Infoln(c.config.Axis)
 	}
 
+	// cleanup
+	cleanup(contexts)
+
 	// write exit code
-	for _, c := range contexts {
-		if c.build.ExitCode() != 0 {
-			os.Exit(c.build.ExitCode())
-		}
-	}
+	os.Exit(exit)
 }
 
 var repo = &common.Repo{
@@ -115,7 +144,7 @@ build:
     - cd redis
     - go version
     - go build
-    - go test -v
+    - go test
 
 compose:
   redis:

@@ -54,13 +54,13 @@ func NewAmbassador(client dockerclient.Client) (_ *Ambassador, err error) {
 // Destroy stops and deletes the ambassador container.
 func (c *Ambassador) Destroy() error {
 	c.Client.StopContainer(c.name, 5)
-	c.Client.KillContainer(c.name, "SIGKILL")
+	c.Client.KillContainer(c.name, "9")
 	return c.Client.RemoveContainer(c.name, true, true)
 }
 
 // CreateContainer creates a container.
 func (c *Ambassador) CreateContainer(conf *dockerclient.ContainerConfig, name string) (string, error) {
-	log.WithField("image", conf.Image).Debugln("create container")
+	log.WithField("image", conf.Image).Infoln("create container")
 
 	// add the affinity flag for swarm
 	conf.Env = append(conf.Env, "affinity:container=="+c.name)

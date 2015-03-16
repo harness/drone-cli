@@ -75,7 +75,7 @@ func (b *B) Inspect(name string) (*dockerclient.ContainerInfo, error) {
 // Remove stops and removes the named Docker container.
 func (b *B) Remove(name string) {
 	b.client.StopContainer(name, 5)
-	b.client.KillContainer(name, "SIGKILL")
+	b.client.KillContainer(name, "9")
 	b.client.RemoveContainer(name, true, true)
 }
 
@@ -85,8 +85,8 @@ func (b *B) RemoveAll() {
 	b.Lock()
 	defer b.Unlock()
 
-	for _, name := range b.containers {
-		b.Remove(name)
+	for i := len(b.containers) - 1; i >= 0; i-- {
+		b.Remove(b.containers[i])
 	}
 }
 

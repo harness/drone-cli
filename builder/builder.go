@@ -39,6 +39,14 @@ func (b *Builder) RunNotify(build *B) error {
 	return b.notify.Run(build)
 }
 
+func (b *Builder) HasDeploy() bool {
+	return len(b.deploy.(serialNode)) != 0
+}
+
+func (b *Builder) HasNotify() bool {
+	return len(b.notify.(serialNode)) != 0
+}
+
 // Load loads a build configuration file.
 func Load(conf *common.Config) *Builder {
 	var (
