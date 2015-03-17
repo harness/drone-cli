@@ -7,6 +7,9 @@
 _obj
 _test
 
+# Temp files
+.DS_*
+
 # Architecture specific extensions/prefixes
 *.[568vq]
 [568vq].out
@@ -22,6 +25,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+*.out
 
 # Binary file(s)
 drone/drone

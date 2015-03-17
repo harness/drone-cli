@@ -1,19 +1,21 @@
 package common
 
-// A step represents a step in the build process, including
+// Step represents a step in the build process, including
 // the execution environment and parameters.
 type Step struct {
-	Name        string
 	Image       string
 	Pull        bool
-	Environment []string
-	Volumes     []string
-	Hostname    string
 	Privileged  bool
-	Net         string
+	Environment []string
+	Entrypoint  []string
+	Command     []string
+	Volumes     []string
+	WorkingDir  string `yaml:"working_dir"`
+	NetworkMode string `yaml:"net"`
 
-	Entrypoint []string
-	Command    []string
+	// Condition represents a set of conditions that must
+	// be met in order to execute this step.
+	Condition *Condition `yaml:"when"`
 
 	// Config represents the unique configuration details
 	// for each plugin.

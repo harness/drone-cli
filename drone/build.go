@@ -1,19 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/drone/drone/shared/build"
-	"github.com/drone/drone/shared/build/docker"
-	"github.com/drone/drone/shared/build/log"
-	"github.com/drone/drone/shared/build/repo"
-	"github.com/drone/drone/shared/build/script"
+	"github.com/drone/drone-cli/builder"
+	"github.com/drone/drone-cli/builder/docker"
+	"github.com/drone/drone-cli/common"
+	"github.com/drone/drone-cli/parser"
+	"github.com/drone/drone-cli/parser/inject"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
+	"github.com/samalba/dockerclient"
 )
 
 const EXIT_STATUS = 1
@@ -42,9 +44,10 @@ func NewBuildCommand() cli.Command {
 				Usage: "runs drone build with publishing enabled",
 			},
 			cli.StringFlag{
-				Name:  "docker-host",
-				Value: getHost(),
-				Usage: "docker daemon address",
+				Name:   "docker-host",
+				Value:  "unix:///var/run/docker.sock",
+				Usage:  "docker daemon address",
+				EnvVar: "DOCKER_HOST",
 			},
 			cli.StringFlag{
 				Name:  "docker-cert",
@@ -91,55 +94,36 @@ func buildCommandFunc(c *cli.Context) {
 		path = filepath.Join(path, ".drone.yml")
 	}
 
-	// this configures the default Docker logging levels,
-	// and suffix and prefix values.
-	log.SetPrefix("\033[2m[DRONE] ")
-	log.SetSuffix("\033[0m\n")
-	log.SetOutput(os.Stdout)
-	log.SetPriority(log.LOG_DEBUG) //LOG_NOTICE
-	docker.Logging = false
-
-	var exit, _ = run(path, identity, dockerhost, dockercert, dockerkey, publish, deploy, privileged)
+	var exit = run(path, identity, dockerhost, dockercert, dockerkey, publish, deploy, privileged)
 	os.Exit(exit)
 }
 
 // TODO this has gotten a bit out of hand. refactor input params
-func run(path, identity, dockerhost, dockercert, dockerkey string, publish, deploy, privileged bool) (int, error) {
-	dockerClient, err := docker.NewHostCertFile(dockerhost, dockercert, dockerkey)
-	if err != nil {
-		log.Err(err.Error())
-		return EXIT_STATUS, err
-	}
+func run(path, identity, dockerhost, dockercert, dockerkey string, publish, deploy, privileged bool) int {
+	// dockerClient, err := docker.NewHostCertFile(dockerhost, dockercert, dockerkey)
+	// if err != nil {
+	// 	log.Err(err.Error())
+	// 	return EXIT_STATUS, err
+	// }
 
 	// parse the private environment variables
 	envs := getParamMap("DRONE_ENV_")
 
-	// parse the Drone yml file
-	s, err := script.ParseBuildFile(path, envs)
+	// parse the drone.yml file
+	raw, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Err(err.Error())
-		return EXIT_STATUS, err
+		return EXIT_STATUS
 	}
+	yml := inject.Inject(string(raw), envs)
 
-	// inject private environment variables into build script
-	for key, val := range envs {
-		s.Env = append(s.Env, key+"="+val)
-	}
-
-	if deploy == false {
-		s.Deploy = nil
-	}
-	if publish == false {
-		s.Publish = nil
+	matrix, err := parser.Parse(yml)
+	if err != nil {
+		return EXIT_STATUS
 	}
 
 	// get the repository root directory
+	parent_dir := filepath.Dir(path)
 	dir := filepath.Dir(path)
-	code := repo.Repo{
-		Name:   filepath.Base(dir),
-		Branch: "HEAD", // should we do this?
-		Path:   dir,
-	}
 
 	// does the local repository match the
 	// $GOPATH/src/{package} pattern? This is
@@ -147,21 +131,21 @@ func run(path, identity, dockerhost, dockercert, dockerkey string, publish, depl
 	// where the code should be copied inside
 	// the container.
 	if gopath, ok := getRepoPath(dir); ok {
-		code.Dir = gopath
+		dir = gopath
 
 	} else if gopath, ok := getGoPath(dir); ok {
 		// in this case we found a GOPATH and
 		// reverse engineered the package path
-		code.Dir = gopath
+		dir = gopath
 
 	} else {
 		// otherwise just use directory name
-		code.Dir = filepath.Base(dir)
+		dir = filepath.Base(dir)
 	}
 
 	// this is where the code gets uploaded to the container
 	// TODO move this code to the build package
-	code.Dir = filepath.Join("/var/cache/drone/src", filepath.Clean(code.Dir))
+	dir = filepath.Join("/drone/src", filepath.Clean(dir))
 
 	// ssh key to import into container
 	var key []byte
@@ -169,44 +153,100 @@ func run(path, identity, dockerhost, dockercert, dockerkey string, publish, depl
 		key, err = ioutil.ReadFile(identity)
 		if err != nil {
 			fmt.Printf("[Error] Could not find or read identity file %s\n", identity)
-			return EXIT_STATUS, err
+			return EXIT_STATUS
 		}
 	}
 
-	// loop through and create builders
-	builder := build.New(dockerClient)
-	builder.Build = s
-	builder.Repo = &code
-	builder.Key = key
-	builder.Stdout = os.Stdout
-	builder.Timeout = 300 * time.Minute
-	builder.Privileged = privileged
+	//
+	//
+	//
 
-	// execute the build
-	if err := builder.Run(); err != nil {
-		log.Errf("Error executing build: %s", err.Error())
-		return EXIT_STATUS, err
+	var contexts []*Context
+
+	// must cleanup after our build
+	defer func() {
+		for _, c := range contexts {
+			c.build.RemoveAll()
+			c.client.Destroy()
+		}
+	}()
+
+	// list of builds and builders for each item
+	// in the matrix
+	for _, conf := range matrix {
+
+		// /home/brad/gocode/src/github.com/garyburd/redigo:/drone/src/github.com/garyburd/redigo
+
+		conf.Build.Volumes = append(conf.Setup.Volumes, parent_dir+":"+dir)
+		conf.Clone = nil
+
+		//client := &mockClient{}
+		client, _ := dockerclient.NewDockerClient(dockerhost, nil)
+		ambassador, err := docker.NewAmbassador(client)
+		if err != nil {
+			return EXIT_STATUS
+		}
+
+		c := Context{}
+		c.builder = builder.Load(conf)
+		c.build = builder.NewB(ambassador, os.Stdout)
+		c.build.Repo = &common.Repo{}
+		c.build.Commit = &common.Commit{}
+		c.build.Clone = &common.Clone{Dir: dir, Keypair: &common.Keypair{Private: string(key)}}
+		c.config = conf
+		c.client = ambassador
+
+		contexts = append(contexts, &c)
 	}
 
-	fmt.Printf("\nDrone Build Results \033[90m(%s)\033[0m\n", dir)
-
-	// loop through and print results
-
-	build := builder.Build
-	res := builder.BuildState
-	duration := time.Duration(res.Finished - res.Started)
-	switch {
-	case builder.BuildState.ExitCode == 0:
-		fmt.Printf(" \033[32m\u2713\033[0m %v \033[90m(%v)\033[0m\n", build.Name, humanizeDuration(duration*time.Second))
-	case builder.BuildState.ExitCode != 0:
-		fmt.Printf(" \033[31m\u2717\033[0m %v \033[90m(%v)\033[0m\n", build.Name, humanizeDuration(duration*time.Second))
+	// run the builds
+	var exit int
+	for _, c := range contexts {
+		log.Printf("starting build %s", c.config.Axis)
+		err := c.builder.RunBuild(c.build)
+		if err != nil {
+			c.build.Exit(255)
+			// TODO need a 255 exit code if the build errors
+		}
+		if c.build.ExitCode() != 0 {
+			exit = c.build.ExitCode()
+		}
 	}
 
-	return builder.BuildState.ExitCode, nil
-}
+	// run the deploy steps
+	if exit == 0 {
+		for _, c := range contexts {
+			if !c.builder.HasDeploy() {
+				continue
+			}
+			log.Printf("starting post-build tasks %s", c.config.Axis)
+			err := c.builder.RunDeploy(c.build)
+			if err != nil {
+				c.build.Exit(255)
+				// TODO need a 255 exit code if the build errors
+			}
+			if c.build.ExitCode() != 0 {
+				exit = c.build.ExitCode()
+			}
+		}
+	}
 
-func getHost() string {
-	return os.Getenv("DOCKER_HOST")
+	// run the notify steps
+	for _, c := range contexts {
+		if !c.builder.HasNotify() {
+			continue
+		}
+		log.Printf("staring notification tasks %s", c.config.Axis)
+		c.builder.RunNotify(c.build)
+		break
+	}
+
+	log.Println("build complete")
+	for _, c := range contexts {
+		log.WithField("exit_code", c.build.ExitCode()).Infoln(c.config.Axis)
+	}
+
+	return exit
 }
 
 func getCert() string {
@@ -223,4 +263,55 @@ func getKey() string {
 	} else {
 		return ""
 	}
+}
+
+func init() {
+	log.SetOutput(os.Stderr)
+	log.SetLevel(log.InfoLevel)
+	log.SetFormatter(&formatter{})
+}
+
+type Context struct {
+	build   *builder.B
+	builder *builder.Builder
+	config  *common.Config
+
+	client *docker.Ambassador
+}
+
+type formatter struct {
+	nocolor bool
+}
+
+func (f *formatter) Format(entry *log.Entry) ([]byte, error) {
+	var buf bytes.Buffer
+
+	buf.WriteString("\033[2m")
+	buf.WriteString("[drone]")
+
+	for k, v := range entry.Data {
+		if k != "exit_code" {
+			continue
+		}
+
+		if v == 0 {
+			buf.WriteString("\033[1;32m SUCCESS\033[0m")
+		} else {
+			buf.WriteString("\033[1;31m FAILURE\033[0m")
+		}
+	}
+
+	buf.WriteByte(' ')
+	buf.WriteString(entry.Message)
+	buf.WriteByte(' ')
+
+	for k, v := range entry.Data {
+		buf.WriteString(
+			fmt.Sprintf("%s=%v", k, v),
+		)
+	}
+
+	buf.WriteString("\033[0m")
+	buf.WriteByte('\n')
+	return buf.Bytes(), nil
 }

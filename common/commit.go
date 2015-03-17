@@ -1,6 +1,7 @@
 package common
 
 type Commit struct {
+	ID          int64  `json:"id"`
 	Status      string `json:"status"`
 	Started     int64  `json:"started_at"`
 	Finished    int64  `json:"finished_at"`
