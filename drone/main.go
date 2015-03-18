@@ -3,7 +3,10 @@ package main
 import (
 	"os"
 
+	"errors"
+	"fmt"
 	"github.com/codegangsta/cli"
+	"net/url"
 )
 
 var (
@@ -42,6 +45,27 @@ func main() {
 		NewWhoamiCommand(),
 		NewSetKeyCommand(),
 		NewDeleteCommand(),
+	}
+
+	app.Before = func(c *cli.Context) error {
+		f := c.GlobalString("server")
+
+		if f == "" {
+			return nil
+		}
+
+		uri, err := url.Parse(f)
+
+		if err != nil {
+			return err
+		}
+
+		if uri.Scheme == "" {
+			fmt.Println("-s/--server requires a scheme (e.g. http://)")
+			return errors.New("Invalid host provided for server")
+		}
+
+		return nil
 	}
 
 	app.Run(os.Args)
