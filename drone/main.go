@@ -45,6 +45,7 @@ func main() {
 		NewWhoamiCommand(),
 		NewSetKeyCommand(),
 		NewDeleteCommand(),
+		NewSetParamsCommand(),
 	}
 
 	app.Before = func(c *cli.Context) error {
