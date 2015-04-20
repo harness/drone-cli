@@ -31,7 +31,7 @@ func (b *Builder) RunBuild(build *B) error {
 
 // RunDeploy runs only the deploy node.
 func (b *Builder) RunDeploy(build *B) error {
-	return b.notify.Run(build)
+	return b.deploy.Run(build)
 }
 
 // RunNotify runs on the notify node.
