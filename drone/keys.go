@@ -33,13 +33,13 @@ func setKeyCommandFunc(c *cli.Context, client *drone.Client) error {
 		path = args[1]
 	}
 
-	pub, err := ioutil.ReadFile(path)
+	priv, err := ioutil.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("Could not find private RSA key %s. %s", path, err)
 	}
 
 	path_pub := path + ".pub"
-	priv, err := ioutil.ReadFile(path_pub)
+	pub, err := ioutil.ReadFile(path_pub)
 	if err != nil {
 		return fmt.Errorf("Could not find public RSA key %s. %s", path_pub, err)
 	}
