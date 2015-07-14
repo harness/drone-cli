@@ -14,23 +14,22 @@ import (
 
 // parseRepo first attempts to find a repo in the recieved string, if
 func parseRepo(args cli.Args) (host, owner, repo string) {
-	var parts = strings.Split(args.First(), "/")
-	if len(parts) == 3 {
-		return parts[0], parts[1], parts[2]
-	}
+	var path = args.First()
+	if path == "" {
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("Could not find current repo path: %s", err)
+		}
 
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Could not find current repo path: %s", err)
+		var success bool
+		path, success = getRepoPath(dir)
+		if !success {
+			log.Fatal("Failed to find current repo, please pass a repo as an argument (host/owner/name)")
+		}
 	}
-
-	gopath, success := getRepoPath(dir)
-	if !success {
-		log.Fatal("Failed to find current repo, please pass a repo as an argument (host/owner/name)")
-	}
-	parts = strings.Split(gopath, "/")
+	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
-		log.Fatalf("Current repo detected as '%s', failed to discern host, owner & name.", gopath)
+		log.Fatalf("Current repo detected as '%s', failed to discern host, owner & name.", path)
 	}
 
 	return parts[0], parts[1], parts[2]

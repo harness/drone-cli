@@ -46,7 +46,6 @@ func main() {
 		NewSetKeyCommand(),
 		NewDeleteCommand(),
 		NewSetParamsCommand(),
-		NewGetParamsCommand(),
 	}
 
 	app.Before = func(c *cli.Context) error {
