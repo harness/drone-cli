@@ -19,12 +19,9 @@ func NewRestartCommand() cli.Command {
 
 // restartCommandFunc executes the "restart" command.
 func restartCommandFunc(c *cli.Context, client *drone.Client) error {
-	var host, owner, repo, branch, sha string
+	var host, owner, name, branch, sha string
 	var args = c.Args()
-
-	if len(args) != 0 {
-		host, owner, repo = parseRepo(args[0])
-	}
+	host, owner, name = parseRepo(c.Args())
 
 	switch len(args) {
 	case 2:
@@ -35,5 +32,5 @@ func restartCommandFunc(c *cli.Context, client *drone.Client) error {
 		sha = args[2]
 	}
 
-	return client.Commits.Rebuild(host, owner, repo, branch, sha)
+	return client.Commits.Rebuild(host, owner, name, branch, sha)
 }

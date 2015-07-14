@@ -22,12 +22,9 @@ func NewSetKeyCommand() cli.Command {
 
 // setKeyCommandFunc executes the "set-key" command.
 func setKeyCommandFunc(c *cli.Context, client *drone.Client) error {
-	var host, owner, name, path string
+	var path string
 	var args = c.Args()
-
-	if len(args) != 0 {
-		host, owner, name = parseRepo(args[0])
-	}
+	var host, owner, name = parseRepo(c.Args())
 
 	if len(args) == 2 {
 		path = args[1]

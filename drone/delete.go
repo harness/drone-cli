@@ -20,11 +20,7 @@ func NewDeleteCommand() cli.Command {
 // deleteCommandFunc executes the "delete" command.
 func deleteCommandFunc(c *cli.Context, client *drone.Client) error {
 	var host, owner, name string
-	var args = c.Args()
-
-	if len(args) != 0 {
-		host, owner, name = parseRepo(args[0])
-	}
+	host, owner, name = parseRepo(c.Args())
 
 	return client.Repos.Delete(host, owner, name)
 }

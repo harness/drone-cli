@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os"
-
 	"errors"
 	"fmt"
-	"github.com/codegangsta/cli"
 	"net/url"
+	"os"
+
+	"github.com/codegangsta/cli"
 )
 
 var (
@@ -46,6 +46,7 @@ func main() {
 		NewSetKeyCommand(),
 		NewDeleteCommand(),
 		NewSetParamsCommand(),
+		NewGetParamsCommand(),
 	}
 
 	app.Before = func(c *cli.Context) error {

@@ -19,12 +19,6 @@ func NewDisableCommand() cli.Command {
 
 // disableCommandFunc executes the "disable" command.
 func disableCommandFunc(c *cli.Context, client *drone.Client) error {
-	var host, owner, name string
-	var args = c.Args()
-
-	if len(args) != 0 {
-		host, owner, name = parseRepo(args[0])
-	}
-
+	host, owner, name := parseRepo(c.Args())
 	return client.Repos.Disable(host, owner, name)
 }

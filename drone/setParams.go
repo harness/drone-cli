@@ -12,7 +12,7 @@ import (
 func NewSetParamsCommand() cli.Command {
 	return cli.Command{
 		Name:  "set-params",
-		Usage: "sets params for the repo",
+		Usage: "sets all params for the repo",
 		Flags: []cli.Flag{},
 		Action: func(c *cli.Context) {
 			handle(c, setParamsCommandFunc)
@@ -25,9 +25,7 @@ func setParamsCommandFunc(c *cli.Context, client *drone.Client) error {
 	var host, owner, name, path string
 	var args = c.Args()
 
-	if len(args) != 0 {
-		host, owner, name = parseRepo(args[0])
-	}
+	host, owner, name = parseRepo(c.Args())
 
 	if len(args) == 2 {
 		path = args[1]

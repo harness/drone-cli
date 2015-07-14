@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-go/drone"
@@ -26,27 +27,28 @@ func NewStatusCommand() cli.Command {
 
 // statusCommandFunc executes the "status" command.
 func statusCommandFunc(c *cli.Context, client *drone.Client) error {
-	var host, owner, repo, branch string
-	var args = c.Args()
-
-	if len(args) != 0 {
-		host, owner, repo = parseRepo(args[0])
-	}
+	host, owner, repo := parseRepo(c.Args())
+	branch := "master"
 
 	if c.IsSet("branch") {
 		branch = c.String("branch")
-	} else {
-		branch = "master"
 	}
 
-	builds, err := client.Commits.ListBranch(host, owner, repo, branch)
+	builds, err := client.Commits.List(host, owner, repo)
 	if err != nil {
 		return err
 	} else if len(builds) == 0 {
+		log.Printf("No builds found for %s/%s/%s", host, owner, repo)
 		return nil
 	}
 
-	var build = builds[len(builds)-1]
-	fmt.Printf("%s\t%s\t%s\t%s\t%v", build.Status, build.ShaShort(), build.Timestamp, build.Author, build.Message)
-	return nil
+	// builds go from older to newer, we want to grab the newest build
+	for i := len(builds) - 1; i >= 0; i-- {
+		if builds[i].Branch == branch {
+			fmt.Printf("%s\t%s\t%s\t%s\t%v\n", builds[i].Status, builds[i].ShaShort(), builds[i].Timestamp, builds[i].Author, builds[i].Message)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("Could not find builds on branch: %s", branch)
 }

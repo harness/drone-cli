@@ -19,12 +19,6 @@ func NewEnableCommand() cli.Command {
 
 // enableCommandFunc executes the "enable" command.
 func enableCommandFunc(c *cli.Context, client *drone.Client) error {
-	var host, owner, name string
-	var args = c.Args()
-
-	if len(args) != 0 {
-		host, owner, name = parseRepo(args[0])
-	}
-
+	host, owner, name := parseRepo(c.Args())
 	return client.Repos.Enable(host, owner, name)
 }
