@@ -12,7 +12,7 @@ import (
 func NewSetKeyCommand() cli.Command {
 	return cli.Command{
 		Name:  "set-key",
-		Usage: "sets the SSH private key used to clone",
+		Usage: "sets the SSH private key used to clone, pass the path of the private key",
 		Flags: []cli.Flag{},
 		Action: func(c *cli.Context) {
 			handle(c, setKeyCommandFunc)
@@ -22,24 +22,26 @@ func NewSetKeyCommand() cli.Command {
 
 // setKeyCommandFunc executes the "set-key" command.
 func setKeyCommandFunc(c *cli.Context, client *drone.Client) error {
-	var path string
+	var keyPath string
 	var args = c.Args()
 	var host, owner, name = parseRepo(c.Args())
 
-	if len(args) == 2 {
-		path = args[1]
+	// path to private key will be last arg
+	if len(args) == 0 {
+		return fmt.Errorf("The path to the private key is required.")
 	}
+	keyPath = args[len(args)-1]
 
-	priv, err := ioutil.ReadFile(path)
+	privKey, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		return fmt.Errorf("Could not find private RSA key %s. %s", path, err)
+		return fmt.Errorf("Could not find private RSA key %s. %s", keyPath, err)
 	}
 
-	path_pub := path + ".pub"
-	pub, err := ioutil.ReadFile(path_pub)
+	pathPub := keyPath + ".pub"
+	pubKey, err := ioutil.ReadFile(pathPub)
 	if err != nil {
-		return fmt.Errorf("Could not find public RSA key %s. %s", path_pub, err)
+		return fmt.Errorf("Could not find public RSA key %s. %s", pathPub, err)
 	}
 
-	return client.Repos.SetKey(host, owner, name, string(pub), string(priv))
+	return client.Repos.SetKey(host, owner, name, string(pubKey), string(privKey))
 }
