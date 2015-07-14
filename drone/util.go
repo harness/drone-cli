@@ -2,22 +2,37 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/codegangsta/cli"
 )
 
-func parseRepo(str string) (host, owner, repo string) {
-	var parts = strings.Split(str, "/")
-	if len(parts) != 3 {
-		return
+// parseRepo first attempts to find a repo in the recieved string, if
+func parseRepo(args cli.Args) (host, owner, repo string) {
+	var path = args.First()
+	if path == "" {
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("Could not find current repo path: %s", err)
+		}
+
+		var success bool
+		path, success = getRepoPath(dir)
+		if !success {
+			log.Fatal("Failed to find current repo, please pass a repo as an argument (host/owner/name)")
+		}
 	}
-	host = parts[0]
-	owner = parts[1]
-	repo = parts[2]
-	return
+	parts := strings.Split(path, "/")
+	if len(parts) < 3 {
+		log.Fatalf("Current repo detected as '%s', failed to discern host, owner & name.", path)
+	}
+
+	return parts[0], parts[1], parts[2]
 }
 
 // getGoPath checks the source codes absolute path

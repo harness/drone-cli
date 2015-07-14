@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os"
-
 	"errors"
 	"fmt"
-	"github.com/codegangsta/cli"
 	"net/url"
+	"os"
+
+	"github.com/codegangsta/cli"
 )
 
 var (

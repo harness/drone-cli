@@ -86,9 +86,7 @@ func buildCommandFunc(c *cli.Context) {
 
 	// the path is provided as an optional argument that
 	// will otherwise default to $PWD/.drone.yml
-	if len(c.Args()) > 0 {
-		path = c.Args()[0]
-	}
+	path = c.Args().First()
 
 	switch len(path) {
 	case 0:
