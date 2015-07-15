@@ -47,6 +47,7 @@ func main() {
 		NewDeleteCommand(),
 		NewSetParamsCommand(),
 		NewGetParamsCommand(),
+		NewAddParamCommand(),
 	}
 
 	app.Before = func(c *cli.Context) error {

@@ -24,12 +24,14 @@ func NewSetParamsCommand() cli.Command {
 func setParamsCommandFunc(c *cli.Context, client *drone.Client) error {
 	var host, owner, name, path string
 	var args = c.Args()
+	host, owner, name = parseRepo(args)
 
-	host, owner, name = parseRepo(c.Args())
-
-	if len(args) == 2 {
-		path = args[1]
+	if len(args) == 0 {
+		return fmt.Errorf("A path to a parameters yaml file must be provided")
 	}
+
+	// path will be the last argument
+	path = args[len(args)-1]
 
 	params, err := ioutil.ReadFile(path)
 	if err != nil {

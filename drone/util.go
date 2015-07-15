@@ -12,10 +12,10 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-// parseRepo first attempts to find a repo in the recieved string, if
+// parseRepo first attempts to find a repo in the recieved string, if there is
 func parseRepo(args cli.Args) (host, owner, repo string) {
 	var path = args.First()
-	if path == "" {
+	if path == "" || strings.Count(path, "/") < 2 {
 		dir, err := os.Getwd()
 		if err != nil {
 			log.Fatalf("Could not find current repo path: %s", err)
