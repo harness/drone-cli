@@ -33,15 +33,12 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		NewBuildCommand(),
-		NewReposCommand(),
-		NewStatusCommand(),
-		NewEnableCommand(),
-		NewDisableCommand(),
-		NewRestartCommand(),
-		NewWhoamiCommand(),
-		NewSetKeyCommand(),
-		NewDeleteCommand(),
+		BuildCmd,
+		RepoCmd,
+		ExecCmd,
+		MachineCmd,
+		SecureCmd,
+		UserCmd,
 	}
 
 	app.Run(os.Args)

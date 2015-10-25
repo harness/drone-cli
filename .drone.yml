@@ -1,44 +1,37 @@
-image: library/golang:1.4.1-cross
-
-git:
+clone:
   path: github.com/drone/drone-cli
 
-env:
-  - GOROOT=/usr/src/go
-  - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+build:
+  image: golang:1.5
+  environment:
+    - GO15VENDOREXPERIMENT=1
+  commands:
 
-script:
-  - go get ./...
-  - go test ./...
+    # compile drone for all architectures
+    - GOOS=linux   GOARCH=amd64 go build -o ./bin/linux_amd64/drone   github.com/drone/drone-cli/drone
+    - GOOS=linux   GOARCH=386   go build -o ./bin/linux_386/drone     github.com/drone/drone-cli/drone
+    - GOOS=linux   GOARCH=arm   go build -o ./bin/linux_arm/drone     github.com/drone/drone-cli/drone
+    - GOOS=darwin  GOARCH=amd64 go build -o ./bin/darwin_amd64/drone  github.com/drone/drone-cli/drone
+    - GOOS=windows GOARCH=386   go build -o ./bin/windows_386/drone   github.com/drone/drone-cli/drone
+    - GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/drone github.com/drone/drone-cli/drone
 
-  # compile drone for all architectures
-  - GOOS=linux   GOARCH=amd64 go build -o ./bin/linux/amd64/drone   github.com/drone/drone-cli/drone
-  - GOOS=linux   GOARCH=386   go build -o ./bin/linux/386/drone     github.com/drone/drone-cli/drone
-  - GOOS=linux   GOARCH=arm   go build -o ./bin/linux/arm/drone     github.com/drone/drone-cli/drone
-  - GOOS=darwin  GOARCH=amd64 go build -o ./bin/darwin/amd64/drone  github.com/drone/drone-cli/drone
-  - GOOS=windows GOARCH=386   go build -o ./bin/windows/386/drone   github.com/drone/drone-cli/drone
-  - GOOS=windows GOARCH=amd64 go build -o ./bin/windows/amd64/drone github.com/drone/drone-cli/drone
+    # tar binary files prior to upload
+    - mkdir ./dist
+    - tar -cvzf ./dist/drone_linux_amd64.tar.gz   ./bin/linux/amd64/drone
+    - tar -cvzf ./dist/drone_linux_386.tar.gz     ./bin/linux/386/drone
+    - tar -cvzf ./dist/drone_linux_arm.tar.gz     ./bin/linux/arm/drone
+    - tar -cvzf ./dist/drone_darwin_amd64.tar.gz  ./bin/darwin/amd64/drone
+    - tar -cvzf ./dist/drone_windows_386.tar.gz   ./bin/windows/386/drone
+    - tar -cvzf ./dist/drone_windows_amd64.tar.gz ./bin/windows/amd64/drone
 
-  # tar binary files prior to upload
-  - mkdir ./dist
-  - tar -cvzf ./dist/drone_linux_amd64.tar.gz   ./bin/linux/amd64/drone
-  - tar -cvzf ./dist/drone_linux_386.tar.gz     ./bin/linux/386/drone
-  - tar -cvzf ./dist/drone_linux_arm.tar.gz     ./bin/linux/arm/drone
-  - tar -cvzf ./dist/drone_darwin_amd64.tar.gz  ./bin/darwin/amd64/drone
-  - tar -cvzf ./dist/drone_windows_386.tar.gz   ./bin/windows/386/drone
-  - tar -cvzf ./dist/drone_windows_amd64.tar.gz ./bin/windows/amd64/drone
+    # generate shas for tar files
+    - sha256sum ./dist/drone_linux_amd64.tar.gz   > ./dist/drone_linux_amd64.sha256
+    - sha256sum ./dist/drone_linux_386.tar.gz     > ./dist/drone_linux_386.sha256
+    - sha256sum ./dist/drone_linux_arm.tar.gz     > ./dist/drone_linux_arm.sha256
+    - sha256sum ./dist/drone_darwin_amd64.tar.gz  > ./dist/drone_darwin_amd64.sha256
+    - sha256sum ./dist/drone_windows_386.tar.gz   > ./dist/drone_windows_386.sha256
+    - sha256sum ./dist/drone_windows_amd64.tar.gz > ./dist/drone_windows_amd64.sha256
 
-  # generate shas for tar files
-  - sha256sum ./dist/drone_linux_amd64.tar.gz   > ./dist/drone_linux_amd64.sha256
-  - sha256sum ./dist/drone_linux_386.tar.gz     > ./dist/drone_linux_386.sha256
-  - sha256sum ./dist/drone_linux_arm.tar.gz     > ./dist/drone_linux_arm.sha256
-  - sha256sum ./dist/drone_darwin_amd64.tar.gz  > ./dist/drone_darwin_amd64.sha256
-  - sha256sum ./dist/drone_windows_386.tar.gz   > ./dist/drone_windows_386.sha256
-  - sha256sum ./dist/drone_windows_amd64.tar.gz > ./dist/drone_windows_amd64.sha256
-
-  # install pip (required by s3 plugin to instal s3 cli)
-  - apt-get update                1> /dev/null 2> /dev/null
-  - apt-get -y install python-pip 1> /dev/null 2> /dev/null
 
 publish:
   s3:
@@ -52,12 +45,3 @@ publish:
     recursive: true
     when:
       branch: master
-      owner: drone
-
-notify:
-  webhook:
-    urls:
-      - https://webhooks.gitter.im/e/$$GITTER_KEY
-    on_started: false
-    on_success: true
-    on_failure: true
