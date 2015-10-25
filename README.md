@@ -1,6 +1,10 @@
 # drone-cli
 Drone command-line interface
 
+### System Requirements
+
+The Drone command-line utility requires **Docker 1.6** or higher. If you are using Windows or Mac you can install Docker using the [Docker Toolbox](https://www.docker.com/docker-toolbox).
+
 ### Installation
 
 **Linux**
