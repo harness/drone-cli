@@ -17,12 +17,12 @@ build:
 
     # tar binary files prior to upload
     - mkdir ./dist
-    - tar -cvzf ./dist/drone_linux_amd64.tar.gz   ./bin/linux/amd64/drone
-    - tar -cvzf ./dist/drone_linux_386.tar.gz     ./bin/linux/386/drone
-    - tar -cvzf ./dist/drone_linux_arm.tar.gz     ./bin/linux/arm/drone
-    - tar -cvzf ./dist/drone_darwin_amd64.tar.gz  ./bin/darwin/amd64/drone
-    - tar -cvzf ./dist/drone_windows_386.tar.gz   ./bin/windows/386/drone
-    - tar -cvzf ./dist/drone_windows_amd64.tar.gz ./bin/windows/amd64/drone
+    - tar -cvzf ./dist/drone_linux_amd64.tar.gz   ./bin/linux_amd64/drone
+    - tar -cvzf ./dist/drone_linux_386.tar.gz     ./bin/linux_386/drone
+    - tar -cvzf ./dist/drone_linux_arm.tar.gz     ./bin/linux_arm/drone
+    - tar -cvzf ./dist/drone_darwin_amd64.tar.gz  ./bin/darwin_amd64/drone
+    - tar -cvzf ./dist/drone_windows_386.tar.gz   ./bin/windows_386/drone
+    - tar -cvzf ./dist/drone_windows_amd64.tar.gz ./bin/windows_amd64/drone
 
     # generate shas for tar files
     - sha256sum ./dist/drone_linux_amd64.tar.gz   > ./dist/drone_linux_amd64.sha256
