@@ -21,7 +21,10 @@ var ExecCmd = cli.Command{
 	Name:  "exec",
 	Usage: "executes a local build",
 	Action: func(c *cli.Context) {
-		handle(c, execCmd)
+		if err := execCmd(c); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -64,7 +67,7 @@ var ExecCmd = cli.Command{
 	},
 }
 
-func execCmd(c *cli.Context, client drone.Client) error {
+func execCmd(c *cli.Context) error {
 
 	cert, _ := ioutil.ReadFile(filepath.Join(
 		c.String("docker-cert-path"),
