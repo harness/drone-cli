@@ -22,7 +22,7 @@ const (
 	pathRepo    = "%s/api/repos/%s/%s"
 	pathEncrypt = "%s/api/repos/%s/%s/encrypt"
 	pathBuilds  = "%s/api/repos/%s/%s/builds"
-	pathBuild   = "%s/api/repos/%s/%s/builds/%d"
+	pathBuild   = "%s/api/repos/%s/%s/builds/%v"
 	pathJob     = "%s/api/repos/%s/%s/builds/%d/%d"
 	pathLog     = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathKey     = "%s/api/repos/%s/%s/key"
@@ -170,6 +170,17 @@ func (c *client) RepoKey(owner, name string) (*Key, error) {
 func (c *client) Build(owner, name string, num int) (*Build, error) {
 	out := new(Build)
 	uri := fmt.Sprintf(pathBuild, c.base, owner, name, num)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// Build returns the latest repository build by branch.
+func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
+	out := new(Build)
+	uri := fmt.Sprintf(pathBuild, c.base, owner, name, "latest")
+	if len(branch) != 0 {
+		uri += "?branch=" + branch
+	}
 	err := c.get(uri, out)
 	return out, err
 }

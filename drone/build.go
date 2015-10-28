@@ -30,6 +30,14 @@ var BuildCmd = cli.Command{
 				handle(c, BuildListCmd)
 			},
 		},
+		// build last
+		{
+			Name:  "last",
+			Usage: "last build (push only)",
+			Action: func(c *cli.Context) {
+				handle(c, BuildLastCmd)
+			},
+		},
 		// build logs
 		{
 			Name:  "logs",
@@ -78,6 +86,34 @@ func BuildInfoCmd(c *cli.Context, client drone.Client) error {
 		return err
 	}
 	build, err := client.Build(owner, name, num)
+	if err != nil {
+		return err
+	}
+	fmt.Println(build.Number)
+	fmt.Println(build.Event)
+	fmt.Println(build.Status)
+	fmt.Println(build.Created)
+	fmt.Println(build.Started)
+	fmt.Println(build.Enqueued)
+	fmt.Println(build.Finished)
+	fmt.Println(build.Commit)
+	fmt.Println(build.Ref)
+	fmt.Println(build.Author)
+	fmt.Println(build.Message)
+	return nil
+}
+
+func BuildLastCmd(c *cli.Context, client drone.Client) error {
+	var (
+		nameParam   = c.Args().Get(0)
+		branchParam = c.Args().Get(1)
+	)
+
+	owner, name, err := parseRepo(nameParam)
+	if err != nil {
+		return err
+	}
+	build, err := client.BuildLast(owner, name, branchParam)
 	if err != nil {
 		return err
 	}

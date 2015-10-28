@@ -46,6 +46,10 @@ type Client interface {
 	// Build returns a repository build by number.
 	Build(string, string, int) (*Build, error)
 
+	// BuildLast returns the latest repository build by branch.
+	// An empty branch will result in the default branch.
+	BuildLast(string, string, string) (*Build, error)
+
 	// BuildList returns a list of recent builds for the
 	// the specified repository.
 	BuildList(string, string) ([]*Build, error)
