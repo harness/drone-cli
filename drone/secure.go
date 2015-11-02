@@ -43,15 +43,20 @@ var SecureCmd = cli.Command{
 			Usage: "path to .drone.yml file",
 			Value: ".drone.yml",
 		},
+		cli.BoolTFlag{
+			Name:  "checksum",
+			Usage: "calculate and encrypt the yaml checksum",
+		},
 	},
 }
 
 func SecureYamlCmd(c *cli.Context, client drone.Client) error {
 	var (
-		repo    = c.String("repo")
-		inFile  = c.String("in")
-		outFile = c.String("out")
-		ymlFile = c.String("yaml")
+		repo     = c.String("repo")
+		inFile   = c.String("in")
+		outFile  = c.String("out")
+		ymlFile  = c.String("yaml")
+		checksum = c.BoolT("checksum")
 	)
 
 	owner, name, err := parseRepo(repo)
@@ -76,7 +81,7 @@ func SecureYamlCmd(c *cli.Context, client drone.Client) error {
 	}
 
 	// parse the .drone.sec.yml file
-	sec := &secure.Secure{}
+	sec := new(secure.Secure)
 	err = yaml.Unmarshal(plaintext, sec)
 	if err != nil {
 		return err
@@ -85,7 +90,7 @@ func SecureYamlCmd(c *cli.Context, client drone.Client) error {
 	// read the .drone.yml file and caclulate the
 	// checksum. add to the .drone.sec.yml file.
 	yml, err := ioutil.ReadFile(ymlFile)
-	if err == nil {
+	if err == nil && checksum {
 		sec.Checksum = sha256sum(string(yml))
 	}
 
