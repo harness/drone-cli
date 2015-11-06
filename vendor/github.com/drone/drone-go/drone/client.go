@@ -209,6 +209,15 @@ func (c *client) BuildStop(owner, name string, num, job int) error {
 	return err
 }
 
+// BuildFork re-starts a stopped build with a new build number,
+// preserving the prior history.
+func (c *client) BuildFork(owner, name string, num int) (*Build, error) {
+	out := new(Build)
+	uri := fmt.Sprintf(pathBuild+"?fork=true", c.base, owner, name, num)
+	err := c.post(uri, nil, out)
+	return out, err
+}
+
 // BuildLogs returns the build logs for the specified job.
 func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
 	uri := fmt.Sprintf(pathLog, c.base, owner, name, num, job)

@@ -54,6 +54,14 @@ var BuildCmd = cli.Command{
 				handle(c, BuildStartCmd)
 			},
 		},
+		// build fork
+		{
+			Name:  "fork",
+			Usage: "fork and execute a build",
+			Action: func(c *cli.Context) {
+				handle(c, BuildForkCmd)
+			},
+		},
 		// build stop
 		{
 			Name:  "stop",
@@ -204,6 +212,37 @@ func BuildStartCmd(c *cli.Context, client drone.Client) error {
 	}
 
 	build, err := client.BuildStart(owner, name, num)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(build.Number)
+	fmt.Println(build.Status)
+
+	return nil
+}
+
+func BuildForkCmd(c *cli.Context, client drone.Client) error {
+	var (
+		nameParam = c.Args().Get(0)
+		numParam  = c.Args().Get(1)
+
+		err   error
+		owner string
+		name  string
+		num   int
+	)
+
+	num, err = strconv.Atoi(numParam)
+	if err != nil {
+		return fmt.Errorf("Invalid or missing build number")
+	}
+	owner, name, err = parseRepo(nameParam)
+	if err != nil {
+		return err
+	}
+
+	build, err := client.BuildFork(owner, name, num)
 	if err != nil {
 		return err
 	}
