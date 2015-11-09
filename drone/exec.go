@@ -150,7 +150,10 @@ func execCmd(c *cli.Context) error {
 				Status: drone.StatusRunning,
 				Commit: "0000000000", // hack
 			},
-			Workspace: drone.Workspace{},
+			System: drone.System{
+				Globals: []string{},
+				Plugins: []string{"plugins/*", "*/*"},
+			},
 		}
 
 		// gets the ssh key if provided
