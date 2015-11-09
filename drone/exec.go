@@ -44,6 +44,15 @@ var ExecCmd = cli.Command{
 			Usage:  "docker certificate directory",
 			Value:  "",
 		},
+		cli.StringFlag{
+			Name:  "i",
+			Value: "",
+			Usage: "identify file injected in the container",
+		},
+		cli.BoolFlag{
+			Name:  "trusted",
+			Usage: "enable elevated privilege",
+		},
 		cli.BoolFlag{
 			Name:  "cache",
 			Usage: "execute cache steps",
@@ -128,6 +137,10 @@ func execCmd(c *cli.Context) error {
 			Job       drone.Job       `json:"job"`
 			Config    string          `json:"config"`
 		}{
+			Repo: drone.Repo{
+				IsTrusted: c.Bool("trusted"),
+				IsPrivate: true,
+			},
 			Job: drone.Job{
 				Status:      drone.StatusRunning,
 				Environment: axis,
@@ -137,7 +150,20 @@ func execCmd(c *cli.Context) error {
 				Status: drone.StatusRunning,
 				Commit: "0000000000", // hack
 			},
+			Workspace: drone.Workspace{},
 		}
+
+		// gets the ssh key if provided
+		if len(c.String("i")) != 0 {
+			key, err = ioutil.ReadFile(c.String("i"))
+			if err != nil {
+				return err
+			}
+			payload.Workspace.Keys = &drone.Key{
+				Private: string(key),
+			}
+		}
+
 		if len(proj) != 0 {
 			payload.Repo.Link = fmt.Sprintf("https://%s", proj)
 		}
