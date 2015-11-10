@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"reflect"
+	"os"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-exec/yaml/secure"
@@ -26,12 +27,12 @@ var SecureCmd = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "in",
-			Usage: "input path to the plaintext secret file",
+			Usage: "input path to the plaintext secret file (use - for stdin)",
 			Value: ".drone.sec.yml",
 		},
 		cli.StringFlag{
 			Name:  "out",
-			Usage: "output path for the encrypted secret file",
+			Usage: "output path for the encrypted secret file (use - for stdout)",
 			Value: ".drone.sec",
 		},
 		cli.StringFlag{
@@ -75,7 +76,7 @@ func SecureYamlCmd(c *cli.Context, client drone.Client) error {
 	}
 
 	// read the .drone.sec.yml file (plain text)
-	plaintext, err := ioutil.ReadFile(inFile)
+	plaintext, err := readInput(inFile)
 	if err != nil {
 		return err
 	}
@@ -108,7 +109,7 @@ func SecureYamlCmd(c *cli.Context, client drone.Client) error {
 	}
 
 	// write the encrypted .drone.sec.yml file to .drone.sec
-	return ioutil.WriteFile(outFile, []byte(ciphertext), 0664)
+	return writeOutput(outFile, ciphertext)
 }
 
 // toPublicKey parses a public key and returns an *rsa.PublicKey.
@@ -146,4 +147,25 @@ func sha256sum(in string) string {
 	h := sha256.New()
 	io.WriteString(h, in)
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+// readInput reads the plaintext secret from a file
+// or stdin if inFile is -
+func readInput(inFile string) ([]byte, error) {
+	if inFile == "-" {
+		return ioutil.ReadAll(os.Stdin)
+	} else {
+		return ioutil.ReadFile(inFile)
+	}
+}
+
+// writeOutput writes the encrypted secret to a file
+// or stdout if outFile is -
+func writeOutput(outFile string, ciphertext string) error {
+	if outFile == "-" {
+		_, err := os.Stdout.Write([]byte(ciphertext))
+		return err
+	} else {
+		return ioutil.WriteFile(outFile, []byte(ciphertext), 0664)
+	}
 }
