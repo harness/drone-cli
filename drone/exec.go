@@ -119,6 +119,13 @@ func execCmd(c *cli.Context) error {
 		return err
 	}
 
+	execArgs := []string{"--build", "--debug", "--mount", pwd}
+	for _, arg := range []string{"cache", "deploy", "notify", "pull"} {
+		if c.Bool(arg) {
+			execArgs = append(execArgs, "--"+arg)
+		}
+	}
+
 	proj := resolvePath(pwd)
 
 	var exits []int
@@ -172,7 +179,7 @@ func execCmd(c *cli.Context) error {
 		}
 		out, _ := json.Marshal(payload)
 
-		exit, err := run(cli, pwd, string(out))
+		exit, err := run(cli, execArgs, string(out))
 		if err != nil {
 			return err
 		}
@@ -202,11 +209,11 @@ func execCmd(c *cli.Context) error {
 	return nil
 }
 
-func run(client dockerclient.Client, mount, input string) (int, error) {
+func run(client dockerclient.Client, args []string, input string) (int, error) {
 
 	image := "drone/drone-exec:latest"
 	entrypoint := []string{"/bin/drone-exec"}
-	args := []string{"--build", "--debug", "--mount", mount, "--", input}
+	args = append(args, "--", input)
 
 	conf := &dockerclient.ContainerConfig{
 		Image:      image,
