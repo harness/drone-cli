@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-go/drone"
@@ -65,26 +67,25 @@ func UserInfoCmd(c *cli.Context, client drone.Client) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(user.Login)
-	fmt.Println(user.Email)
-	fmt.Println(user.Admin)
-	fmt.Println(user.Active)
+	fmt.Println("username:", user.Login)
+	fmt.Println("email:", user.Email)
+	fmt.Println("admin:", user.Admin)
+	fmt.Println("active:", user.Active)
 	return nil
 }
 
 func UserListCmd(c *cli.Context, client drone.Client) error {
-
 	users, err := client.UserList()
-	if err != nil {
+	if err != nil || len(users) == 0 {
 		return err
 	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+	fmt.Fprintln(w, "username\temail\tadmin\tactive")
+	fmt.Fprintln(w, "--------\t-----\t-----\t------")
 	for _, user := range users {
-		fmt.Println(user.Login)
-		fmt.Println("\t", user.Email)
-		fmt.Println("\t", user.Admin)
-		fmt.Println("\t", user.Active)
+		fmt.Fprintf(w, "%s\t%s\t%v\t%v\n", user.Login, user.Email, user.Admin, user.Active)
 	}
-
+	w.Flush()
 	return nil
 }
 
