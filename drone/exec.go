@@ -174,11 +174,7 @@ func execCmd(c *cli.Context) error {
 			payload.Keys = drone.Key{
 				Private: string(key),
 			}
-			payload.Netrc = drone.Netrc{
-				Machine: "",
-				Login: "",
-				Password: "",
-			}
+			payload.Netrc = drone.Netrc{}
 		}
 
 		if len(proj) != 0 {
