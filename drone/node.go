@@ -41,7 +41,7 @@ var MachineCmd = cli.Command{
 				cli.StringFlag{
 					EnvVar: "DOCKER_HOST",
 					Name:   "docker-host",
-					Usage:  "docker deamon address",
+					Usage:  "docker daemon address",
 					Value:  "",
 				},
 				cli.BoolFlag{
