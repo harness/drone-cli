@@ -147,6 +147,8 @@ func execCmd(c *cli.Context) error {
 			Repo      drone.Repo      `json:"repo"`
 			Build     drone.Build     `json:"build"`
 			Job       drone.Job       `json:"job"`
+			Netrc     drone.Netrc     `json:"netrc"`
+			Keys      drone.Key       `json:"keys"`
 			Config    string          `json:"config"`
 		}{
 			Repo: drone.Repo{
@@ -175,9 +177,10 @@ func execCmd(c *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			payload.Workspace.Keys = &drone.Key{
+			payload.Keys = drone.Key{
 				Private: string(key),
 			}
+			payload.Netrc = drone.Netrc{}
 		}
 
 		if len(proj) != 0 {
