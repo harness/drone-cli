@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
+	"github.com/drone/drone-cli/drone/git"
 	"github.com/drone/drone-exec/docker"
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone/yaml/matrix"
@@ -49,6 +50,10 @@ var ExecCmd = cli.Command{
 			Value: "",
 			Usage: "identify file injected in the container",
 		},
+		cli.StringSliceFlag{
+			Name:  "e",
+			Usage: "secret environment variables",
+		},
 		cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "enable elevated privilege",
@@ -69,11 +74,11 @@ var ExecCmd = cli.Command{
 			Name:  "pull",
 			Usage: "always pull the latest docker image",
 		},
-                cli.StringFlag{
-                        Name:   "event",
-                        Usage:  "hook event type",
-                        Value:  "push",
-                },
+		cli.StringFlag{
+			Name:  "event",
+			Usage: "hook event type",
+			Value: "push",
+		},
 		cli.BoolTFlag{
 			Name:  "debug",
 			Usage: "execute the build in debug mode",
@@ -82,6 +87,7 @@ var ExecCmd = cli.Command{
 }
 
 func execCmd(c *cli.Context) error {
+	info := git.Info()
 
 	cert, _ := ioutil.ReadFile(filepath.Join(
 		c.String("docker-cert-path"),
@@ -161,12 +167,16 @@ func execCmd(c *cli.Context) error {
 			},
 			Config: string(yml),
 			Build: drone.Build{
-				Status: drone.StatusRunning,
-				Commit: "0000000000", // hack
-				Event: c.String("event"),
+				Status:  drone.StatusRunning,
+				Branch:  info.Branch,
+				Commit:  info.Head.Id,
+				Author:  info.Head.AuthorName,
+				Email:   info.Head.AuthorEmail,
+				Message: info.Head.Message,
+				Event:   c.String("event"),
 			},
 			System: drone.System{
-				Globals: []string{},
+				Globals: c.StringSlice("e"),
 				Plugins: []string{"plugins/*", "*/*"},
 			},
 		}
