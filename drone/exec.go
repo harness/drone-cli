@@ -176,6 +176,7 @@ func execCmd(c *cli.Context) error {
 				Event:   c.String("event"),
 			},
 			System: drone.System{
+				Link:    c.GlobalString("server"),
 				Globals: c.StringSlice("e"),
 				Plugins: []string{"plugins/*", "*/*"},
 			},
