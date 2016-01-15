@@ -69,6 +69,11 @@ var ExecCmd = cli.Command{
 			Name:  "pull",
 			Usage: "always pull the latest docker image",
 		},
+                cli.StringFlag{
+                        Name:   "event",
+                        Usage:  "hook event type",
+                        Value:  "push",
+                },
 		cli.BoolTFlag{
 			Name:  "debug",
 			Usage: "execute the build in debug mode",
@@ -156,6 +161,7 @@ func execCmd(c *cli.Context) error {
 			Build: drone.Build{
 				Status: drone.StatusRunning,
 				Commit: "0000000000", // hack
+				Event: c.String("event"),
 			},
 			System: drone.System{
 				Globals: []string{},
