@@ -2,6 +2,7 @@ package drone
 
 import "io"
 
+// Client describes a drone client.
 type Client interface {
 	// Self returns the currently authenticated user.
 	Self() (*User, error)

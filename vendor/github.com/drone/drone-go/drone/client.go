@@ -75,7 +75,7 @@ func (c *client) User(login string) (*User, error) {
 
 // UserList returns a list of all registered users.
 func (c *client) UserList() ([]*User, error) {
-	out := make([]*User, 0)
+	var out []*User
 	uri := fmt.Sprintf(pathUsers, c.base)
 	err := c.get(uri, &out)
 	return out, err
@@ -106,7 +106,7 @@ func (c *client) UserDel(login string) error {
 
 // UserFeed returns the user's activity feed.
 func (c *client) UserFeed() ([]*Activity, error) {
-	out := make([]*Activity, 0)
+	var out []*Activity
 	uri := fmt.Sprintf(pathFeed, c.base)
 	err := c.get(uri, &out)
 	return out, err
@@ -123,7 +123,7 @@ func (c *client) Repo(owner string, name string) (*Repo, error) {
 // RepoList returns a list of all repositories to which
 // the user has explicit access in the host system.
 func (c *client) RepoList() ([]*Repo, error) {
-	out := make([]*Repo, 0)
+	var out []*Repo
 	uri := fmt.Sprintf(pathRepos, c.base)
 	err := c.get(uri, &out)
 	return out, err
@@ -188,7 +188,7 @@ func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
 // BuildList returns a list of recent builds for the
 // the specified repository.
 func (c *client) BuildList(owner, name string) ([]*Build, error) {
-	out := make([]*Build, 0)
+	var out []*Build
 	uri := fmt.Sprintf(pathBuilds, c.base, owner, name)
 	err := c.get(uri, &out)
 	return out, err
@@ -234,7 +234,7 @@ func (c *client) Node(id int64) (*Node, error) {
 
 // NodeList returns a list of all registered worker nodes.
 func (c *client) NodeList() ([]*Node, error) {
-	out := make([]*Node, 0)
+	var out []*Node
 	uri := fmt.Sprintf(pathNodes, c.base)
 	err := c.get(uri, &out)
 	return out, err
