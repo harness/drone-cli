@@ -147,26 +147,17 @@ func execCmd(c *cli.Context) error {
 			color.Magenta("[DRONE] export %s", axis)
 		}
 
-		payload := struct {
-			System    drone.System    `json:"system"`
-			Workspace drone.Workspace `json:"workspace"`
-			Repo      drone.Repo      `json:"repo"`
-			Build     drone.Build     `json:"build"`
-			Job       drone.Job       `json:"job"`
-			Netrc     drone.Netrc     `json:"netrc"`
-			Keys      drone.Key       `json:"keys"`
-			Config    string          `json:"config"`
-		}{
-			Repo: drone.Repo{
+		payload := drone.Payload{
+			Repo: &drone.Repo{
 				IsTrusted: c.Bool("trusted"),
 				IsPrivate: true,
 			},
-			Job: drone.Job{
+			Job: &drone.Job{
 				Status:      drone.StatusRunning,
 				Environment: axis,
 			},
-			Config: string(yml),
-			Build: drone.Build{
+			Yaml: string(yml),
+			Build: &drone.Build{
 				Status:  drone.StatusRunning,
 				Branch:  info.Branch,
 				Commit:  info.Head.Id,
@@ -175,7 +166,7 @@ func execCmd(c *cli.Context) error {
 				Message: info.Head.Message,
 				Event:   c.String("event"),
 			},
-			System: drone.System{
+			System: &drone.System{
 				Link:    c.GlobalString("server"),
 				Globals: c.StringSlice("e"),
 				Plugins: []string{"plugins/*", "*/*"},
@@ -188,10 +179,10 @@ func execCmd(c *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			payload.Keys = drone.Key{
+			payload.Keys = &drone.Key{
 				Private: string(key),
 			}
-			payload.Netrc = drone.Netrc{}
+			payload.Netrc = &drone.Netrc{}
 		}
 
 		if len(proj) != 0 {
