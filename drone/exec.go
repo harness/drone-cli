@@ -136,6 +136,15 @@ func execCmd(c *cli.Context) error {
 			execArgs = append(execArgs, "--"+arg)
 		}
 	}
+	if c.Bool("pull") {
+		image := "drone/drone-exec:latest"
+		color.Magenta("[DRONE] pulling %s", image)
+		err := cli.PullImage(image, nil)
+		if err != nil {
+			color.Red("[DRONE] failed to pull %s", image)
+			os.Exit(1)
+		}
+	}
 
 	proj := resolvePath(pwd)
 
