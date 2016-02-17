@@ -8,10 +8,14 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-cli/drone/git"
 	"github.com/drone/drone-exec/docker"
+	"github.com/drone/drone-exec/yaml/secure"
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone/yaml/matrix"
 	"github.com/fatih/color"
@@ -53,6 +57,10 @@ var ExecCmd = cli.Command{
 		cli.StringSliceFlag{
 			Name:  "e",
 			Usage: "secret environment variables",
+		},
+		cli.StringFlag{
+			Name:  "E",
+			Usage: "secrets from plaintext YAML of .drone.sec (use - for stdin)",
 		},
 		cli.BoolFlag{
 			Name:  "trusted",
@@ -110,6 +118,29 @@ func execCmd(c *cli.Context) error {
 	yml, err := ioutil.ReadFile(".drone.yml")
 	if err != nil {
 		return err
+	}
+
+	// initially populate globals from the '-e' slice
+	globals := c.StringSlice("e")
+	if c.IsSet("E") {
+		// read the .drone.sec.yml file (plain text)
+		plaintext, err := readInput(c.String("E"))
+		if err != nil {
+			return err
+		}
+
+		// parse the plaintext secrets file
+		sec := new(secure.Secure)
+		err = yaml.Unmarshal(plaintext, sec)
+		if err != nil {
+			return err
+		}
+
+		// prepend values into globals (allow '-e' to override the secrets file)
+		for k, v := range sec.Environment.Map() {
+			tmp := strings.Join([]string{k, v}, "=")
+			globals = append([]string{tmp}, globals...)
+		}
 	}
 
 	axes, err := matrix.Parse(string(yml))
@@ -177,7 +208,7 @@ func execCmd(c *cli.Context) error {
 			},
 			System: &drone.System{
 				Link:    c.GlobalString("server"),
-				Globals: c.StringSlice("e"),
+				Globals: globals,
 				Plugins: []string{"plugins/*", "*/*"},
 			},
 		}

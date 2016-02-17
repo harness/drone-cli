@@ -149,16 +149,6 @@ func sha256sum(in string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-// readInput reads the plaintext secret from a file
-// or stdin if inFile is -
-func readInput(inFile string) ([]byte, error) {
-	if inFile == "-" {
-		return ioutil.ReadAll(os.Stdin)
-	} else {
-		return ioutil.ReadFile(inFile)
-	}
-}
-
 // writeOutput writes the encrypted secret to a file
 // or stdout if outFile is -
 func writeOutput(outFile string, ciphertext string) error {
