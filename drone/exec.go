@@ -229,9 +229,28 @@ func execCmd(c *cli.Context) error {
 	return nil
 }
 
+func getDroneImage(client dockerclient.Client) (droneImage string) {
+	droneImage = "drone/drone-exec:latest"
+
+	imageFromEnv := os.Getenv("DRONE_EXEC_IMAGE")
+	if imageFromEnv != "" {
+		_, err := client.InspectImage(imageFromEnv)
+		if err != nil {
+			color.Red("[DRONE] error using custom drone image - %s - %s\n", imageFromEnv, err.Error())
+			os.Exit(1)
+		}
+		color.Magenta("[DRONE] using custom drone image: %s\n", imageFromEnv)
+		droneImage = imageFromEnv
+	} else {
+		color.Magenta("[DRONE] using default drone image: %s\n", droneImage)
+	}
+
+	return
+}
+
 func run(client dockerclient.Client, args []string, input string) (int, error) {
 
-	image := "drone/drone-exec:latest"
+	image := getDroneImage(client)
 	entrypoint := []string{"/bin/drone-exec"}
 	args = append(args, "--", input)
 
