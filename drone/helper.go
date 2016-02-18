@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -41,6 +42,16 @@ func resolvePath(dir string) string {
 	}
 
 	return ""
+}
+
+// readInput reads the plaintext secret from a file
+// or stdin if inFile is -
+func readInput(inFile string) ([]byte, error) {
+	if inFile == "-" {
+		return ioutil.ReadAll(os.Stdin)
+	} else {
+		return ioutil.ReadFile(inFile)
+	}
 }
 
 var gopathExp = regexp.MustCompile("./src/(github.com/[^/]+/[^/]+|bitbucket.org/[^/]+/[^/]+|code.google.com/[^/]+/[^/]+)")
