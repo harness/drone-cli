@@ -12,7 +12,7 @@ var remotesRE = regexp.MustCompile(`^(\S+)\s+(\S+)`)
 
 // A Head object encapsulates information about the HEAD revision of a git repo.
 type Head struct {
-	Id             string `json:"id"`
+	ID             string `json:"id"`
 	AuthorName     string `json:"author_name,omitempty"`
 	AuthorEmail    string `json:"author_email,omitempty"`
 	CommitterName  string `json:"committer_name,omitempty"`
@@ -23,7 +23,7 @@ type Head struct {
 // A Remote object encapsulates information about a remote of a git repo.
 type Remote struct {
 	Name string `json:"name"`
-	Url  string `json:"url"`
+	URL  string `json:"url"`
 }
 
 // A Git object encapsulates information about a git repo.
@@ -83,12 +83,12 @@ func Info() *Git {
 		url := matches[0][2]
 		r := Remote{
 			Name: name,
-			Url:  url,
+			URL:  url,
 		}
 		remotes[name] = r
 	}
 	h := Head{
-		Id:             results["id"],
+		ID:             results["id"],
 		AuthorName:     results["aname"],
 		AuthorEmail:    results["aemail"],
 		CommitterName:  results["cname"],
