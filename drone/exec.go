@@ -200,7 +200,7 @@ func execCmd(c *cli.Context) error {
 			Build: &drone.Build{
 				Status:  drone.StatusRunning,
 				Branch:  info.Branch,
-				Commit:  info.Head.Id,
+				Commit:  info.Head.ID,
 				Author:  info.Head.AuthorName,
 				Email:   info.Head.AuthorEmail,
 				Message: info.Head.Message,
