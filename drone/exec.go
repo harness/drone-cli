@@ -279,6 +279,9 @@ func run(client dockerclient.Client, args []string, input string) (int, error) {
 	}
 
 	info, err := docker.Run(client, conf, false)
+	if err != nil {
+		return 0, err
+	}
 
 	client.StopContainer(info.Id, 15)
 	client.RemoveContainer(info.Id, true, true)
