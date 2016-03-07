@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"runtime"
 
 	"gopkg.in/yaml.v2"
 
@@ -159,6 +160,11 @@ func execCmd(c *cli.Context) error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
+	}
+
+	// Massage windows paths for docker
+	if runtime.GOOS == "windows" {
+		pwd = convertWindowsPath(pwd)
 	}
 
 	execArgs := []string{"--build", "--debug", "--mount", pwd}
