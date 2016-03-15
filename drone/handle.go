@@ -1,11 +1,13 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-go/drone"
+	"github.com/jackspirou/syscerts"
 )
 
 type handlerFunc func(*cli.Context, drone.Client) error
@@ -27,8 +29,12 @@ func handle(c *cli.Context, fn handlerFunc) {
 		os.Exit(1)
 	}
 
-	// create the drone client
-	client := drone.NewClientToken(server, token)
+	// get system CA certs
+	certs := syscerts.SystemRootsPool()
+	tlsConfig := &tls.Config{RootCAs: certs}
+
+	// create the drone client with TLS options
+	client := drone.NewClientTokenTLS(server, token, tlsConfig)
 
 	// handle the function
 	if err := fn(c, client); err != nil {

@@ -22,20 +22,10 @@ const (
 	secondCsiCode
 )
 
-type parseResult int
-
-const (
-	noConsole parseResult = iota
-	changedColor
-	unknown
-)
-
 type ansiColorWriter struct {
-	w             io.Writer
-	mode          outputMode
-	state         csiState
-	paramStartBuf bytes.Buffer
-	paramBuf      bytes.Buffer
+	w        io.Writer
+	state    csiState
+	paramBuf bytes.Buffer
 }
 
 const (
@@ -236,7 +226,7 @@ func convertTextAttr(winAttr uint16) *textAttributes {
 }
 
 func convertWinAttr(textAttr *textAttributes) uint16 {
-	var winAttr uint16
+	var winAttr uint16 = 0
 	winAttr |= textAttr.foregroundColor
 	winAttr |= textAttr.backgroundColor
 	winAttr |= textAttr.foregroundIntensity
@@ -246,10 +236,14 @@ func convertWinAttr(textAttr *textAttributes) uint16 {
 	return winAttr
 }
 
-func changeColor(param []byte) parseResult {
+func changeColor(param []byte) {
+	if defaultAttr == nil {
+		return
+	}
+
 	screenInfo := getConsoleScreenBufferInfo(uintptr(syscall.Stdout))
 	if screenInfo == nil {
-		return noConsole
+		return
 	}
 
 	winAttr := convertTextAttr(screenInfo.WAttributes)
@@ -293,56 +287,13 @@ func changeColor(param []byte) parseResult {
 	}
 	winTextAttribute := convertWinAttr(winAttr)
 	setConsoleTextAttribute(uintptr(syscall.Stdout), winTextAttribute)
-
-	return changedColor
 }
 
-func parseEscapeSequence(command byte, param []byte) parseResult {
-	if defaultAttr == nil {
-		return noConsole
-	}
-
+func parseEscapeSequence(command byte, param []byte) {
 	switch command {
 	case sgrCode:
-		return changeColor(param)
-	default:
-		return unknown
+		changeColor(param)
 	}
-}
-
-func (cw *ansiColorWriter) flushBuffer() (int, error) {
-	return cw.flushTo(cw.w)
-}
-
-func (cw *ansiColorWriter) resetBuffer() (int, error) {
-	return cw.flushTo(nil)
-}
-
-func (cw *ansiColorWriter) flushTo(w io.Writer) (int, error) {
-	var n1, n2 int
-	var err error
-
-	startBytes := cw.paramStartBuf.Bytes()
-	cw.paramStartBuf.Reset()
-	if w != nil {
-		n1, err = cw.w.Write(startBytes)
-		if err != nil {
-			return n1, err
-		}
-	} else {
-		n1 = len(startBytes)
-	}
-	paramBytes := cw.paramBuf.Bytes()
-	cw.paramBuf.Reset()
-	if w != nil {
-		n2, err = cw.w.Write(paramBytes)
-		if err != nil {
-			return n1 + n2, err
-		}
-	} else {
-		n2 = len(paramBytes)
-	}
-	return n1 + n2, nil
 }
 
 func isParameterChar(b byte) bool {
@@ -350,34 +301,29 @@ func isParameterChar(b byte) bool {
 }
 
 func (cw *ansiColorWriter) Write(p []byte) (int, error) {
-	r, nw, first, last := 0, 0, 0, 0
-	if cw.mode != DiscardNonColorEscSeq {
-		cw.state = outsideCsiCode
-		cw.resetBuffer()
-	}
-
+	r, nw, nc, first, last := 0, 0, 0, 0, 0
 	var err error
 	for i, ch := range p {
 		switch cw.state {
 		case outsideCsiCode:
 			if ch == firstCsiChar {
-				cw.paramStartBuf.WriteByte(ch)
+				nc++
 				cw.state = firstCsiCode
 			}
 		case firstCsiCode:
 			switch ch {
 			case firstCsiChar:
-				cw.paramStartBuf.WriteByte(ch)
+				nc++
 				break
 			case secondeCsiChar:
-				cw.paramStartBuf.WriteByte(ch)
+				nc++
 				cw.state = secondCsiCode
 				last = i - 1
 			default:
-				cw.resetBuffer()
 				cw.state = outsideCsiCode
 			}
 		case secondCsiCode:
+			nc++
 			if isParameterChar(ch) {
 				cw.paramBuf.WriteByte(ch)
 			} else {
@@ -387,20 +333,9 @@ func (cw *ansiColorWriter) Write(p []byte) (int, error) {
 					return r, err
 				}
 				first = i + 1
-				result := parseEscapeSequence(ch, cw.paramBuf.Bytes())
-				if result == noConsole || (cw.mode == OutputNonColorEscSeq && result == unknown) {
-					cw.paramBuf.WriteByte(ch)
-					nw, err := cw.flushBuffer()
-					if err != nil {
-						return r, err
-					}
-					r += nw
-				} else {
-					n, _ := cw.resetBuffer()
-					// Add one more to the size of the buffer for the last ch
-					r += n + 1
-				}
-
+				param := cw.paramBuf.Bytes()
+				cw.paramBuf.Reset()
+				parseEscapeSequence(ch, param)
 				cw.state = outsideCsiCode
 			}
 		default:
@@ -408,10 +343,9 @@ func (cw *ansiColorWriter) Write(p []byte) (int, error) {
 		}
 	}
 
-	if cw.mode != DiscardNonColorEscSeq || cw.state == outsideCsiCode {
+	if cw.state == outsideCsiCode {
 		nw, err = cw.w.Write(p[first:len(p)])
-		r += nw
 	}
 
-	return r, err
+	return r + nw + nc, err
 }

@@ -9,8 +9,7 @@ package ansicolor
 import "io"
 
 type ansiColorWriter struct {
-	w    io.Writer
-	mode outputMode
+	w io.Writer
 }
 
 func (cw *ansiColorWriter) Write(p []byte) (int, error) {
