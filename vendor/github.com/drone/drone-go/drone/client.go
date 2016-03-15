@@ -5,6 +5,7 @@ package drone
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -47,6 +48,18 @@ func NewClient(uri string) Client {
 func NewClientToken(uri, token string) Client {
 	config := new(oauth2.Config)
 	auther := config.Client(oauth2.NoContext, &oauth2.Token{AccessToken: token})
+	return &client{auther, uri}
+}
+
+// NewClientTokenTLS returns a client at the specified url that
+// authenticates all outbound requests with the given token and
+// tls.Config if provided.
+func NewClientTokenTLS(uri, token string, c *tls.Config) Client {
+	config := new(oauth2.Config)
+	auther := config.Client(oauth2.NoContext, &oauth2.Token{AccessToken: token})
+	if c != nil {
+		auther.Transport = &http.Transport{TLSClientConfig: c}
+	}
 	return &client{auther, uri}
 }
 

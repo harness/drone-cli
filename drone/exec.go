@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"runtime"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 
