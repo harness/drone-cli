@@ -2,6 +2,7 @@ package docker
 
 import (
 	"errors"
+	"io"
 	"os"
 	// "strings"
 
@@ -30,10 +31,16 @@ var (
 	}
 )
 
-func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bool) (*dockerclient.ContainerInfo, error) {
+func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, auth *dockerclient.AuthConfig, pull bool, outw, errw io.Writer) (*dockerclient.ContainerInfo, error) {
+	if outw == nil {
+		outw = os.Stdout
+	}
+	if errw == nil {
+		errw = os.Stdout
+	}
 
 	// fetches the container information.
-	info, err := Start(client, conf, pull)
+	info, err := Start(client, conf, auth, pull)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +68,12 @@ func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bo
 			return
 		}
 		defer rc.Close()
-		StdCopy(os.Stdout, os.Stdout, rc)
+		_, err = StdCopy(outw, errw, rc)
+		if err != nil {
+			log.Errorf("Error streaming docker logs for %s. %s\n", conf.Image, err)
+			errc <- err
+			return
+		}
 
 		// fetches the container information
 		info, err := client.InspectContainer(info.Id)
@@ -81,25 +93,26 @@ func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bo
 	}
 }
 
-func Start(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bool) (*dockerclient.ContainerInfo, error) {
+func Start(client dockerclient.Client, conf *dockerclient.ContainerConfig, auth *dockerclient.AuthConfig, pull bool) (*dockerclient.ContainerInfo, error) {
+
 	// force-pull the image if specified.
 	if pull {
 		log.Printf("Pulling image %s", conf.Image)
-		client.PullImage(conf.Image, nil)
+		client.PullImage(conf.Image, auth)
 	}
 
 	// attempts to create the contianer
-	id, err := client.CreateContainer(conf, "")
+	id, err := client.CreateContainer(conf, "", auth)
 	if err != nil {
 		log.Printf("Pulling image %s", conf.Image)
 
 		// and pull the image and re-create if that fails
-		err = client.PullImage(conf.Image, nil)
+		err = client.PullImage(conf.Image, auth)
 		if err != nil {
 			log.Errorf("Error pulling %s. %s\n", conf.Image, err)
 			return nil, err
 		}
-		id, err = client.CreateContainer(conf, "")
+		id, err = client.CreateContainer(conf, "", auth)
 		if err != nil {
 			log.Errorf("Error creating %s. %s\n", conf.Image, err)
 			client.RemoveContainer(id, true, true)

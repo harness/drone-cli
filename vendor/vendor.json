@@ -1,12 +1,106 @@
 {
 	"comment": "",
-	"ignore": "",
+	"ignore": "test",
 	"package": [
 		{
-			"origin": "github.com/drone/drone-cli/vendor/github.com/drone/drone-go/drone",
+			"path": "github.com/Sirupsen/logrus",
+			"revision": "be52937128b38f1d99787bb476c789e2af1147f1",
+			"revisionTime": "2016-02-02T21:14:36Z"
+		},
+		{
+			"path": "github.com/codegangsta/cli",
+			"revision": "a2943485b110df8842045ae0600047f88a3a56a1",
+			"revisionTime": "2016-02-27T08:56:50-08:00"
+		},
+		{
+			"path": "github.com/docker/go-units",
+			"revision": "5d2041e26a699eaca682e2ea41c8f891e1060444",
+			"revisionTime": "2016-01-25T09:48:45-08:00"
+		},
+		{
+			"path": "github.com/drone/drone-exec/docker",
+			"revision": "7dc4524fc4c8115d1dcc6cc5027f75606a3069ea",
+			"revisionTime": "2016-01-27T21:53:37-08:00"
+		},
+		{
+			"path": "github.com/drone/drone-exec/yaml/secure",
+			"revision": "7dc4524fc4c8115d1dcc6cc5027f75606a3069ea",
+			"revisionTime": "2016-01-27T21:53:37-08:00"
+		},
+		{
 			"path": "github.com/drone/drone-go/drone",
-			"revision": "087ffc5443db5e88c5cceeb0eae6d5df1bd96539",
-			"revisionTime": "2016-01-12T09:53:55-08:00"
+			"revision": "4c741964e4a3f71d11174c2affe036c052a7f731",
+			"revisionTime": "2016-02-02T09:05:04-08:00"
+		},
+		{
+			"path": "github.com/drone/drone/yaml/matrix",
+			"revision": "670217ac1b7ab19525cf4b584a982cada4b1ea6f",
+			"revisionTime": "2016-02-17T17:05:53-08:00"
+		},
+		{
+			"path": "github.com/fatih/color",
+			"revision": "a56f4833e47f827a93836d8d3f76c63459a1b310",
+			"revisionTime": "2015-07-24T17:41:16+03:00"
+		},
+		{
+			"path": "github.com/jackspirou/syscerts",
+			"revision": "77504eb6a3351a2946299ce59591b40bf108754c",
+			"revisionTime": "2016-03-04T08:55:40-06:00"
+		},
+		{
+			"path": "github.com/mattn/go-isatty",
+			"revision": "ae0b1f8f8004be68d791a576e3d8e7648ab41449",
+			"revisionTime": "2015-04-09T09:42:43+09:00"
+		},
+		{
+			"path": "github.com/samalba/dockerclient",
+			"revision": "ccb0d5a7b8a7278f3f57de0135d4c5cc6921fcac",
+			"revisionTime": "2016-02-03T07:44:56-05:00"
+		},
+		{
+			"path": "github.com/shiena/ansicolor",
+			"revision": "a5e2b567a4dd6cc74545b8a4f27c9d63b9e7735b",
+			"revisionTime": "2015-07-19T16:15:31+09:00"
+		},
+		{
+			"path": "github.com/square/go-jose",
+			"revision": "098f022b71a56e470f228150225a8bef1e790646",
+			"revisionTime": "2016-01-25T18:51:50-08:00"
+		},
+		{
+			"path": "github.com/square/go-jose/cipher",
+			"revision": "098f022b71a56e470f228150225a8bef1e790646",
+			"revisionTime": "2016-01-25T18:51:50-08:00"
+		},
+		{
+			"path": "golang.org/x/crypto/curve25519",
+			"revision": "c8b9e6388ef638d5a8a9d865c634befdc46a6784",
+			"revisionTime": "2015-06-18T17:47:17-07:00"
+		},
+		{
+			"path": "golang.org/x/crypto/ssh",
+			"revision": "c8b9e6388ef638d5a8a9d865c634befdc46a6784",
+			"revisionTime": "2015-06-18T17:47:17-07:00"
+		},
+		{
+			"path": "golang.org/x/net/context",
+			"revision": "b6d7b1396ec874c3b00f6c84cd4301a17c56c8ed",
+			"revisionTime": "2016-02-16T22:16:06+09:00"
+		},
+		{
+			"path": "golang.org/x/oauth2",
+			"revision": "8a57ed94ffd43444c0879fe75701732a38afc985",
+			"revisionTime": "2015-12-29T21:02:54-07:00"
+		},
+		{
+			"path": "golang.org/x/oauth2/internal",
+			"revision": "8a57ed94ffd43444c0879fe75701732a38afc985",
+			"revisionTime": "2015-12-29T21:02:54-07:00"
+		},
+		{
+			"path": "gopkg.in/yaml.v2",
+			"revision": "f7716cbe52baa25d2e9b0d0da546fcf909fc16b4",
+			"revisionTime": "2015-12-01T14:27:45-02:00"
 		}
 	]
 }
