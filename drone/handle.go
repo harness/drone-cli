@@ -33,7 +33,7 @@ func handle(c *cli.Context, fn handlerFunc) {
 	certs := syscerts.SystemRootsPool()
 	tlsConfig := &tls.Config{RootCAs: certs}
 
-	// create the drone client
+	// create the drone client with TLS options
 	client := drone.NewClientTokenTLS(server, token, tlsConfig)
 
 	// handle the function
