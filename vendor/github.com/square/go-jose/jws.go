@@ -17,7 +17,6 @@
 package jose
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -46,10 +45,14 @@ type JsonWebSignature struct {
 
 // Signature represents a single signature over the JWS payload and protected header.
 type Signature struct {
-	Header    JoseHeader
+	// Header fields, such as the signature algorithm
+	Header JoseHeader
+
+	// The actual signature value
+	Signature []byte
+
 	protected *rawHeader
 	header    *rawHeader
-	signature []byte
 	original  *rawSignatureInfo
 }
 
@@ -91,7 +94,7 @@ func (obj JsonWebSignature) computeAuthData(signature *Signature) []byte {
 // parseSignedFull parses a message in full format.
 func parseSignedFull(input string) (*JsonWebSignature, error) {
 	var parsed rawJsonWebSignature
-	err := json.Unmarshal([]byte(input), &parsed)
+	err := UnmarshalJSON([]byte(input), &parsed)
 	if err != nil {
 		return nil, err
 	}
@@ -115,14 +118,18 @@ func (parsed *rawJsonWebSignature) sanitized() (*JsonWebSignature, error) {
 		signature := Signature{}
 		if parsed.Protected != nil && len(parsed.Protected.bytes()) > 0 {
 			signature.protected = &rawHeader{}
-			err := json.Unmarshal(parsed.Protected.bytes(), signature.protected)
+			err := UnmarshalJSON(parsed.Protected.bytes(), signature.protected)
 			if err != nil {
 				return nil, err
 			}
 		}
 
+		if parsed.Header != nil && parsed.Header.Nonce != "" {
+			return nil, ErrUnprotectedNonce
+		}
+
 		signature.header = parsed.Header
-		signature.signature = parsed.Signature.bytes()
+		signature.Signature = parsed.Signature.bytes()
 		// Make a fake "original" rawSignatureInfo to store the unprocessed
 		// Protected header. This is necessary because the Protected header can
 		// contain arbitrary fields not registered as part of the spec. See
@@ -145,13 +152,18 @@ func (parsed *rawJsonWebSignature) sanitized() (*JsonWebSignature, error) {
 	for i, sig := range parsed.Signatures {
 		if sig.Protected != nil && len(sig.Protected.bytes()) > 0 {
 			obj.Signatures[i].protected = &rawHeader{}
-			err := json.Unmarshal(sig.Protected.bytes(), obj.Signatures[i].protected)
+			err := UnmarshalJSON(sig.Protected.bytes(), obj.Signatures[i].protected)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		obj.Signatures[i].signature = sig.Signature.bytes()
+		// Check that there is not a nonce in the unprotected header
+		if sig.Header != nil && sig.Header.Nonce != "" {
+			return nil, ErrUnprotectedNonce
+		}
+
+		obj.Signatures[i].Signature = sig.Signature.bytes()
 
 		// Copy value of sig
 		original := sig
@@ -196,7 +208,7 @@ func parseSignedCompact(input string) (*JsonWebSignature, error) {
 
 // CompactSerialize serializes an object using the compact serialization format.
 func (obj JsonWebSignature) CompactSerialize() (string, error) {
-	if len(obj.Signatures) > 1 || obj.Signatures[0].header != nil {
+	if len(obj.Signatures) != 1 || obj.Signatures[0].header != nil || obj.Signatures[0].protected == nil {
 		return "", ErrNotSupported
 	}
 
@@ -206,7 +218,7 @@ func (obj JsonWebSignature) CompactSerialize() (string, error) {
 		"%s.%s.%s",
 		base64URLEncode(serializedProtected),
 		base64URLEncode(obj.payload),
-		base64URLEncode(obj.Signatures[0].signature)), nil
+		base64URLEncode(obj.Signatures[0].Signature)), nil
 }
 
 // FullSerialize serializes an object using the full JSON serialization format.
@@ -216,19 +228,22 @@ func (obj JsonWebSignature) FullSerialize() string {
 	}
 
 	if len(obj.Signatures) == 1 {
-		serializedProtected := mustSerializeJSON(obj.Signatures[0].protected)
-		raw.Protected = newBuffer(serializedProtected)
+		if obj.Signatures[0].protected != nil {
+			serializedProtected := mustSerializeJSON(obj.Signatures[0].protected)
+			raw.Protected = newBuffer(serializedProtected)
+		}
 		raw.Header = obj.Signatures[0].header
-		raw.Signature = newBuffer(obj.Signatures[0].signature)
+		raw.Signature = newBuffer(obj.Signatures[0].Signature)
 	} else {
 		raw.Signatures = make([]rawSignatureInfo, len(obj.Signatures))
 		for i, signature := range obj.Signatures {
-			serializedProtected := mustSerializeJSON(signature.protected)
-
 			raw.Signatures[i] = rawSignatureInfo{
-				Protected: newBuffer(serializedProtected),
 				Header:    signature.header,
-				Signature: newBuffer(signature.signature),
+				Signature: newBuffer(signature.Signature),
+			}
+
+			if signature.protected != nil {
+				raw.Signatures[i].Protected = newBuffer(mustSerializeJSON(signature.protected))
 			}
 		}
 	}

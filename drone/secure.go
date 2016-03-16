@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"reflect"
 	"os"
+	"reflect"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-exec/yaml/secure"

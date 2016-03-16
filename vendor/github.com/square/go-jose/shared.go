@@ -55,6 +55,10 @@ var (
 	// trying to compact-serialize an object which can't be represented in
 	// compact form.
 	ErrNotSupported = errors.New("square/go-jose: compact serialization not supported for object")
+
+	// ErrUnprotectedNonce indicates that while parsing a JWS or JWE object, a
+	// nonce header parameter was included in an unprotected header object.
+	ErrUnprotectedNonce = errors.New("square/go-jose: Nonce parameter included in unprotected header")
 )
 
 // Key management algorithms
@@ -86,9 +90,9 @@ const (
 	RS256 = SignatureAlgorithm("RS256") // RSASSA-PKCS-v1.5 using SHA-256
 	RS384 = SignatureAlgorithm("RS384") // RSASSA-PKCS-v1.5 using SHA-384
 	RS512 = SignatureAlgorithm("RS512") // RSASSA-PKCS-v1.5 using SHA-512
-	ES256 = SignatureAlgorithm("ES256") // RCDSA using P-256 and SHA-256
-	ES384 = SignatureAlgorithm("ES384") // RCDSA using P-384 and SHA-384
-	ES512 = SignatureAlgorithm("ES512") // RCDSA using P-521 and SHA-512
+	ES256 = SignatureAlgorithm("ES256") // ECDSA using P-256 and SHA-256
+	ES384 = SignatureAlgorithm("ES384") // ECDSA using P-384 and SHA-384
+	ES512 = SignatureAlgorithm("ES512") // ECDSA using P-521 and SHA-512
 	PS256 = SignatureAlgorithm("PS256") // RSASSA-PSS using SHA256 and MGF1-SHA256
 	PS384 = SignatureAlgorithm("PS384") // RSASSA-PSS using SHA384 and MGF1-SHA384
 	PS512 = SignatureAlgorithm("PS512") // RSASSA-PSS using SHA512 and MGF1-SHA512
@@ -112,17 +116,18 @@ const (
 
 // rawHeader represents the JOSE header for JWE/JWS objects (used for parsing).
 type rawHeader struct {
-	Alg  string               `json:"alg,omitempty"`
-	Enc  ContentEncryption    `json:"enc,omitempty"`
-	Zip  CompressionAlgorithm `json:"zip,omitempty"`
-	Crit []string             `json:"crit,omitempty"`
-	Apu  *byteBuffer          `json:"apu,omitempty"`
-	Apv  *byteBuffer          `json:"apv,omitempty"`
-	Epk  *JsonWebKey          `json:"epk,omitempty"`
-	Iv   *byteBuffer          `json:"iv,omitempty"`
-	Tag  *byteBuffer          `json:"tag,omitempty"`
-	Jwk  *JsonWebKey          `json:"jwk,omitempty"`
-	Kid  string               `json:"kid,omitempty"`
+	Alg   string               `json:"alg,omitempty"`
+	Enc   ContentEncryption    `json:"enc,omitempty"`
+	Zip   CompressionAlgorithm `json:"zip,omitempty"`
+	Crit  []string             `json:"crit,omitempty"`
+	Apu   *byteBuffer          `json:"apu,omitempty"`
+	Apv   *byteBuffer          `json:"apv,omitempty"`
+	Epk   *JsonWebKey          `json:"epk,omitempty"`
+	Iv    *byteBuffer          `json:"iv,omitempty"`
+	Tag   *byteBuffer          `json:"tag,omitempty"`
+	Jwk   *JsonWebKey          `json:"jwk,omitempty"`
+	Kid   string               `json:"kid,omitempty"`
+	Nonce string               `json:"nonce,omitempty"`
 }
 
 // JoseHeader represents the read-only JOSE header for JWE/JWS objects.
@@ -130,6 +135,7 @@ type JoseHeader struct {
 	KeyID      string
 	JsonWebKey *JsonWebKey
 	Algorithm  string
+	Nonce      string
 }
 
 // sanitized produces a cleaned-up header object from the raw JSON.
@@ -138,6 +144,7 @@ func (parsed rawHeader) sanitized() JoseHeader {
 		KeyID:      parsed.Kid,
 		JsonWebKey: parsed.Jwk,
 		Algorithm:  parsed.Alg,
+		Nonce:      parsed.Nonce,
 	}
 }
 
@@ -182,6 +189,9 @@ func (dst *rawHeader) merge(src *rawHeader) {
 	}
 	if dst.Jwk == nil {
 		dst.Jwk = src.Jwk
+	}
+	if dst.Nonce == "" {
+		dst.Nonce = src.Nonce
 	}
 }
 
