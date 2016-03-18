@@ -2,8 +2,8 @@ package docker
 
 import (
 	"errors"
+	"io"
 	"os"
-	// "strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/samalba/dockerclient"
@@ -20,20 +20,18 @@ var (
 		Stdout: true,
 		Stderr: true,
 	}
-
-	// options to fetch the stdout and stderr logs
-	// by tailing the output.
-	logOptsTail = &dockerclient.LogOptions{
-		Follow: true,
-		Stdout: true,
-		Stderr: true,
-	}
 )
 
-func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bool) (*dockerclient.ContainerInfo, error) {
+func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, auth *dockerclient.AuthConfig, pull bool, outw, errw io.Writer) (*dockerclient.ContainerInfo, error) {
+	if outw == nil {
+		outw = os.Stdout
+	}
+	if errw == nil {
+		errw = os.Stdout
+	}
 
 	// fetches the container information.
-	info, err := Start(client, conf, pull)
+	info, err := Start(client, conf, auth, pull)
 	if err != nil {
 		return nil, err
 	}
@@ -50,27 +48,60 @@ func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bo
 	errc := make(chan error, 1)
 	infoc := make(chan *dockerclient.ContainerInfo, 1)
 	go func() {
-
-		// blocks and waits for the container to finish
-		// by streaming the logs (to /dev/null). Ideally
-		// we could use the `wait` function instead
-		rc, err := client.ContainerLogs(info.Id, logOptsTail)
-		if err != nil {
-			log.Errorf("Error tailing %s. %s\n", conf.Image, err)
-			errc <- err
-			return
+		// options to fetch the stdout and stderr logs
+		// by tailing the output.
+		logOptsTail := &dockerclient.LogOptions{
+			Follow: true,
+			Stdout: true,
+			Stderr: true,
 		}
-		defer rc.Close()
-		StdCopy(os.Stdout, os.Stdout, rc)
 
-		// fetches the container information
-		info, err := client.InspectContainer(info.Id)
-		if err != nil {
-			log.Errorf("Error getting exit code for %s. %s\n", conf.Image, err)
-			errc <- err
-			return
+		// It's possible that the docker logs endpoint returns before the container
+		// is done, we'll naively resume up to 5 times if when the logs unblocks
+		// the container is still reported to be running.
+		for attempts := 0; attempts < 5; attempts++ {
+			if attempts > 0 {
+				// When resuming the stream, only grab the last line when starting
+				// the tailing.
+				logOptsTail.Tail = 1
+			}
+
+			// blocks and waits for the container to finish
+			// by streaming the logs (to /dev/null). Ideally
+			// we could use the `wait` function instead
+			rc, err := client.ContainerLogs(info.Id, logOptsTail)
+			if err != nil {
+				log.Errorf("Error tailing %s. %s\n", conf.Image, err)
+				errc <- err
+				return
+			}
+			defer rc.Close()
+
+			_, err = StdCopy(outw, errw, rc)
+			if err != nil {
+				log.Errorf("Error streaming docker logs for %s. %s\n", conf.Image, err)
+				errc <- err
+				return
+			}
+
+			// fetches the container information
+			info, err := client.InspectContainer(info.Id)
+			if err != nil {
+				log.Errorf("Error getting exit code for %s. %s\n", conf.Image, err)
+				errc <- err
+				return
+			}
+
+			if !info.State.Running {
+				// The container is no longer running, there should be no more logs to tail.
+				infoc <- info
+				return
+			}
+
+			log.Debugf("Attempting to resume log tailing after %d attempts.\n", attempts)
 		}
-		infoc <- info
+
+		errc <- errors.New("Maximum number of attempts made while tailing logs.")
 	}()
 
 	select {
@@ -81,25 +112,26 @@ func Run(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bo
 	}
 }
 
-func Start(client dockerclient.Client, conf *dockerclient.ContainerConfig, pull bool) (*dockerclient.ContainerInfo, error) {
+func Start(client dockerclient.Client, conf *dockerclient.ContainerConfig, auth *dockerclient.AuthConfig, pull bool) (*dockerclient.ContainerInfo, error) {
+
 	// force-pull the image if specified.
 	if pull {
 		log.Printf("Pulling image %s", conf.Image)
-		client.PullImage(conf.Image, nil)
+		client.PullImage(conf.Image, auth)
 	}
 
 	// attempts to create the contianer
-	id, err := client.CreateContainer(conf, "")
+	id, err := client.CreateContainer(conf, "", auth)
 	if err != nil {
 		log.Printf("Pulling image %s", conf.Image)
 
 		// and pull the image and re-create if that fails
-		err = client.PullImage(conf.Image, nil)
+		err = client.PullImage(conf.Image, auth)
 		if err != nil {
 			log.Errorf("Error pulling %s. %s\n", conf.Image, err)
 			return nil, err
 		}
-		id, err = client.CreateContainer(conf, "")
+		id, err = client.CreateContainer(conf, "", auth)
 		if err != nil {
 			log.Errorf("Error creating %s. %s\n", conf.Image, err)
 			client.RemoveContainer(id, true, true)
