@@ -68,6 +68,10 @@ type Client interface {
 	// BuildLogs returns the build logs for the specified job.
 	BuildLogs(string, string, int, int) (io.ReadCloser, error)
 
+	// Deploy triggers a deployment for an existing build using the
+	// specified target environment.
+	Deploy(string, string, int, string) (*Build, error)
+
 	// Node returns a node by id.
 	Node(int64) (*Node, error)
 

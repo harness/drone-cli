@@ -237,6 +237,19 @@ func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, err
 	return c.stream(uri, "GET", nil, nil)
 }
 
+// Deploy triggers a deployment for an existing build using the
+// specified target environment.
+func (c *client) Deploy(owner, name string, num int, env string) (*Build, error) {
+	out := new(Build)
+	val := new(url.Values)
+	val.Set("fork", "true")
+	val.Set("event", "deployment")
+	val.Set("deploy_to", env)
+	uri := fmt.Sprintf(pathBuild+"?"+val.Encode(), c.base, owner, name, num)
+	err := c.post(uri, nil, out)
+	return out, err
+}
+
 // Node returns a node by id.
 func (c *client) Node(id int64) (*Node, error) {
 	out := new(Node)

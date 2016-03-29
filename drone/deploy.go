@@ -20,6 +20,7 @@ func deployCmd(c *cli.Context, client drone.Client) error {
 	var (
 		nameParam = c.Args().Get(0)
 		numParam  = c.Args().Get(1)
+		envParam  = c.Args().Get(2)
 
 		err   error
 		owner string
@@ -44,7 +45,12 @@ func deployCmd(c *cli.Context, client drone.Client) error {
 		return fmt.Errorf("Cannot trigger a pull request deployment")
 	}
 
-	// client.BuildFork(owner, name, num)
+	deploy, err := client.Deploy(owner, name, num, envParam)
+	if err != nil {
+		return err
+	}
 
+	fmt.Println(deploy.Number)
+	fmt.Println(deploy.Status)
 	return nil
 }

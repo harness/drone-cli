@@ -29,8 +29,8 @@
 		},
 		{
 			"path": "github.com/drone/drone-go/drone",
-			"revision": "a8c0e14be86d212a2329466c1146b37654b6c744",
-			"revisionTime": "2016-03-18T09:49:29-07:00"
+			"revision": "2f78138d26a6518e6bf340122258ce5026ba5db5",
+			"revisionTime": "2016-03-28T23:59:33-07:00"
 		},
 		{
 			"path": "github.com/drone/drone/yaml/matrix",
