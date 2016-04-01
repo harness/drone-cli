@@ -63,6 +63,11 @@ var ExecCmd = cli.Command{
 			Name:  "E",
 			Usage: "secrets from plaintext YAML of .drone.sec (use - for stdin)",
 		},
+		cli.StringFlag{
+			Name:  "yaml",
+			Usage: "path to .drone.yml file",
+			Value: ".drone.yml",
+		},
 		cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "enable elevated privilege",
@@ -96,6 +101,8 @@ var ExecCmd = cli.Command{
 }
 
 func execCmd(c *cli.Context) error {
+	var ymlFile = c.String("yaml")
+
 	info := git.Info()
 
 	cert, _ := ioutil.ReadFile(filepath.Join(
@@ -116,7 +123,7 @@ func execCmd(c *cli.Context) error {
 		println("")
 	}
 
-	yml, err := ioutil.ReadFile(".drone.yml")
+	yml, err := ioutil.ReadFile(ymlFile)
 	if err != nil {
 		return err
 	}
