@@ -26,6 +26,9 @@ const (
 	pathJob     = "%s/api/repos/%s/%s/builds/%d/%d"
 	pathLog     = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathKey     = "%s/api/repos/%s/%s/key"
+	pathSign    = "%s/api/repos/%s/%s/sign"
+	pathSecrets = "%s/api/repos/%s/%s/secrets"
+	pathSecret  = "%s/api/repos/%s/%s/secrets/%s"
 	pathNodes   = "%s/api/nodes"
 	pathNode    = "%s/api/nodes/%d"
 	pathUsers   = "%s/api/users"
@@ -224,6 +227,31 @@ func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, err
 	return c.stream(uri, "GET", nil, nil)
 }
 
+// SecretPost create or updates a repository secret.
+func (c *client) SecretPost(owner, name string, secret *Secret) error {
+	uri := fmt.Sprintf(pathSecrets, c.base, owner, name)
+	return c.post(uri, secret, nil)
+}
+
+// SecretDel deletes a named repository secret.
+func (c *client) SecretDel(owner, name, secret string) error {
+	uri := fmt.Sprintf(pathSecret, c.base, owner, name, secret)
+	return c.delete(uri)
+}
+
+// Sign returns a cryptographic signature for the input string.
+func (c *client) Sign(owner, name string, in []byte) ([]byte, error) {
+	buf := bytes.Buffer{}
+	buf.Write(in)
+	uri := fmt.Sprintf(pathSign, c.base, owner, name)
+	rc, err := c.stream(uri, "POST", buf, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+	return ioutil.ReadAll(rc)
+}
+
 // Node returns a node by id.
 func (c *client) Node(id int64) (*Node, error) {
 	out := new(Node)
@@ -312,7 +340,11 @@ func (c *client) stream(rawurl, method string, in, out interface{}) (io.ReadClos
 	// if we are posting or putting data, we need to
 	// write it to the body of the request.
 	var buf io.ReadWriter
-	if in != nil {
+	if in == nil {
+		// nothing
+	} else if rw, ok := in.(io.ReadWriter); ok {
+		buf = rw
+	} else {
 		buf = new(bytes.Buffer)
 		err := json.NewEncoder(buf).Encode(in)
 		if err != nil {
@@ -325,7 +357,11 @@ func (c *client) stream(rawurl, method string, in, out interface{}) (io.ReadClos
 	if err != nil {
 		return nil, err
 	}
-	if in != nil {
+	if in == nil {
+		// nothing
+	} else if _, ok := in.(io.ReadWriter); ok {
+		req.Header.Set("Content-Type", "plain/text")
+	} else {
 		req.Header.Set("Content-Type", "application/json")
 	}
 

@@ -69,6 +69,15 @@ type Job struct {
 	Environment map[string]string `json:"environment"`
 }
 
+// Secret represents a repository secret.
+type Secret struct {
+	ID    int64    `json:"id"`
+	Name  string   `json:"name"`
+	Value string   `json:"value"`
+	Image []string `json:"image"`
+	Event []string `json:"event"`
+}
+
 // Activity represents a build activity. It combines the
 // build details with summary Repository information.
 type Activity struct {

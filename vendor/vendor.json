@@ -5,8 +5,8 @@
 		{
 			"origin": "github.com/drone/drone-cli/vendor/github.com/drone/drone-go/drone",
 			"path": "github.com/drone/drone-go/drone",
-			"revision": "087ffc5443db5e88c5cceeb0eae6d5df1bd96539",
-			"revisionTime": "2016-01-12T09:53:55-08:00"
+			"revision": "55e0cb7b2df329bcb6820e86b70168bbe6841e4f",
+			"revisionTime": "2016-03-31T17:27:05-07:00"
 		}
 	]
 }

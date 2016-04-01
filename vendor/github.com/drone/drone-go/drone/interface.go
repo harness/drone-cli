@@ -68,6 +68,15 @@ type Client interface {
 	// BuildLogs returns the build logs for the specified job.
 	BuildLogs(string, string, int, int) (io.ReadCloser, error)
 
+	// SecretPost create or updates a repository secret.
+	SecretPost(string, string, *Secret) error
+
+	// SecretDel deletes a named repository secret.
+	SecretDel(string, string, string) error
+
+	// Sign returns a cryptographic signature for the input string.
+	Sign(string, string, []byte) ([]byte, error)
+
 	// Node returns a node by id.
 	Node(int64) (*Node, error)
 
