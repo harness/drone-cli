@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -161,6 +162,11 @@ func execCmd(c *cli.Context) error {
 		return err
 	}
 
+	// Massage windows paths for docker
+	if runtime.GOOS == "windows" {
+		pwd = convertWindowsPath(pwd)
+	}
+
 	execArgs := []string{"--build", "--debug", "--mount", pwd}
 	for _, arg := range []string{"cache", "deploy", "notify", "pull"} {
 		if c.Bool(arg) {
@@ -278,7 +284,7 @@ func run(client dockerclient.Client, args []string, input string) (int, error) {
 		},
 	}
 
-	info, err := docker.Run(client, conf, false)
+	info, err := docker.Run(client, conf, nil, false, os.Stdout, os.Stderr)
 	if err != nil {
 		return 0, err
 	}

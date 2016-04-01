@@ -1,5 +1,7 @@
 package drone
 
+import "encoding/json"
+
 // User represents a user account.
 type User struct {
 	ID     int64  `json:"id"`
@@ -130,7 +132,45 @@ type Key struct {
 type Netrc struct {
 	Machine  string `json:"machine"`
 	Login    string `json:"login"`
-	Password string `json:"user"`
+	Password string `json:"password"`
+}
+
+// netrc is only used to allow compatibility with older plugins that rely on
+// the JSON "user" attribute as a password value. In Drone 0.6 breaking
+// changes will be introduced and this netrc struct and the Netrc UnmarshalJSON
+// and MarshalJSON will be removed.
+type netrc struct {
+	Machine     string `json:"machine"`
+	Login       string `json:"login"`
+	Password    string `json:"password"`
+	PasswordOld string `json:"user"`
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+func (n *Netrc) UnmarshalJSON(b []byte) error {
+	x := &netrc{}
+	err := json.Unmarshal(b, x)
+	if err != nil {
+		return err
+	}
+	n.Machine = x.Machine
+	n.Login = x.Login
+	n.Password = x.Password
+	if x.PasswordOld != "" {
+		n.Password = x.PasswordOld
+	}
+	return nil
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+func (n Netrc) MarshalJSON() ([]byte, error) {
+	x := &netrc{
+		Machine:     n.Machine,
+		Login:       n.Login,
+		Password:    n.Password,
+		PasswordOld: n.Password,
+	}
+	return json.Marshal(x)
 }
 
 // System represents the drone system.

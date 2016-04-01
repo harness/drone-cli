@@ -10,6 +10,19 @@ import (
 	// "time"
 )
 
+func convertWindowsPath(str string) string {
+	// Split path into Array
+	var pwds = strings.Split(str, "\\")
+
+	// Convert drive "C:" to "/c"
+	rp := regexp.MustCompile("(^[a-zA-Z]):")
+	pwds[0] = rp.ReplaceAllString(pwds[0], "/$1")
+	pwds[0] = strings.ToLower(pwds[0])
+
+	// Join path using "/"
+	return strings.Join(pwds, "/")
+}
+
 func parseRepo(str string) (owner, repo string, err error) {
 	var parts = strings.Split(str, "/")
 	if len(parts) != 2 {

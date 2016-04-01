@@ -34,6 +34,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		BuildCmd,
+		DeployCmd,
 		RepoCmd,
 		ExecCmd,
 		MachineCmd,

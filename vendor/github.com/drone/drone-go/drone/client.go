@@ -5,6 +5,7 @@ package drone
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -50,6 +51,18 @@ func NewClient(uri string) Client {
 func NewClientToken(uri, token string) Client {
 	config := new(oauth2.Config)
 	auther := config.Client(oauth2.NoContext, &oauth2.Token{AccessToken: token})
+	return &client{auther, uri}
+}
+
+// NewClientTokenTLS returns a client at the specified url that
+// authenticates all outbound requests with the given token and
+// tls.Config if provided.
+func NewClientTokenTLS(uri, token string, c *tls.Config) Client {
+	config := new(oauth2.Config)
+	auther := config.Client(oauth2.NoContext, &oauth2.Token{AccessToken: token})
+	if c != nil {
+		auther.Transport.(*oauth2.Transport).Base = &http.Transport{TLSClientConfig: c}
+	}
 	return &client{auther, uri}
 }
 
@@ -225,6 +238,19 @@ func (c *client) BuildFork(owner, name string, num int) (*Build, error) {
 func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
 	uri := fmt.Sprintf(pathLog, c.base, owner, name, num, job)
 	return c.stream(uri, "GET", nil, nil)
+}
+
+// Deploy triggers a deployment for an existing build using the
+// specified target environment.
+func (c *client) Deploy(owner, name string, num int, env string) (*Build, error) {
+	out := new(Build)
+	val := new(url.Values)
+	val.Set("fork", "true")
+	val.Set("event", "deployment")
+	val.Set("deploy_to", env)
+	uri := fmt.Sprintf(pathBuild+"?"+val.Encode(), c.base, owner, name, num)
+	err := c.post(uri, nil, out)
+	return out, err
 }
 
 // SecretPost create or updates a repository secret.
