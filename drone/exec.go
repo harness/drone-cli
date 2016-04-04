@@ -93,6 +93,10 @@ var ExecCmd = cli.Command{
 			Usage: "hook event type",
 			Value: "push",
 		},
+		cli.StringFlag{
+			Name:  "payload",
+			Usage: "merge the argument's json value with the normal payload",
+		},
 		cli.BoolTFlag{
 			Name:  "debug",
 			Usage: "execute the build in debug mode",
@@ -241,6 +245,19 @@ func execCmd(c *cli.Context) error {
 		if len(proj) != 0 {
 			payload.Repo.Link = fmt.Sprintf("https://%s", proj)
 		}
+		if c.IsSet("payload") {
+			err := json.Unmarshal([]byte(c.String("payload")), &payload)
+			if err != nil {
+				color.Red("Error reading --payload argument, it must be valid json: %v", err)
+				os.Exit(1)
+			}
+		}
+		if c.Bool("debug") {
+			out, _ := json.MarshalIndent(payload, " ", "  ")
+			color.Magenta("[DRONE] job #%d payload:", i+1)
+			fmt.Println(string(out))
+		}
+
 		out, _ := json.Marshal(payload)
 
 		exit, err := run(cli, execArgs, string(out))
