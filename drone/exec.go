@@ -97,7 +97,7 @@ var ExecCmd = cli.Command{
 			Name:  "payload",
 			Usage: "merge the argument's json value with the normal payload",
 		},
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name:  "debug",
 			Usage: "execute the build in debug mode",
 		},
