@@ -40,6 +40,8 @@ func main() {
 		MachineCmd,
 		SecureCmd,
 		UserCmd,
+		SecretCmd,
+		SignCmd,
 	}
 
 	app.Run(os.Args)

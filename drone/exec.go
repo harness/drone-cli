@@ -63,6 +63,11 @@ var ExecCmd = cli.Command{
 			Name:  "E",
 			Usage: "secrets from plaintext YAML of .drone.sec (use - for stdin)",
 		},
+		cli.StringFlag{
+			Name:  "yaml",
+			Usage: "path to .drone.yml file",
+			Value: ".drone.yml",
+		},
 		cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "enable elevated privilege",
@@ -88,7 +93,11 @@ var ExecCmd = cli.Command{
 			Usage: "hook event type",
 			Value: "push",
 		},
-		cli.BoolTFlag{
+		cli.StringFlag{
+			Name:  "payload",
+			Usage: "merge the argument's json value with the normal payload",
+		},
+		cli.BoolFlag{
 			Name:  "debug",
 			Usage: "execute the build in debug mode",
 		},
@@ -96,6 +105,8 @@ var ExecCmd = cli.Command{
 }
 
 func execCmd(c *cli.Context) error {
+	var ymlFile = c.String("yaml")
+
 	info := git.Info()
 
 	cert, _ := ioutil.ReadFile(filepath.Join(
@@ -116,7 +127,7 @@ func execCmd(c *cli.Context) error {
 		println("")
 	}
 
-	yml, err := ioutil.ReadFile(".drone.yml")
+	yml, err := ioutil.ReadFile(ymlFile)
 	if err != nil {
 		return err
 	}
@@ -234,6 +245,19 @@ func execCmd(c *cli.Context) error {
 		if len(proj) != 0 {
 			payload.Repo.Link = fmt.Sprintf("https://%s", proj)
 		}
+		if c.IsSet("payload") {
+			err := json.Unmarshal([]byte(c.String("payload")), &payload)
+			if err != nil {
+				color.Red("Error reading --payload argument, it must be valid json: %v", err)
+				os.Exit(1)
+			}
+		}
+		if c.Bool("debug") {
+			out, _ := json.MarshalIndent(payload, " ", "  ")
+			color.Magenta("[DRONE] job #%d payload:", i+1)
+			fmt.Println(string(out))
+		}
+
 		out, _ := json.Marshal(payload)
 
 		exit, err := run(cli, execArgs, string(out))
