@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -21,6 +22,10 @@ import (
 	"github.com/drone/drone/yaml/matrix"
 	"github.com/fatih/color"
 	"github.com/samalba/dockerclient"
+)
+
+const (
+	droneAvatarUrl = "https://avatars0.githubusercontent.com/u/2181346?v=3&s=200"
 )
 
 var ExecCmd = cli.Command{
@@ -282,8 +287,10 @@ func execCmd(c *cli.Context) error {
 	}
 	if passed {
 		color.Green("[DRONE] build passed")
+		Notify("Build passed")
 	} else {
 		color.Red("[DRONE] build failed")
+		Notify("Build failed")
 		os.Exit(1)
 	}
 
@@ -316,6 +323,35 @@ func run(client dockerclient.Client, args []string, input string) (int, error) {
 	client.StopContainer(info.Id, 15)
 	client.RemoveContainer(info.Id, true, true)
 	return info.State.ExitCode, err
+}
+
+func Notify(message string) {
+	//Skip if this is not a darwin
+	if runtime.GOOS != "darwin" {
+		return
+	}
+
+	// Skip if drone exec launched form tmux
+	if len(os.Getenv("TMUX")) != 0 {
+		return
+	}
+
+	// Skip if Terminal notifier not installed
+	if _, err := exec.LookPath("terminal-notifier"); err != nil {
+		return
+	}
+
+	cmd := exec.Command(
+		"terminal-notifier",
+		"-appIcon",
+		droneAvatarUrl,
+		"-title",
+		"Drone",
+		"-message",
+		message,
+	)
+
+	cmd.Run()
 }
 
 func newDockerClient(addr string, cert, key, ca []byte) (dockerclient.Client, error) {
