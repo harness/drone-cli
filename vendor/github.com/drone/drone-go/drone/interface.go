@@ -72,6 +72,15 @@ type Client interface {
 	// specified target environment.
 	Deploy(string, string, int, string) (*Build, error)
 
+	// Sign returns a cryptographic signature for the input string.
+	Sign(string, string, []byte) ([]byte, error)
+
+	// SecretPost create or updates a repository secret.
+	SecretPost(string, string, *Secret) error
+
+	// SecretDel deletes a named repository secret.
+	SecretDel(string, string, string) error
+
 	// Node returns a node by id.
 	Node(int64) (*Node, error)
 
