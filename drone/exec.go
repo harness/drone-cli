@@ -106,6 +106,11 @@ var ExecCmd = cli.Command{
 			Name:  "debug",
 			Usage: "execute the build in debug mode",
 		},
+		cli.StringSliceFlag{
+			Name:  "whitelist",
+			Usage: "whitelist of enabled plugins",
+			Value: &cli.StringSlice{"plugins/*", "*/*", "*/*/*"},
+		},
 	},
 }
 
@@ -231,7 +236,7 @@ func execCmd(c *cli.Context) error {
 			System: &drone.System{
 				Link:    c.GlobalString("server"),
 				Globals: globals,
-				Plugins: []string{"plugins/*", "*/*"},
+				Plugins: c.StringSlice("whitelist"),
 			},
 		}
 
