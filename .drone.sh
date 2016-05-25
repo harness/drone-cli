@@ -5,9 +5,6 @@ set -x
 mkdir bin
 mkdir dist
 
-# supported platforms
-PLATFORMS=linux darwin windows
-
 # compile drone for all architectures
 GOOS=linux   GOARCH=amd64 go build -o ./bin/linux_amd64/drone   github.com/drone/drone-cli/drone
 GOOS=darwin  GOARCH=amd64 go build -o ./bin/darwin_amd64/drone  github.com/drone/drone-cli/drone
