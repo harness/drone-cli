@@ -1,8 +1,5 @@
 package drone
 
-//go:generate mockery -all
-//go:generate mv mocks/Client.go mocks/client.go
-
 import (
 	"bytes"
 	"crypto/tls"
@@ -21,19 +18,17 @@ const (
 	pathFeed    = "%s/api/user/feed"
 	pathRepos   = "%s/api/user/repos"
 	pathRepo    = "%s/api/repos/%s/%s"
-	pathEncrypt = "%s/api/repos/%s/%s/encrypt"
 	pathBuilds  = "%s/api/repos/%s/%s/builds"
 	pathBuild   = "%s/api/repos/%s/%s/builds/%v"
 	pathJob     = "%s/api/repos/%s/%s/builds/%d/%d"
 	pathLog     = "%s/api/repos/%s/%s/logs/%d/%d"
-	pathKey     = "%s/api/repos/%s/%s/key"
 	pathSign    = "%s/api/repos/%s/%s/sign"
 	pathSecrets = "%s/api/repos/%s/%s/secrets"
 	pathSecret  = "%s/api/repos/%s/%s/secrets/%s"
-	pathNodes   = "%s/api/nodes"
-	pathNode    = "%s/api/nodes/%d"
 	pathUsers   = "%s/api/users"
 	pathUser    = "%s/api/users/%s"
+	pathAgent   = "%s/api/agents"
+	pathQueue   = "%s/api/builds"
 )
 
 type client struct {
@@ -66,9 +61,8 @@ func NewClientTokenTLS(uri, token string, c *tls.Config) Client {
 	return &client{auther, uri}
 }
 
-// SetClient sets the default http client. This should be
-// used in conjunction with golang.org/x/oauth2 to
-// authenticate requests to the Drone server.
+// SetClient sets the default http client. This should be used in conjunction
+// with golang.org/x/oauth2 to authenticate requests to the Drone server.
 func (c *client) SetClient(client *http.Client) {
 	c.client = client
 }
@@ -168,20 +162,6 @@ func (c *client) RepoDel(owner, name string) error {
 	return err
 }
 
-// RepoKey returns a repository public key.
-func (c *client) RepoKey(owner, name string) (*Key, error) {
-	out := new(Key)
-	uri := fmt.Sprintf(pathKey, c.base, owner, name)
-	rc, err := c.stream(uri, "GET", nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer rc.Close()
-	raw, _ := ioutil.ReadAll(rc)
-	out.Public = string(raw)
-	return out, err
-}
-
 // Build returns a repository build by number.
 func (c *client) Build(owner, name string, num int) (*Build, error) {
 	out := new(Build)
@@ -240,6 +220,14 @@ func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, err
 	return c.stream(uri, "GET", nil, nil)
 }
 
+// BuildQueue returns a list of builds in queue.
+func (c *client) BuildQueue() ([]*Activity, error) {
+	var out []*Activity
+	uri := fmt.Sprintf(pathQueue, c.base)
+	err := c.get(uri, &out)
+	return out, err
+}
+
 // Deploy triggers a deployment for an existing build using the
 // specified target environment.
 func (c *client) Deploy(owner, name string, num int, env string) (*Build, error) {
@@ -278,35 +266,22 @@ func (c *client) Sign(owner, name string, in []byte) ([]byte, error) {
 	return ioutil.ReadAll(rc)
 }
 
-// Node returns a node by id.
-func (c *client) Node(id int64) (*Node, error) {
-	out := new(Node)
-	uri := fmt.Sprintf(pathNode, c.base, id)
-	err := c.get(uri, out)
-	return out, err
+// Agent returns a build agent by address.
+func (c *client) Agent(addr string) (*Agent, error) {
+	return nil, fmt.Errorf("Not yet implemented")
 }
 
-// NodeList returns a list of all registered worker nodes.
-func (c *client) NodeList() ([]*Node, error) {
-	var out []*Node
-	uri := fmt.Sprintf(pathNodes, c.base)
+// AgentDel deletes a build agent by address.
+func (c *client) AgentDel(addr string) error {
+	return fmt.Errorf("Not yet implemented")
+}
+
+// AgentList returns a list of build agents.
+func (c *client) AgentList() ([]*Agent, error) {
+	var out []*Agent
+	uri := fmt.Sprintf(pathAgent, c.base)
 	err := c.get(uri, &out)
 	return out, err
-}
-
-// NodePost registers a new worker node.
-func (c *client) NodePost(in *Node) (*Node, error) {
-	out := new(Node)
-	uri := fmt.Sprintf(pathNodes, c.base)
-	err := c.post(uri, in, out)
-	return out, err
-}
-
-// NodeDel deletes a worker node.
-func (c *client) NodeDel(id int64) error {
-	uri := fmt.Sprintf(pathNode, c.base, id)
-	err := c.delete(uri)
-	return err
 }
 
 //

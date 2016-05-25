@@ -1,0 +1,43 @@
+package transform
+
+import (
+	"os"
+	"strings"
+
+	"github.com/drone/drone-exec/yaml"
+)
+
+var (
+	httpProxy  = os.Getenv("HTTP_PROXY")
+	httpsProxy = os.Getenv("HTTPS_PROXY")
+	noProxy    = os.Getenv("NO_PROXY")
+)
+
+// Environ transforms the steps in the Yaml pipeline to include runtime
+// environment variables.
+func Environ(c *yaml.Config, envs map[string]string) error {
+	for _, p := range c.Pipeline {
+		if p.Environment == nil {
+			p.Environment = map[string]string{}
+		}
+		for k, v := range envs {
+			if v == "" {
+				continue
+			}
+			p.Environment[k] = v
+		}
+		if httpProxy != "" {
+			p.Environment["HTTP_PROXY"] = httpProxy
+			p.Environment["http_proxy"] = strings.ToUpper(httpProxy)
+		}
+		if httpsProxy != "" {
+			p.Environment["HTTPS_PROXY"] = httpsProxy
+			p.Environment["https_proxy"] = strings.ToUpper(httpsProxy)
+		}
+		if noProxy != "" {
+			p.Environment["NO_PROXY"] = noProxy
+			p.Environment["no_proxy"] = strings.ToUpper(noProxy)
+		}
+	}
+	return nil
+}

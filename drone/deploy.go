@@ -2,55 +2,74 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"os"
 	"strconv"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-go/drone"
 )
 
-var DeployCmd = cli.Command{
-	Name:  "deploy",
-	Usage: "deploy code",
-	Action: func(c *cli.Context) {
-		handle(c, deployCmd)
+var deployCmd = cli.Command{
+	Name:   "deploy",
+	Usage:  "deploy code",
+	Action: deploy,
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplDeployInfo,
+		},
 	},
 }
 
-func deployCmd(c *cli.Context, client drone.Client) error {
-	var (
-		nameParam = c.Args().Get(0)
-		numParam  = c.Args().Get(1)
-		envParam  = c.Args().Get(2)
-
-		err   error
-		owner string
-		name  string
-		num   int
-	)
-
-	num, err = strconv.Atoi(numParam)
+func deploy(c *cli.Context) error {
+	repo := c.Args().First()
+	owner, name, err := parseRepo(repo)
 	if err != nil {
-		return fmt.Errorf("Invalid or missing build number")
+		return err
 	}
-	owner, name, err = parseRepo(nameParam)
+	number, err := strconv.Atoi(c.Args().Get(1))
 	if err != nil {
 		return err
 	}
 
-	build, err := client.Build(owner, name, num)
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
+
+	build, err := client.Build(owner, name, number)
 	if err != nil {
 		return err
 	}
 	if build.Event == drone.EventPull {
-		return fmt.Errorf("Cannot trigger a pull request deployment")
+		return fmt.Errorf("Cannot deploy a pull request")
+	}
+	env := c.Args().Get(2)
+	if env == "" {
+		return fmt.Errorf("Please specify the target environment (ie production)")
 	}
 
-	deploy, err := client.Deploy(owner, name, num, envParam)
+	deploy, err := client.Deploy(owner, name, number, env)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(deploy.Number)
-	fmt.Println(deploy.Status)
-	return nil
+	tmpl, err := template.New("_").Parse(c.String("format"))
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, deploy)
 }
+
+// template for deployment information
+var tmplDeployInfo = `Number: {{ .Number }}
+Status: {{ .Status }}
+Commit: {{ .Commit }}
+Branch: {{ .Branch }}
+Ref: {{ .Ref }}
+Message: {{ .Message }}
+Author: {{ .Author }}
+Target: {{ .Deploy }}
+`

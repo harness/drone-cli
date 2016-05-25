@@ -1,43 +1,89 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
-	"os/exec"
+	"os/signal"
 	"path/filepath"
-	"runtime"
 	"strings"
+	"time"
 
-	"gopkg.in/yaml.v2"
+	"github.com/drone/drone-exec/agent"
+	"github.com/drone/drone-exec/build/docker"
+	"github.com/drone/drone-go/drone"
 
 	"github.com/codegangsta/cli"
-	"github.com/drone/drone-cli/drone/git"
-	"github.com/drone/drone-exec/docker"
-	"github.com/drone/drone-exec/yaml/secure"
-	"github.com/drone/drone-go/drone"
-	"github.com/drone/drone/yaml/matrix"
-	"github.com/fatih/color"
-	"github.com/samalba/dockerclient"
 )
 
-const (
-	droneAvatarUrl = "https://avatars0.githubusercontent.com/u/2181346?v=3&s=200"
-)
-
-var ExecCmd = cli.Command{
+var execCmd = cli.Command{
 	Name:  "exec",
-	Usage: "executes a local build",
+	Usage: "execute a local build",
 	Action: func(c *cli.Context) {
-		if err := execCmd(c); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		if err := exec(c); err != nil {
+			log.Fatalln(err)
 		}
 	},
 	Flags: []cli.Flag{
+		cli.BoolTFlag{
+			Name:   "local",
+			Usage:  "build from local directory",
+			EnvVar: "DRONE_LOCAL",
+		},
+		cli.StringSliceFlag{
+			Name:   "plugin",
+			Usage:  "plugin steps to enable",
+			EnvVar: "DRONE_PLUGIN_ENABLE",
+		},
+		cli.StringSliceFlag{
+			Name:   "secret",
+			Usage:  "build secrets in KEY=VALUE format",
+			EnvVar: "DRONE_SECRET",
+		},
+		cli.StringSliceFlag{
+			Name:   "matrix",
+			Usage:  "build matrix in KEY=VALUE format",
+			EnvVar: "DRONE_MATRIX",
+		},
+		cli.DurationFlag{
+			Name:   "timeout",
+			Usage:  "build timeout",
+			Value:  time.Hour,
+			EnvVar: "DRONE_TIMEOUT",
+		},
+		cli.DurationFlag{
+			Name:   "timeout.inactivity",
+			Usage:  "build timeout for inactivity",
+			Value:  time.Minute * 15,
+			EnvVar: "DRONE_TIMEOUT_INACTIVITY",
+		},
+		cli.BoolFlag{
+			EnvVar: "DRONE_PLUGIN_PULL",
+			Name:   "pull",
+			Usage:  "always pull latest plugin images",
+		},
+		cli.StringFlag{
+			EnvVar: "DRONE_PLUGIN_NAMESPACE",
+			Name:   "namespace",
+			Value:  "plugins",
+			Usage:  "default plugin image namespace",
+		},
+		cli.StringSliceFlag{
+			EnvVar: "DRONE_PLUGIN_PRIVILEGED",
+			Name:   "privileged",
+			Usage:  "plugins that require privileged mode",
+			Value: &cli.StringSlice{
+				"plugins/docker",
+				"plugins/docker:*",
+				"plguins/gcr",
+				"plguins/gcr:*",
+				"plugins/ecr",
+				"plugins/ecr:*",
+			},
+		},
+
+		// Docker daemon flags
+
 		cli.StringFlag{
 			EnvVar: "DOCKER_HOST",
 			Name:   "docker-host",
@@ -55,330 +101,323 @@ var ExecCmd = cli.Command{
 			Usage:  "docker certificate directory",
 			Value:  "",
 		},
+
+		//
+		// Please note the below flags are mirrored in the plugin starter kit and
+		// should be kept synchronized.
+		// https://github.com/drone/drone-plugin-starter
+		//
+
 		cli.StringFlag{
-			Name:  "i",
-			Value: "",
-			Usage: "identify file injected in the container",
-		},
-		cli.StringSliceFlag{
-			Name:  "e",
-			Usage: "secret environment variables",
-		},
-		cli.StringFlag{
-			Name:  "E",
-			Usage: "secrets from plaintext YAML of .drone.sec (use - for stdin)",
-		},
-		cli.StringFlag{
-			Name:  "yaml",
-			Usage: "path to .drone.yml file",
-			Value: ".drone.yml",
-		},
-		cli.BoolFlag{
-			Name:  "trusted",
-			Usage: "enable elevated privilege",
-		},
-		cli.BoolFlag{
-			Name:  "cache",
-			Usage: "execute cache steps",
-		},
-		cli.BoolFlag{
-			Name:  "deploy",
-			Usage: "execute publish and deployment steps",
-		},
-		cli.BoolFlag{
-			Name:  "notify",
-			Usage: "execute notification steps",
-		},
-		cli.BoolFlag{
-			Name:  "pull",
-			Usage: "always pull the latest docker image",
+			Name:   "repo.fullname",
+			Usage:  "repository full name",
+			EnvVar: "DRONE_REPO",
 		},
 		cli.StringFlag{
-			Name:  "event",
-			Usage: "hook event type",
-			Value: "push",
+			Name:   "repo.owner",
+			Usage:  "repository owner",
+			EnvVar: "DRONE_REPO_OWNER",
 		},
 		cli.StringFlag{
-			Name:  "payload",
-			Usage: "merge the argument's json value with the normal payload",
+			Name:   "repo.name",
+			Usage:  "repository name",
+			EnvVar: "DRONE_REPO_NAME",
+		},
+		cli.StringFlag{
+			Name:   "repo.type",
+			Value:  "git",
+			Usage:  "repository type",
+			EnvVar: "DRONE_REPO_SCM",
+		},
+		cli.StringFlag{
+			Name:   "repo.link",
+			Usage:  "repository link",
+			EnvVar: "DRONE_REPO_LINK",
+		},
+		cli.StringFlag{
+			Name:   "repo.avatar",
+			Usage:  "repository avatar",
+			EnvVar: "DRONE_REPO_AVATAR",
+		},
+		cli.StringFlag{
+			Name:   "repo.branch",
+			Usage:  "repository default branch",
+			EnvVar: "DRONE_REPO_BRANCH",
 		},
 		cli.BoolFlag{
-			Name:  "debug",
-			Usage: "execute the build in debug mode",
+			Name:   "repo.private",
+			Usage:  "repository is private",
+			EnvVar: "DRONE_REPO_PRIVATE",
 		},
-		cli.StringSliceFlag{
-			Name:  "whitelist",
-			Usage: "whitelist of enabled plugins",
-			Value: &cli.StringSlice{"plugins/*", "*/*", "*/*/*"},
+		cli.BoolFlag{
+			Name:   "repo.trusted",
+			Usage:  "repository is trusted",
+			EnvVar: "DRONE_REPO_TRUSTED",
+		},
+		cli.StringFlag{
+			Name:   "remote.url",
+			Usage:  "git remote url",
+			EnvVar: "DRONE_REMOTE_URL",
+		},
+		cli.StringFlag{
+			Name:   "commit.sha",
+			Usage:  "git commit sha",
+			EnvVar: "DRONE_COMMIT_SHA",
+		},
+		cli.StringFlag{
+			Name:   "commit.ref",
+			Value:  "refs/heads/master",
+			Usage:  "git commit ref",
+			EnvVar: "DRONE_COMMIT_REF",
+		},
+		cli.StringFlag{
+			Name:   "commit.branch",
+			Value:  "master",
+			Usage:  "git commit branch",
+			EnvVar: "DRONE_COMMIT_BRANCH",
+		},
+		cli.StringFlag{
+			Name:   "commit.message",
+			Usage:  "git commit message",
+			EnvVar: "DRONE_COMMIT_MESSAGE",
+		},
+		cli.StringFlag{
+			Name:   "commit.link",
+			Usage:  "git commit link",
+			EnvVar: "DRONE_COMMIT_LINK",
+		},
+		cli.StringFlag{
+			Name:   "commit.author.name",
+			Usage:  "git author name",
+			EnvVar: "DRONE_COMMIT_AUTHOR",
+		},
+		cli.StringFlag{
+			Name:   "commit.author.email",
+			Usage:  "git author email",
+			EnvVar: "DRONE_COMMIT_AUTHOR_EMAIL",
+		},
+		cli.StringFlag{
+			Name:   "commit.author.avatar",
+			Usage:  "git author avatar",
+			EnvVar: "DRONE_COMMIT_AUTHOR_AVATAR",
+		},
+		cli.StringFlag{
+			Name:   "build.event",
+			Value:  "push",
+			Usage:  "build event",
+			EnvVar: "DRONE_BUILD_EVENT",
+		},
+		cli.IntFlag{
+			Name:   "build.number",
+			Usage:  "build number",
+			EnvVar: "DRONE_BUILD_NUMBER",
+		},
+		cli.IntFlag{
+			Name:   "build.created",
+			Usage:  "build created",
+			EnvVar: "DRONE_BUILD_CREATED",
+		},
+		cli.IntFlag{
+			Name:   "build.started",
+			Usage:  "build started",
+			EnvVar: "DRONE_BUILD_STARTED",
+		},
+		cli.IntFlag{
+			Name:   "build.finished",
+			Usage:  "build finished",
+			EnvVar: "DRONE_BUILD_FINISHED",
+		},
+		cli.StringFlag{
+			Name:   "build.status",
+			Usage:  "build status",
+			Value:  "success",
+			EnvVar: "DRONE_BUILD_STATUS",
+		},
+		cli.StringFlag{
+			Name:   "build.link",
+			Usage:  "build link",
+			EnvVar: "DRONE_BUILD_LINK",
+		},
+		cli.StringFlag{
+			Name:   "build.deploy",
+			Usage:  "build deployment target",
+			EnvVar: "DRONE_DEPLOY_TO",
+		},
+		cli.BoolTFlag{
+			Name:   "yaml.verified",
+			Usage:  "build yaml is verified",
+			EnvVar: "DRONE_YAML_VERIFIED",
+		},
+		cli.BoolTFlag{
+			Name:   "yaml.signed",
+			Usage:  "build yaml is signed",
+			EnvVar: "DRONE_YAML_SIGNED",
+		},
+		cli.IntFlag{
+			Name:   "prev.build.number",
+			Usage:  "previous build number",
+			EnvVar: "DRONE_PREV_BUILD_NUMBER",
+		},
+		cli.StringFlag{
+			Name:   "prev.build.status",
+			Usage:  "previous build status",
+			EnvVar: "DRONE_PREV_BUILD_STATUS",
+		},
+		cli.StringFlag{
+			Name:   "prev.commit.sha",
+			Usage:  "previous build sha",
+			EnvVar: "DRONE_PREV_COMMIT_SHA",
+		},
+
+		cli.StringFlag{
+			Name:   "netrc.username",
+			Usage:  "previous build sha",
+			EnvVar: "DRONE_NETRC_USERNAME",
+		},
+		cli.StringFlag{
+			Name:   "netrc.password",
+			Usage:  "previous build sha",
+			EnvVar: "DRONE_NETRC_PASSWORD",
+		},
+		cli.StringFlag{
+			Name:   "netrc.machine",
+			Usage:  "previous build sha",
+			EnvVar: "DRONE_NETRC_MACHINE",
 		},
 	},
 }
 
-func execCmd(c *cli.Context) error {
-	var ymlFile = c.String("yaml")
+func exec(c *cli.Context) error {
+	sigterm := make(chan os.Signal, 1)
+	cancelc := make(chan bool, 1)
+	signal.Notify(sigterm, os.Interrupt)
+	go func() {
+		<-sigterm
+		cancelc <- true
+	}()
 
-	info := git.Info()
+	path := c.Args().First()
+	if path == "" {
+		path = ".drone.yml"
+	}
+	path, _ = filepath.Abs(path)
+	dir := filepath.Dir(path)
 
-	cert, _ := ioutil.ReadFile(filepath.Join(
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	engine, err := docker.New(
+		c.String("docker-host"),
 		c.String("docker-cert-path"),
-		"cert.pem",
-	))
-
-	key, _ := ioutil.ReadFile(filepath.Join(
-		c.String("docker-cert-path"),
-		"key.pem",
-	))
-
-	ca, _ := ioutil.ReadFile(filepath.Join(
-		c.String("docker-cert-path"),
-		"ca.pem",
-	))
-	if len(cert) == 0 || len(key) == 0 || len(ca) == 0 {
-		println("")
-	}
-
-	yml, err := ioutil.ReadFile(ymlFile)
-	if err != nil {
-		return err
-	}
-
-	// initially populate globals from the '-e' slice
-	globals := c.StringSlice("e")
-	if c.IsSet("E") {
-		// read the .drone.sec.yml file (plain text)
-		plaintext, err := readInput(c.String("E"))
-		if err != nil {
-			return err
-		}
-
-		// parse the plaintext secrets file
-		sec := new(secure.Secure)
-		err = yaml.Unmarshal(plaintext, sec)
-		if err != nil {
-			return err
-		}
-
-		// prepend values into globals (allow '-e' to override the secrets file)
-		for k, v := range sec.Environment.Map() {
-			tmp := strings.Join([]string{k, v}, "=")
-			globals = append([]string{tmp}, globals...)
-		}
-	}
-
-	axes, err := matrix.Parse(string(yml))
-	if err != nil {
-		return err
-	}
-	if len(axes) == 0 {
-		axes = append(axes, matrix.Axis{})
-	}
-
-	cli, err := newDockerClient(c.String("docker-host"), cert, key, ca)
-	if err != nil {
-		return err
-	}
-
-	pwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	// Massage windows paths for docker
-	if runtime.GOOS == "windows" {
-		pwd = convertWindowsPath(pwd)
-	}
-
-	execArgs := []string{"--build", "--debug", "--mount", pwd}
-	for _, arg := range []string{"cache", "deploy", "notify", "pull"} {
-		if c.Bool(arg) {
-			execArgs = append(execArgs, "--"+arg)
-		}
-	}
-	if c.Bool("pull") {
-		image := "drone/drone-exec:latest"
-		color.Magenta("[DRONE] pulling %s", image)
-		err := cli.PullImage(image, nil)
-		if err != nil {
-			color.Red("[DRONE] failed to pull %s", image)
-			os.Exit(1)
-		}
-	}
-
-	proj := resolvePath(pwd)
-
-	var exits []int
-
-	for i, axis := range axes {
-		color.Magenta("[DRONE] starting job #%d", i+1)
-		if len(axis) != 0 {
-			color.Magenta("[DRONE] export %s", axis)
-		}
-
-		payload := drone.Payload{
-			Repo: &drone.Repo{
-				IsTrusted: c.Bool("trusted"),
-				IsPrivate: true,
-			},
-			Job: &drone.Job{
-				Status:      drone.StatusRunning,
-				Environment: axis,
-			},
-			Yaml: string(yml),
-			Build: &drone.Build{
-				Status:  drone.StatusRunning,
-				Branch:  info.Branch,
-				Commit:  info.Head.ID,
-				Author:  info.Head.AuthorName,
-				Email:   info.Head.AuthorEmail,
-				Message: info.Head.Message,
-				Event:   c.String("event"),
-			},
-			System: &drone.System{
-				Link:    c.GlobalString("server"),
-				Globals: globals,
-				Plugins: c.StringSlice("whitelist"),
-			},
-		}
-
-		// gets the ssh key if provided
-		if len(c.String("i")) != 0 {
-			key, err = ioutil.ReadFile(c.String("i"))
-			if err != nil {
-				return err
-			}
-			payload.Keys = &drone.Key{
-				Private: string(key),
-			}
-			payload.Netrc = &drone.Netrc{}
-		}
-
-		if len(proj) != 0 {
-			payload.Repo.Link = fmt.Sprintf("https://%s", proj)
-		}
-		if c.IsSet("payload") {
-			err := json.Unmarshal([]byte(c.String("payload")), &payload)
-			if err != nil {
-				color.Red("Error reading --payload argument, it must be valid json: %v", err)
-				os.Exit(1)
-			}
-		}
-		if c.Bool("debug") {
-			out, _ := json.MarshalIndent(payload, " ", "  ")
-			color.Magenta("[DRONE] job #%d payload:", i+1)
-			fmt.Println(string(out))
-		}
-
-		out, _ := json.Marshal(payload)
-
-		exit, err := run(cli, execArgs, string(out))
-		if err != nil {
-			return err
-		}
-		exits = append(exits, exit)
-
-		color.Magenta("[DRONE] finished job #%d", i+1)
-		color.Magenta("[DRONE] exit code %d", exit)
-	}
-
-	var passed = true
-	for i, _ := range axes {
-		exit := exits[i]
-		if exit == 0 {
-			color.Green("[DRONE] job #%d passed", i+1)
-		} else {
-			color.Red("[DRONE] job #%d failed", i+1)
-			passed = false
-		}
-	}
-	if passed {
-		color.Green("[DRONE] build passed")
-		Notify("Build passed")
-	} else {
-		color.Red("[DRONE] build failed")
-		Notify("Build failed")
-		os.Exit(1)
-	}
-
-	return nil
-}
-
-func run(client dockerclient.Client, args []string, input string) (int, error) {
-
-	image := "drone/drone-exec:latest"
-	entrypoint := []string{"/bin/drone-exec"}
-	args = append(args, "--", input)
-
-	conf := &dockerclient.ContainerConfig{
-		Image:      image,
-		Entrypoint: entrypoint,
-		Cmd:        args,
-		HostConfig: dockerclient.HostConfig{
-			Binds: []string{"/var/run/docker.sock:/var/run/docker.sock"},
-		},
-		Volumes: map[string]struct{}{
-			"/var/run/docker.sock": struct{}{},
-		},
-	}
-
-	info, err := docker.Run(client, conf, nil, false, os.Stdout, os.Stderr)
-	if err != nil {
-		return 0, err
-	}
-
-	client.StopContainer(info.Id, 15)
-	client.RemoveContainer(info.Id, true, true)
-	return info.State.ExitCode, err
-}
-
-func Notify(message string) {
-	//Skip if this is not a darwin
-	if runtime.GOOS != "darwin" {
-		return
-	}
-
-	// Skip if drone exec launched form tmux
-	if len(os.Getenv("TMUX")) != 0 {
-		return
-	}
-
-	// Skip if Terminal notifier not installed
-	if _, err := exec.LookPath("terminal-notifier"); err != nil {
-		return
-	}
-
-	cmd := exec.Command(
-		"terminal-notifier",
-		"-appIcon",
-		droneAvatarUrl,
-		"-title",
-		"Drone",
-		"-message",
-		message,
+		c.Bool("docker-tls-verify"),
 	)
-
-	cmd.Run()
-}
-
-func newDockerClient(addr string, cert, key, ca []byte) (dockerclient.Client, error) {
-	var tlc *tls.Config
-
-	if len(cert) != 0 {
-		pem, err := tls.X509KeyPair(cert, key)
-		if err != nil {
-			return dockerclient.NewDockerClient(addr, nil)
-		}
-		tlc = &tls.Config{}
-		tlc.Certificates = []tls.Certificate{pem}
-
-		if len(ca) != 0 {
-			pool := x509.NewCertPool()
-			pool.AppendCertsFromPEM(ca)
-			tlc.RootCAs = pool
-
-		} else {
-			tlc.InsecureSkipVerify = true
-		}
+	if err != nil {
+		return err
 	}
 
-	return dockerclient.NewDockerClient(addr, tlc)
+	agent := agent.Agent{
+		Update:    agent.NoopUpdateFunc,
+		Logger:    agent.TermLoggerFunc,
+		Engine:    engine,
+		Timeout:   c.Duration("timeout.inactivity"),
+		Platform:  "linux/amd64",
+		Namespace: c.String("namespace"),
+		Disable:   c.StringSlice("plugin"),
+		Escalate:  c.StringSlice("privileged"),
+		Netrc:     []string{},
+		Local:     dir,
+		Pull:      c.Bool("pull"),
+	}
+
+	payload := drone.Payload{
+		Yaml: string(file),
+		Repo: &drone.Repo{
+			FullName:  c.String("repo.fullname"),
+			Owner:     c.String("repo.owner"),
+			Name:      c.String("repo.name"),
+			Kind:      c.String("repo.type"),
+			Link:      c.String("repo.link"),
+			Branch:    c.String("repo.branch"),
+			Avatar:    c.String("repo.avatar"),
+			Timeout:   int64(c.Duration("timeout").Minutes()),
+			IsPrivate: c.Bool("repo.private"),
+			IsTrusted: c.Bool("repo.trusted"),
+			Clone:     c.String("remote.url"),
+		},
+		System: &drone.System{
+			Link: c.GlobalString("server"),
+		},
+		Secrets: getSecrets(c),
+		Netrc: &drone.Netrc{
+			Login:    c.String("netrc.username"),
+			Password: c.String("netrc.password"),
+			Machine:  c.String("netrc.machine"),
+		},
+		Build: &drone.Build{
+			Commit:   c.String("commit.sha"),
+			Branch:   c.String("commit.branch"),
+			Ref:      c.String("commit.ref"),
+			Link:     c.String("commit.link"),
+			Message:  c.String("commit.message"),
+			Author:   c.String("commit.author.name"),
+			Email:    c.String("commit.author.email"),
+			Avatar:   c.String("commit.author.avatar"),
+			Number:   c.Int("build.number"),
+			Event:    c.String("build.event"),
+			Deploy:   c.String("build.deploy"),
+			Verified: c.BoolT("yaml.verified"),
+			Signed:   c.BoolT("yaml.signed"),
+		},
+		BuildLast: &drone.Build{
+			Number: c.Int("prev.build.number"),
+			Status: c.String("prev.build.status"),
+			Commit: c.String("prev.commit.sha"),
+		},
+		Job: &drone.Job{
+			Environment: getMatrix(c),
+		},
+	}
+
+	return agent.Run(&payload, cancelc)
+}
+
+// helper function to retrieve matrix variables.
+func getMatrix(c *cli.Context) map[string]string {
+	envs := map[string]string{}
+	for _, s := range c.StringSlice("matrix") {
+		parts := strings.SplitN(s, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		k := parts[0]
+		v := parts[1]
+		envs[k] = v
+	}
+	return envs
+}
+
+// helper function to retrieve secret variables.
+func getSecrets(c *cli.Context) []*drone.Secret {
+	var secrets []*drone.Secret
+	for _, s := range c.StringSlice("secret") {
+		parts := strings.SplitN(s, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		secret := &drone.Secret{
+			Name:  parts[0],
+			Value: parts[1],
+			Events: []string{
+				drone.EventPull,
+				drone.EventPush,
+				drone.EventTag,
+				drone.EventDeploy,
+			},
+			Images: []string{"*"},
+		}
+		secrets = append(secrets, secret)
+	}
+	return secrets
 }

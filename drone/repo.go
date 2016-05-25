@@ -2,100 +2,164 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/drone/drone-go/drone"
 )
 
-var RepoCmd = cli.Command{
+var repoCmd = cli.Command{
 	Name:  "repo",
-	Usage: "manage repos",
+	Usage: "manage repositories",
 	Subcommands: []cli.Command{
-		// Repo List
-		{
-			Name:  "ls",
-			Usage: "lists repositories",
-			Action: func(c *cli.Context) {
-				handle(c, RepoListCmd)
+
+		// list command
+		cli.Command{
+			Name:   "ls",
+			Usage:  "list all repos",
+			Action: repoList,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "format",
+					Usage: "format output",
+					Value: tmplRepoList,
+				},
+				cli.StringFlag{
+					Name:  "org",
+					Usage: "filter by organization",
+				},
 			},
 		},
-		// Repo Info
-		{
-			Name:  "info",
-			Usage: "show repository details",
-			Action: func(c *cli.Context) {
-				handle(c, RepoInfoCmd)
+
+		// info command
+		cli.Command{
+			Name:   "info",
+			Usage:  "show repository details",
+			Action: repoInfo,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "format",
+					Usage: "format output",
+					Value: tmplRepoInfo,
+				},
 			},
 		},
-		// Repo Add
-		{
-			Name:  "add",
-			Usage: "add a repository",
-			Action: func(c *cli.Context) {
-				handle(c, RepoAddCmd)
-			},
+
+		// add command
+		cli.Command{
+			Name:   "add",
+			Usage:  "add a repository",
+			Action: repoAdd,
 		},
-		// Repo Delete
-		{
-			Name:  "rm",
-			Usage: "remove a repository",
-			Action: func(c *cli.Context) {
-				handle(c, RepoDelCmd)
-			},
+
+		// remove command
+		cli.Command{
+			Name:   "rm",
+			Usage:  "remove a repository",
+			Action: repoRemove,
 		},
 	},
 }
 
-func RepoAddCmd(c *cli.Context, client drone.Client) error {
-	owner, name, err := parseRepo(c.Args().Get(0))
+// command to fetch and return repository information.
+func repoInfo(c *cli.Context) error {
+	arg := c.Args().First()
+	owner, name, err := parseRepo(arg)
 	if err != nil {
 		return err
 	}
 
-	repo, err := client.RepoPost(owner, name)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Successfully added %s\n", repo.FullName)
-	return nil
-}
-
-func RepoDelCmd(c *cli.Context, client drone.Client) error {
-	owner, name, err := parseRepo(c.Args().Get(0))
+	client, err := newClient(c)
 	if err != nil {
 		return err
 	}
 
-	err = client.RepoDel(owner, name)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Successfully removed %s/%s\n", owner, name)
-	return nil
-}
-
-func RepoListCmd(c *cli.Context, client drone.Client) error {
-	repos, err := client.RepoList()
-	if err != nil {
-		return err
-	}
-
-	for _, repo := range repos {
-		fmt.Println(repo.FullName)
-	}
-	return nil
-}
-
-func RepoInfoCmd(c *cli.Context, client drone.Client) error {
-	owner, name, err := parseRepo(c.Args().Get(0))
-	if err != nil {
-		return err
-	}
 	repo, err := client.Repo(owner, name)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(repo.FullName)
+	tmpl, err := template.New("_").Parse(c.String("format"))
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, repo)
+}
+
+// command to add a repository.
+func repoAdd(c *cli.Context) error {
+	repo := c.Args().First()
+	owner, name, err := parseRepo(repo)
+	if err != nil {
+		return err
+	}
+
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err := client.RepoPost(owner, name); err != nil {
+		return err
+	}
+	fmt.Printf("Successfully activated repository %s/%s\n", owner, name)
 	return nil
 }
+
+// command to remove a repository from drone.
+func repoRemove(c *cli.Context) error {
+	repo := c.Args().First()
+	owner, name, err := parseRepo(repo)
+	if err != nil {
+		return err
+	}
+
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
+
+	if err := client.RepoDel(owner, name); err != nil {
+		return err
+	}
+	fmt.Printf("Successfully removed repository %s/%s\n", owner, name)
+	return nil
+}
+
+// command to list user repositories.
+func repoList(c *cli.Context) error {
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
+
+	repos, err := client.RepoList()
+	if err != nil || len(repos) == 0 {
+		return err
+	}
+
+	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	if err != nil {
+		return err
+	}
+
+	org := c.String("org")
+	for _, repo := range repos {
+		if org != "" && org != repo.Owner {
+			continue
+		}
+		tmpl.Execute(os.Stdout, repo)
+	}
+	return nil
+}
+
+// repository info template.
+var tmplRepoInfo = `Owner: {{ .Owner }}
+Repo: {{ .Name }}
+Type: {{ .Kind }}
+Private: {{ .IsPrivate }}
+Remote: {{ .Clone }}
+`
+
+// repository list template.
+var tmplRepoList = `{{ .FullName }}`

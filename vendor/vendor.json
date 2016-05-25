@@ -3,104 +3,181 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "DWPL08pD/SQ2GzLfoR7ZXnjj7Sw=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/Sirupsen/logrus",
 			"path": "github.com/Sirupsen/logrus",
-			"revision": "2cea0f0d141f56fae06df5b813ec4119d1c8ccbd",
-			"revisionTime": "2015-03-09T11:58:39-04:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
+			"checksumSHA1": "7OCBbeztrwhJCOKXTWTdp7+lAHY=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/cloudfoundry-incubator/candiedyaml",
+			"path": "github.com/cloudfoundry-incubator/candiedyaml",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "RQ8uEehMnbc8lncEG94anEBT4E0=",
 			"path": "github.com/codegangsta/cli",
-			"revision": "0302d3914d2a6ad61404584cdae6e6dbc9c03599",
-			"revisionTime": "2015-11-20T13:56:42-08:00"
+			"revision": "1ce6660d5de65095e81443b119d50585984142c7",
+			"revisionTime": "2016-05-24T00:56:50Z"
 		},
 		{
+			"checksumSHA1": "18hmvak2Dc9x5cgKeZ2iApviT7w=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/docker/go-units",
 			"path": "github.com/docker/go-units",
-			"revision": "8e2d4523730c73120e10d4652f36ad6010998f4e",
-			"revisionTime": "2015-12-22T11:14:43-08:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
-			"path": "github.com/drone/drone-exec/docker",
-			"revision": "4ca5f5474aa5831885bb4537b409094a91a4aa51",
-			"revisionTime": "2016-02-18T11:43:16-08:00"
+			"checksumSHA1": "V23tHkmbR70glZkC36o2V9hMt4E=",
+			"path": "github.com/drone/drone-exec/agent",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
-			"path": "github.com/drone/drone-exec/yaml/secure",
-			"revision": "4ca5f5474aa5831885bb4537b409094a91a4aa51",
-			"revisionTime": "2016-02-18T11:43:16-08:00"
+			"checksumSHA1": "bwut7jNx9eF7jT1xwYTlXKrlOz4=",
+			"path": "github.com/drone/drone-exec/build",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
+			"checksumSHA1": "fpd3qDmHkgURZxpdRZkP8IRdsH0=",
+			"path": "github.com/drone/drone-exec/build/docker",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "tyaJm2eb5y6N3qPe5XvHDbuAXkU=",
+			"path": "github.com/drone/drone-exec/build/docker/internal",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "D1Dfbt8JghlSqzdxvP3th2C9K2o=",
+			"path": "github.com/drone/drone-exec/client",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "z+wOmyzGKpwSjmhjAWa9I2Da4GM=",
+			"path": "github.com/drone/drone-exec/yaml",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "aKnCrSAQfsXtinDnhdSDJcZ1CjE=",
+			"path": "github.com/drone/drone-exec/yaml/expander",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "1D4v202aEMFuIaXNZTRmyh4oJls=",
+			"path": "github.com/drone/drone-exec/yaml/transform",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "RHKxkkhaL3NgB9jMT7+gXDzH7uE=",
+			"path": "github.com/drone/drone-exec/yaml/types",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "8t8iVqBt08r4SW7PxrEu4qp7xLQ=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/drone/drone-go/drone",
 			"path": "github.com/drone/drone-go/drone",
-			"revision": "0831bec7069de2e7eba55e4760874164461b10c3",
-			"revisionTime": "2016-04-11T18:49:00-07:00"
+			"revision": "386e144f1aa22ea3597bd7ad12f69c6097a44ab7",
+			"revisionTime": "2016-05-24T23:17:31Z"
 		},
 		{
-			"path": "github.com/drone/drone/yaml/matrix",
-			"revision": "4c1e5b713080ac404acf65393175ec7279234d6c",
-			"revisionTime": "2015-12-13T01:07:40-08:00"
+			"checksumSHA1": "KOThXqDanFZmWCmJsOGrpVIdpPo=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/ghodss/yaml",
+			"path": "github.com/ghodss/yaml",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
-			"path": "github.com/fatih/color",
-			"revision": "9aae6aaa22315390f03959adca2c4d395b02fcef",
-			"revisionTime": "2015-11-11T14:02:02+02:00"
+			"checksumSHA1": "7P67mLoODa41eNHrdAMtDJl9Ebg=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/gorilla/securecookie",
+			"path": "github.com/gorilla/securecookie",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
+			"checksumSHA1": "UluBK/KntetOAdusj9Qamt8sFFg=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/gorilla/websocket",
+			"path": "github.com/gorilla/websocket",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "j+WFAFfZu9lF9gkUJ17dAGfo6To=",
 			"path": "github.com/jackspirou/syscerts",
 			"revision": "5ecaea8f7ec96a0826ced1ff106d30083066bf35",
-			"revisionTime": "2016-03-18T16:00:26-05:00"
+			"revisionTime": "2016-03-18T21:00:26Z"
 		},
 		{
-			"path": "github.com/mattn/go-colorable",
-			"revision": "3dac7b4f76f6e17fb39b768b89e3783d16e237fe",
-			"revisionTime": "2015-11-27T10:45:55+09:00"
+			"checksumSHA1": "ljZrmD7pmMXAkGNfp6IEzj31fY8=",
+			"path": "github.com/joho/godotenv",
+			"revision": "4ed13390c0acd2ff4e371e64d8b97c8954138243",
+			"revisionTime": "2015-09-07T01:02:28Z"
 		},
 		{
-			"path": "github.com/mattn/go-isatty",
-			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639",
-			"revisionTime": "2015-12-11T09:06:21+09:00"
+			"checksumSHA1": "UE4lhbPYYWEhqHXQk24OA73m5+8=",
+			"path": "github.com/joho/godotenv/autoload",
+			"revision": "4ed13390c0acd2ff4e371e64d8b97c8954138243",
+			"revisionTime": "2015-09-07T01:02:28Z"
 		},
 		{
+			"checksumSHA1": "B5OyQnyDru9551OBF9g4zLb/tGc=",
+			"origin": "github.com/drone/drone-exec/vendor/github.com/samalba/dockerclient",
 			"path": "github.com/samalba/dockerclient",
-			"revision": "0cba4a962c5a4dfcc4a83b8e64a946837a6ed913",
-			"revisionTime": "2015-12-19T00:20:48-08:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
-			"path": "github.com/square/go-jose",
-			"revision": "37934a899dd03635373fd1e143936d32cfe48d31",
-			"revisionTime": "2015-11-19T10:07:58-08:00"
-		},
-		{
-			"path": "github.com/square/go-jose/cipher",
-			"revision": "37934a899dd03635373fd1e143936d32cfe48d31",
-			"revisionTime": "2015-11-19T10:07:58-08:00"
-		},
-		{
-			"path": "golang.org/x/crypto/curve25519",
-			"revision": "3760e016850398b85094c4c99e955b8c3dea5711",
-			"revisionTime": "2015-12-23T13:51:54-08:00"
-		},
-		{
-			"path": "golang.org/x/crypto/ssh",
-			"revision": "3760e016850398b85094c4c99e955b8c3dea5711",
-			"revisionTime": "2015-12-23T13:51:54-08:00"
-		},
-		{
+			"checksumSHA1": "pancewZW3HwGvpDwfH5Imrbadc4=",
+			"origin": "github.com/drone/drone-exec/vendor/golang.org/x/net/context",
 			"path": "golang.org/x/net/context",
-			"revision": "6ccd6698c634f5d835c40c1c31848729e0cecda1",
-			"revisionTime": "2016-02-02T14:37:19-08:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
+			"checksumSHA1": "EJMLw8rk55bsqmIpSMtVORJpSGo=",
+			"origin": "github.com/drone/drone-exec/vendor/golang.org/x/net/context/ctxhttp",
+			"path": "golang.org/x/net/context/ctxhttp",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "mktBVED98G2vv+OKcSgtnFVZC1Y=",
+			"origin": "github.com/drone/drone-exec/vendor/golang.org/x/oauth2",
 			"path": "golang.org/x/oauth2",
-			"revision": "8a57ed94ffd43444c0879fe75701732a38afc985",
-			"revisionTime": "2015-12-29T21:02:54-07:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
+			"checksumSHA1": "st9F4RETvsjcEHmnMvF9XvlAxDE=",
+			"origin": "github.com/drone/drone-exec/vendor/golang.org/x/oauth2/internal",
 			"path": "golang.org/x/oauth2/internal",
-			"revision": "8a57ed94ffd43444c0879fe75701732a38afc985",
-			"revisionTime": "2015-12-29T21:02:54-07:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		},
 		{
+			"checksumSHA1": "c8iMfP5+K3GEg26HJiO0OVVLiM4=",
+			"origin": "github.com/drone/drone-exec/vendor/golang.org/x/sys/unix",
+			"path": "golang.org/x/sys/unix",
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
+		},
+		{
+			"checksumSHA1": "+OgOXBoiQ+X+C2dsAeiOHwBIEH0=",
+			"origin": "github.com/drone/drone-exec/vendor/gopkg.in/yaml.v2",
 			"path": "gopkg.in/yaml.v2",
-			"revision": "f7716cbe52baa25d2e9b0d0da546fcf909fc16b4",
-			"revisionTime": "2015-12-01T14:27:45-02:00"
+			"revision": "79c691b24a86e70b7bff58523005c03d4487b628",
+			"revisionTime": "2016-05-24T23:48:11Z"
 		}
-	]
+	],
+	"rootPath": "github.com/drone/drone-cli"
 }

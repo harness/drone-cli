@@ -1,7 +1,5 @@
 package drone
 
-import "encoding/json"
-
 // User represents a user account.
 type User struct {
 	ID     int64  `json:"id"`
@@ -20,6 +18,7 @@ type Repo struct {
 	FullName    string `json:"full_name"`
 	Avatar      string `json:"avatar_url"`
 	Link        string `json:"link_url"`
+	Kind        string `json:"kind"`
 	Clone       string `json:"clone_url"`
 	Branch      string `json:"default_branch"`
 	Timeout     int64  `json:"timeout"`
@@ -31,8 +30,8 @@ type Repo struct {
 	AllowTag    bool   `json:"allow_tags"`
 }
 
-// Build represents the process of compiling and testing a changeset,
-// typically triggered by the remote system (ie GitHub).
+// Build represents the process of compiling and testing a changeset, typically
+// triggered by the remote system (ie GitHub).
 type Build struct {
 	ID        int64  `json:"id"`
 	Number    int    `json:"number"`
@@ -55,14 +54,16 @@ type Build struct {
 	Avatar    string `json:"author_avatar"`
 	Email     string `json:"author_email"`
 	Link      string `json:"link_url"`
+	Signed    bool   `json:"signed"`
+	Verified  bool   `json:"verified"`
 }
 
-// Job represents a single job that is being executed as part
-// of a Build.
+// Job represents a single job that is being executed as part of a Build.
 type Job struct {
 	ID       int64  `json:"id"`
 	Number   int    `json:"number"`
 	Status   string `json:"status"`
+	Error    string `json:"error"`
 	ExitCode int    `json:"exit_code"`
 	Enqueued int64  `json:"enqueued_at"`
 	Started  int64  `json:"started_at"`
@@ -73,15 +74,15 @@ type Job struct {
 
 // Secret represents a repository secret.
 type Secret struct {
-	ID    int64    `json:"id"`
-	Name  string   `json:"name"`
-	Value string   `json:"value"`
-	Image []string `json:"image"`
-	Event []string `json:"event"`
+	ID     int64    `json:"id"`
+	Name   string   `json:"name"`
+	Value  string   `json:"value"`
+	Images []string `json:"image"`
+	Events []string `json:"event"`
 }
 
-// Activity represents a build activity. It combines the
-// build details with summary Repository information.
+// Activity represents a build activity. It combines the build details with
+// summary Repository information.
 type Activity struct {
 	Owner     string `json:"owner"`
 	Name      string `json:"name"`
@@ -105,105 +106,44 @@ type Activity struct {
 	Avatar    string `json:"author_avatar"`
 	Email     string `json:"author_email"`
 	Link      string `json:"link_url"`
+	Signed    bool   `json:"signed"`
+	Verified  bool   `json:"verified"`
 }
 
-// Node represents a local or remote Docker daemon that is
-// responsible for running jobs.
-type Node struct {
-	ID   int64  `json:"id"`
-	Addr string `json:"address"`
-	Arch string `json:"architecture"`
-	Cert string `json:"cert"`
-	Key  string `json:"key"`
-	CA   string `json:"ca"`
-}
-
-// Key represents an RSA public and private key assigned to a
-// repository. It may be used to clone private repositories, or as
-// a deployment key.
-type Key struct {
-	Public  string `json:"public"`
-	Private string `json:"private"`
-}
-
-// Netrc defines a default .netrc file that should be injected
-// into the build environment. It will be used to authorize access
-// to https resources, such as git+https clones.
+// Netrc defines a default .netrc file that should be injected into the build
+// environment. It will be used to authorize access to https resources, such as
+// git+https clones.
 type Netrc struct {
 	Machine  string `json:"machine"`
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 
-// netrc is only used to allow compatibility with older plugins that rely on
-// the JSON "user" attribute as a password value. In Drone 0.6 breaking
-// changes will be introduced and this netrc struct and the Netrc UnmarshalJSON
-// and MarshalJSON will be removed.
-type netrc struct {
-	Machine     string `json:"machine"`
-	Login       string `json:"login"`
-	Password    string `json:"password"`
-	PasswordOld string `json:"user"`
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface.
-func (n *Netrc) UnmarshalJSON(b []byte) error {
-	x := &netrc{}
-	err := json.Unmarshal(b, x)
-	if err != nil {
-		return err
-	}
-	n.Machine = x.Machine
-	n.Login = x.Login
-	n.Password = x.Password
-	if x.PasswordOld != "" {
-		n.Password = x.PasswordOld
-	}
-	return nil
-}
-
-// MarshalJSON implements the json.Marshaler interface.
-func (n Netrc) MarshalJSON() ([]byte, error) {
-	x := &netrc{
-		Machine:     n.Machine,
-		Login:       n.Login,
-		Password:    n.Password,
-		PasswordOld: n.Password,
-	}
-	return json.Marshal(x)
-}
-
 // System represents the drone system.
 type System struct {
-	Version   string   `json:"version"`
-	Link      string   `json:"link_url"`
-	Plugins   []string `json:"plugins"`
-	Globals   []string `json:"globals"`
-	Escalates []string `json:"privileged_plugins"`
+	Version string `json:"version"`
+	Link    string `json:"link_url"`
 }
 
-// Workspace defines the build's workspace inside the
-// container. This helps the plugin locate the source
-// code directory.
-type Workspace struct {
-	Root string `json:"root"`
-	Path string `json:"path"`
-
-	Netrc *Netrc `json:"netrc"`
-	Keys  *Key   `json:"keys"`
+// Agent represents a registered build node.
+type Agent struct {
+	ID       int64  `json:"id"`
+	Address  string `json:"address"`
+	Platform string `json:"platform"`
+	Capacity int    `json:"capacity"`
+	Created  int64  `json:"created_at"`
+	Updated  int64  `json:"updated_at"`
 }
 
 // Payload defines the full payload send to plugins.
 type Payload struct {
-	Yaml      string      `json:"config"`
-	YamlEnc   string      `json:"secret"`
-	Repo      *Repo       `json:"repo"`
-	Build     *Build      `json:"build"`
-	BuildLast *Build      `json:"build_last"`
-	Job       *Job        `json:"job"`
-	Netrc     *Netrc      `json:"netrc"`
-	Keys      *Key        `json:"keys"`
-	System    *System     `json:"system"`
-	Workspace *Workspace  `json:"workspace"`
-	Vargs     interface{} `json:"vargs"`
+	Yaml      string    `json:"config"`
+	User      *User     `json:"user"`
+	Repo      *Repo     `json:"repo"`
+	Build     *Build    `json:"build"`
+	BuildLast *Build    `json:"build_last"`
+	Job       *Job      `json:"job"`
+	Netrc     *Netrc    `json:"netrc"`
+	System    *System   `json:"system"`
+	Secrets   []*Secret `json:"secrets"`
 }

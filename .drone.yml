@@ -1,47 +1,21 @@
-clone:
-  path: github.com/drone/drone-cli
+workspace:
+  base: /go
+  path: src/github.com/drone/drone-cli
 
-build:
-  image: golang:1.5
-  environment:
-    - GO15VENDOREXPERIMENT=1
-  commands:
-
-    # compile drone for all architectures
-    - GOOS=linux   GOARCH=amd64 go build -o ./bin/linux_amd64/drone   github.com/drone/drone-cli/drone
-    - GOOS=linux   GOARCH=386   go build -o ./bin/linux_386/drone     github.com/drone/drone-cli/drone
-    - GOOS=linux   GOARCH=arm   go build -o ./bin/linux_arm/drone     github.com/drone/drone-cli/drone
-    - GOOS=darwin  GOARCH=amd64 go build -o ./bin/darwin_amd64/drone  github.com/drone/drone-cli/drone
-    - GOOS=windows GOARCH=386   go build -o ./bin/windows_386/drone   github.com/drone/drone-cli/drone
-    - GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/drone github.com/drone/drone-cli/drone
-
-    # tar binary files prior to upload
-    - mkdir dist
-    - tar -cvzf dist/drone_linux_amd64.tar.gz   --directory=bin/linux_amd64   drone
-    - tar -cvzf dist/drone_linux_386.tar.gz     --directory=bin/linux_386     drone
-    - tar -cvzf dist/drone_linux_arm.tar.gz     --directory=bin/linux_arm     drone
-    - tar -cvzf dist/drone_darwin_amd64.tar.gz  --directory=bin/darwin_amd64  drone
-    - tar -cvzf dist/drone_windows_386.tar.gz   --directory=bin/windows_386   drone
-    - tar -cvzf dist/drone_windows_amd64.tar.gz --directory=bin/windows_amd64 drone
-
-    # generate shas for tar files
-    - sha256sum ./dist/drone_linux_amd64.tar.gz   > ./dist/drone_linux_amd64.sha256
-    - sha256sum ./dist/drone_linux_386.tar.gz     > ./dist/drone_linux_386.sha256
-    - sha256sum ./dist/drone_linux_arm.tar.gz     > ./dist/drone_linux_arm.sha256
-    - sha256sum ./dist/drone_darwin_amd64.tar.gz  > ./dist/drone_darwin_amd64.sha256
-    - sha256sum ./dist/drone_windows_386.tar.gz   > ./dist/drone_windows_386.sha256
-    - sha256sum ./dist/drone_windows_amd64.tar.gz > ./dist/drone_windows_amd64.sha256
-
-
-publish:
-  s3:
-    acl: public-read
-    region: us-east-1
-    bucket: downloads.drone.io
-    access_key: $$AWS_KEY
-    secret_key: $$AWS_SECRET
-    source: dist/
-    target: drone-cli/
-    recursive: true
+pipeline:
+  test:
+    image: golang:1.6
+    commands:
+      - cd drone
+      - go test
+  dist:
+    image: golang:1.6
+    commands: ./.drone.sh
     when:
-      branch: master
+      event: push
+
+  # publish:
+  #   image: s3
+  #   when:
+  #     event: push
+  #     branch: master

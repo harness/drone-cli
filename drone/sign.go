@@ -1,46 +1,50 @@
 package main
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/codegangsta/cli"
-	"github.com/drone/drone-go/drone"
 )
 
-var SignCmd = cli.Command{
-	Name:  "sign",
-	Usage: "creates a secure yaml file",
-	Action: func(c *cli.Context) {
-		handle(c, signCmd)
+var signCmd = cli.Command{
+	Name:   "sign",
+	Usage:  "sign the yaml file",
+	Action: sign,
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "in",
+			Usage: "input file",
+			Value: ".drone.yml",
+		},
+		cli.StringFlag{
+			Name:  "out",
+			Usage: "output file signature",
+			Value: ".drone.yml.sig",
+		},
 	},
-	Flags: []cli.Flag{},
 }
 
-func signCmd(c *cli.Context, client drone.Client) error {
+func sign(c *cli.Context) error {
 	repo := c.Args().First()
 	owner, name, err := parseRepo(repo)
 	if err != nil {
 		return err
 	}
 
-	in, err := readInput(".drone.yml")
+	in, err := readInput(c.String("in"))
 	if err != nil {
 		return err
 	}
 
-	checksum := shasum(in)
-	sig, err := client.Sign(owner, name, []byte(checksum))
+	client, err := newClient(c)
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(".drone.yml.sig", sig, 0664)
-}
+	sig, err := client.Sign(owner, name, in)
+	if err != nil {
+		return err
+	}
 
-func shasum(in []byte) string {
-	h := sha256.New()
-	h.Write(in)
-	return fmt.Sprintf("%x", h.Sum(nil))
+	return ioutil.WriteFile(c.String("out"), sig, 0664)
 }

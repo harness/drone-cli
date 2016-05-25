@@ -2,99 +2,85 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"os"
-	"text/tabwriter"
 
 	"github.com/codegangsta/cli"
 	"github.com/drone/drone-go/drone"
 )
 
-var UserCmd = cli.Command{
+var userCmd = cli.Command{
 	Name:  "user",
 	Usage: "manage users",
 	Subcommands: []cli.Command{
-		// User List
-		{
-			Name:  "ls",
-			Usage: "list all users",
-			Action: func(c *cli.Context) {
-				handle(c, UserListCmd)
+
+		// list command
+		cli.Command{
+			Name:   "ls",
+			Usage:  "list all users",
+			Action: userList,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "format",
+					Usage: "format output",
+					Value: tmplUserList,
+				},
 			},
 		},
-		// User Info
-		{
-			Name:  "info",
-			Usage: "show user details",
-			Action: func(c *cli.Context) {
-				handle(c, UserInfoCmd)
+
+		// info command
+		cli.Command{
+			Name:   "info",
+			Usage:  "show user details",
+			Action: userInfo,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "format",
+					Usage: "format output",
+					Value: tmplUserInfo,
+				},
 			},
 		},
-		// User Add
-		{
-			Name:  "add",
-			Usage: "adds a user",
-			Action: func(c *cli.Context) {
-				handle(c, UserAddCmd)
-			},
+
+		// add command
+		cli.Command{
+			Name:   "add",
+			Usage:  "adds a user",
+			Action: userAdd,
 		},
-		// User Delete
-		{
-			Name:  "rm",
-			Usage: "remove a user",
-			Action: func(c *cli.Context) {
-				handle(c, UserDelCmd)
-			},
-		},
-		// User Self
-		{
-			Name:  "self",
-			Usage: "show the current user details",
-			Flags: []cli.Flag{},
-			Action: func(c *cli.Context) {
-				handle(c, UserSelfCmd)
-			},
+
+		// remove command
+		cli.Command{
+			Name:   "rm",
+			Usage:  "remove a user",
+			Action: userRemove,
 		},
 	},
 }
 
-func UserInfoCmd(c *cli.Context, client drone.Client) error {
-	login := c.Args().Get(0)
-	if len(login) == 0 {
-		return fmt.Errorf("Missing or invalid user login")
-	}
+// command to de-register a user from drone server.
+func userRemove(c *cli.Context) error {
+	login := c.Args().First()
 
-	user, err := client.User(login)
+	client, err := newClient(c)
 	if err != nil {
 		return err
 	}
-	fmt.Println("username:", user.Login)
-	fmt.Println("email:", user.Email)
-	fmt.Println("admin:", user.Admin)
-	fmt.Println("active:", user.Active)
-	return nil
-}
-
-func UserListCmd(c *cli.Context, client drone.Client) error {
-	users, err := client.UserList()
-	if err != nil || len(users) == 0 {
+	if err := client.UserDel(login); err != nil {
 		return err
 	}
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, "username\temail\tadmin\tactive")
-	fmt.Fprintln(w, "--------\t-----\t-----\t------")
-	for _, user := range users {
-		fmt.Fprintf(w, "%s\t%s\t%v\t%v\n", user.Login, user.Email, user.Admin, user.Active)
-	}
-	w.Flush()
+	fmt.Printf("Successfully removed user %s\n", login)
 	return nil
 }
 
-func UserAddCmd(c *cli.Context, client drone.Client) error {
-	login := c.Args().Get(0)
-	if len(login) == 0 {
-		return fmt.Errorf("Missing or invalid user login")
-	}
+// command to register a user with drone server.
+func userAdd(c *cli.Context) error {
+	login := c.Args().First()
 
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
 	user, err := client.UserPost(&drone.User{Login: login})
 	if err != nil {
 		return err
@@ -103,26 +89,54 @@ func UserAddCmd(c *cli.Context, client drone.Client) error {
 	return nil
 }
 
-func UserDelCmd(c *cli.Context, client drone.Client) error {
-	login := c.Args().Get(0)
+// command to display information for a registered user.
+func userInfo(c *cli.Context) error {
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
+
+	login := c.Args().First()
 	if len(login) == 0 {
 		return fmt.Errorf("Missing or invalid user login")
 	}
-
-	err := client.UserDel(login)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Successfully removed user %s\n", login)
-	return nil
-}
-
-func UserSelfCmd(c *cli.Context, client drone.Client) error {
-	user, err := client.Self()
+	user, err := client.User(login)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(user.Login)
+	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, user)
+}
+
+// command to list registered user.
+func userList(c *cli.Context) error {
+	client, err := newClient(c)
+	if err != nil {
+		return err
+	}
+
+	users, err := client.UserList()
+	if err != nil || len(users) == 0 {
+		return err
+	}
+
+	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	if err != nil {
+		return err
+	}
+	for _, user := range users {
+		tmpl.Execute(os.Stdout, user)
+	}
 	return nil
 }
+
+// template for user list.
+var tmplUserList = `{{ .Login }}`
+
+// template for user info
+var tmplUserInfo = `User: {{ .Login }}
+Email: {{ .Email }}`
