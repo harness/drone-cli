@@ -1,6 +1,6 @@
 package drone
 
-// Events
+// Event values.
 const (
 	EventPush   = "push"
 	EventPull   = "pull_request"
@@ -8,8 +8,9 @@ const (
 	EventDeploy = "deployment"
 )
 
-// Statuses
+// Status values.
 const (
+	StatusBlocked = "blocked"
 	StatusSkipped = "skipped"
 	StatusPending = "pending"
 	StatusRunning = "running"

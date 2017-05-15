@@ -1,8 +1,6 @@
 package drone
 
-import "io"
-
-// Client describes a drone client.
+// Client is used to communicate with a Drone server.
 type Client interface {
 	// Self returns the currently authenticated user.
 	Self() (*User, error)
@@ -22,9 +20,6 @@ type Client interface {
 	// UserDel deletes a user account.
 	UserDel(string) error
 
-	// UserFeed returns the user's activity feed.
-	UserFeed() ([]*Activity, error)
-
 	// Repo returns a repository by name.
 	Repo(string, string) (*Repo, error)
 
@@ -36,7 +31,13 @@ type Client interface {
 	RepoPost(string, string) (*Repo, error)
 
 	// RepoPatch updates a repository.
-	RepoPatch(*Repo) (*Repo, error)
+	RepoPatch(string, string, *RepoPatch) (*Repo, error)
+
+	// RepoChown updates a repository owner.
+	RepoChown(string, string) (*Repo, error)
+
+	// RepoRepair repairs the repository hooks.
+	RepoRepair(string, string) error
 
 	// RepoDel deletes a repository.
 	RepoDel(string, string) error
@@ -52,41 +53,56 @@ type Client interface {
 	// the specified repository.
 	BuildList(string, string) ([]*Build, error)
 
+	// BuildQueue returns a list of enqueued builds.
+	BuildQueue() ([]*Activity, error)
+
 	// BuildStart re-starts a stopped build.
-	BuildStart(string, string, int) (*Build, error)
+	BuildStart(string, string, int, map[string]string) (*Build, error)
 
 	// BuildStop stops the specified running job for given build.
 	BuildStop(string, string, int, int) error
 
 	// BuildFork re-starts a stopped build with a new build number, preserving
 	// the prior history.
-	BuildFork(string, string, int) (*Build, error)
+	BuildFork(string, string, int, map[string]string) (*Build, error)
 
-	// BuildLogs returns the build logs for the specified job.
-	BuildLogs(string, string, int, int) (io.ReadCloser, error)
+	// BuildApprove approves a blocked build.
+	BuildApprove(string, string, int) (*Build, error)
 
-	// BuildQueue returns a list of builds in queue.
-	BuildQueue() ([]*Activity, error)
+	// BuildDecline declines a blocked build.
+	BuildDecline(string, string, int) (*Build, error)
 
 	// Deploy triggers a deployment for an existing build using the specified
 	// target environment.
-	Deploy(string, string, int, string) (*Build, error)
+	Deploy(string, string, int, string, map[string]string) (*Build, error)
 
-	// Sign returns a cryptographic signature for the input string.
-	Sign(string, string, []byte) ([]byte, error)
+	// Registry returns a registry by hostname.
+	Registry(owner, name, hostname string) (*Registry, error)
 
-	// SecretPost create or updates a repository secret.
-	SecretPost(string, string, *Secret) error
+	// RegistryList returns a list of all repository registries.
+	RegistryList(owner, name string) ([]*Registry, error)
 
-	// SecretDel deletes a named repository secret.
-	SecretDel(string, string, string) error
+	// RegistryCreate creates a registry.
+	RegistryCreate(owner, name string, registry *Registry) (*Registry, error)
 
-	// Agent returns an agent by IP address.
-	Agent(string) (*Agent, error)
+	// RegistryUpdate updates a registry.
+	RegistryUpdate(owner, name string, registry *Registry) (*Registry, error)
 
-	// AgentDel deletes an agent by IP address.
-	AgentDel(string) error
+	// RegistryDelete deletes a registry.
+	RegistryDelete(owner, name, hostname string) error
 
-	// AgentList returns a list of build agents.
-	AgentList() ([]*Agent, error)
+	// Secret returns a secret by name.
+	Secret(owner, name, secret string) (*Secret, error)
+
+	// SecretList returns a list of all repository secrets.
+	SecretList(owner, name string) ([]*Secret, error)
+
+	// SecretCreate creates a registry.
+	SecretCreate(owner, name string, secret *Secret) (*Secret, error)
+
+	// SecretUpdate updates a registry.
+	SecretUpdate(owner, name string, secret *Secret) (*Secret, error)
+
+	// SecretDelete deletes a secret.
+	SecretDelete(owner, name, secret string) error
 }

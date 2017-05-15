@@ -8,14 +8,9 @@ pipeline:
     commands:
       - cd drone
       - go test
-  dist:
+
+  build:
     image: golang:1.6
-    commands: ./.drone.sh
+    commands: bash .drone.sh
     when:
       event: push
-
-  # publish:
-  #   image: s3
-  #   when:
-  #     event: push
-  #     branch: master
