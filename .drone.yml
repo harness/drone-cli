@@ -4,13 +4,13 @@ workspace:
 
 pipeline:
   test:
-    image: golang:1.6
+    image: golang:1.8
     commands:
       - cd drone
       - go test
 
   build:
-    image: golang:1.6
+    image: golang:1.8
     commands: bash .drone.sh
     when:
       event: push
