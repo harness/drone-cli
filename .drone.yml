@@ -11,6 +11,6 @@ pipeline:
 
   build:
     image: golang:1.8
-    commands: bash .drone.sh
+    commands: sh .drone.sh
     when:
       event: push
