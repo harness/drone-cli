@@ -6,11 +6,21 @@ pipeline:
   test:
     image: golang:1.8
     commands:
+      - echo starting
       - cd drone
       - go test
 
   build:
     image: golang:1.8
     commands: sh .drone.sh
+
+  publish:
+    image: plugins/github-release
+    files:
+      - release/drone_*.tar.gz
+      - release/drone_checksums.txt
+    secrets:
+      - source: github_token
+        target: github_release_api_key
     when:
-      event: push
+      event: tag
