@@ -55,7 +55,7 @@ func secretUpdate(c *cli.Context) error {
 		Name:   c.String("name"),
 		Value:  c.String("value"),
 		Images: c.StringSlice("image"),
-		Events: c.StringSlice("events"),
+		Events: c.StringSlice("event"),
 	}
 	if strings.HasPrefix(secret.Value, "@") {
 		path := strings.TrimPrefix(secret.Value, "@")
