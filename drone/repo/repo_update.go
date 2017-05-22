@@ -28,6 +28,10 @@ var repoUpdateCmd = cli.Command{
 			Usage: "repository timeout",
 		},
 		cli.StringFlag{
+			Name:  "visibility",
+			Usage: "repository visibility",
+		},
+		cli.StringFlag{
 			Name:  "config",
 			Usage: "repository configuration path (e.g. .drone.yml)",
 		},
@@ -47,10 +51,11 @@ func repoUpdate(c *cli.Context) error {
 	}
 
 	var (
-		config  = c.String("config")
-		timeout = c.Duration("timeout")
-		trusted = c.Bool("trusted")
-		gated   = c.Bool("gated")
+		visibility = c.String("visibility")
+		config     = c.String("config")
+		timeout    = c.Duration("timeout")
+		trusted    = c.Bool("trusted")
+		gated      = c.Bool("gated")
 	)
 
 	patch := new(drone.RepoPatch)
@@ -66,6 +71,12 @@ func repoUpdate(c *cli.Context) error {
 	}
 	if c.IsSet("config") {
 		patch.Config = &config
+	}
+	if c.IsSet("visibility") {
+		switch visibility {
+		case "public", "private", "internal":
+			patch.Visibility = &visibility
+		}
 	}
 
 	if _, err := client.RepoPatch(owner, name, patch); err != nil {

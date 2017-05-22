@@ -23,6 +23,7 @@ type (
 		Clone       string `json:"clone_url,omitempty"`
 		Branch      string `json:"default_branch,omitempty"`
 		Timeout     int64  `json:"timeout,omitempty"`
+		Visibility  string `json:"visibility"`
 		IsPrivate   bool   `json:"private,omitempty"`
 		IsTrusted   bool   `json:"trusted"`
 		IsStarred   bool   `json:"starred,omitempty"`
@@ -40,6 +41,7 @@ type (
 		IsTrusted   *bool   `json:"trusted,omitempty"`
 		IsGated     *bool   `json:"gated,omitempty"`
 		Timeout     *int64  `json:"timeout,omitempty"`
+		Visibility  *string `json:"visibility"`
 		AllowPull   *bool   `json:"allow_pr,omitempty"`
 		AllowPush   *bool   `json:"allow_push,omitempty"`
 		AllowDeploy *bool   `json:"allow_deploy,omitempty"`

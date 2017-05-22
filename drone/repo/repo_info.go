@@ -50,6 +50,7 @@ var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
 Type: {{ .Kind }}
 Config: {{ .Config }}
+Visibility: {{ .Visibility }}
 Private: {{ .IsPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
