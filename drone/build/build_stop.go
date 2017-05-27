@@ -30,11 +30,15 @@ func buildStop(c *cli.Context) (err error) {
 		return errInvalidBuildNumber
 	}
 
-	job, err := strconv.Atoi(c.Args().Get(2))
-	if job == 0 {
+	var job int
+	jobArg := c.Args().Get(2)
+	if jobArg == "" {
 		job = 1
-	} else if err != nil {
-		return errInvalidJobNumber
+	} else {
+		job, err = strconv.Atoi(jobArg)
+		if err != nil {
+			return errInvalidJobNumber
+		}
 	}
 
 	client, err := internal.NewClient(c)
