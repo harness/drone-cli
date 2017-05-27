@@ -35,6 +35,10 @@ func buildStart(c *cli.Context) (err error) {
 	}
 
 	_, number, err := getBuildWithArg(c.Args().Get(1), owner, name, client)
+	if err != nil {
+		return err
+	}
+
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
 	build, err := client.BuildStart(owner, name, number, params)
