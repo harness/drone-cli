@@ -25,9 +25,16 @@ func buildStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	job, _ := strconv.Atoi(c.Args().Get(2))
-	if job == 0 {
+	var job int
+
+	jobIdStr := c.Args().Get(2)
+	if len(jobIdStr) == 0 {
 		job = 1
+	} else {
+		job, err = strconv.Atoi(jobIdStr)
+		if err != nil {
+			return fmt.Errorf("Error: malformed job number specified: %s", err.Error())
+		}
 	}
 
 	client, err := internal.NewClient(c)
