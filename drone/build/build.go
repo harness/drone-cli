@@ -5,7 +5,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var errInvalidBuildNumber = errors.New("Missing or invalid build number.")
+var errInvalidBuildNumber = errors.New("Error: missing or invalid build number.")
 
 // Command exports the build command set.
 var Command = cli.Command{

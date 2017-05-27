@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"strconv"
 
+	"errors"
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
 )
+
+var errInvalidJobNumber = errors.New("Error: missing or invalid job number.")
 
 var buildStopCmd = cli.Command{
 	Name:      "stop",
@@ -35,7 +38,7 @@ func buildStop(c *cli.Context) (err error) {
 	} else {
 		job, err = strconv.Atoi(jobIdStr)
 		if err != nil {
-			return fmt.Errorf("Error: malformed job number specified: %s", err.Error())
+			return errInvalidJobNumber
 		}
 	}
 
