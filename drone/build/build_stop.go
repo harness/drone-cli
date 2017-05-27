@@ -21,7 +21,7 @@ func buildStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := parseBuildArg(c.Args().Get(1))
 	if err != nil {
 		return err
 	}

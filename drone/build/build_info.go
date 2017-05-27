@@ -45,7 +45,7 @@ func buildInfo(c *cli.Context) error {
 		}
 		number = build.Number
 	} else {
-		number, err = strconv.Atoi(buildArg)
+		number, err = parseBuildArg(buildArg)
 		if err != nil {
 			return err
 		}

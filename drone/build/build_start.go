@@ -34,6 +34,7 @@ func buildStart(c *cli.Context) (err error) {
 		return err
 	}
 
+<<<<<<< HEAD
 	buildArg := c.Args().Get(1)
 	var number int
 	if buildArg == "last" {
@@ -53,6 +54,9 @@ func buildStart(c *cli.Context) (err error) {
 		}
 	}
 
+=======
+	_, number, err := getBuildWithArg(c.Args().Get(1), owner, name, client)
+>>>>>>> add clearer error messages when drone fails to parse the build number
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
 	build, err := client.BuildStart(owner, name, number, params)
