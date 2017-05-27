@@ -3,6 +3,7 @@ package build
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
@@ -33,29 +34,7 @@ func buildStart(c *cli.Context) (err error) {
 		return err
 	}
 
-<<<<<<< HEAD
-	buildArg := c.Args().Get(1)
-	var number int
-	if buildArg == "last" {
-		// Fetch the build number from the last build
-		build, err := client.BuildLast(owner, name, "")
-		if err != nil {
-			return err
-		}
-		number = build.Number
-	} else {
-		if len(buildArg) == 0 {
-			return errors.New("missing job number")
-		}
-		number, err = strconv.Atoi(buildArg)
-		if err != nil {
-			return err
-		}
-	}
-
-=======
 	_, number, err := getBuildWithArg(c.Args().Get(1), owner, name, client)
->>>>>>> add clearer error messages when drone fails to parse the build number
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
 	build, err := client.BuildStart(owner, name, number, params)
