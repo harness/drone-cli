@@ -2,7 +2,6 @@ package build
 
 import (
 	"os"
-	"strconv"
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
