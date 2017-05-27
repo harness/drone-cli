@@ -2,11 +2,11 @@ package build
 
 import (
 	"os"
+	"strconv"
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
-	"strconv"
 )
 
 var buildInfoCmd = cli.Command{
@@ -34,18 +34,20 @@ func buildInfo(c *cli.Context) error {
 		return err
 	}
 
-	buildArgStr := c.Args().Get(1)
 	var number int
-	if buildArgStr == "last" {
+
+	buildArg := c.Args().Get(1)
+	if buildArg == "last" {
 		build, err := client.BuildLast(owner, name, "")
 		if err != nil {
 			return err
 		}
 		number = build.Number
-	} else if parsedNumber, err := strconv.Atoi(buildArgStr); err != nil {
-		return errInvalidBuildNumber
 	} else {
-		number = parsedNumber
+		number, err = strconv.Atoi(buildArg)
+		if err != nil {
+			return errInvalidBuildNumber
+		}
 	}
 
 	build, err := client.Build(owner, name, number)

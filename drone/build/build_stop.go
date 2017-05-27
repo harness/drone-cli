@@ -1,10 +1,10 @@
 package build
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
-	"errors"
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
 )
@@ -30,16 +30,11 @@ func buildStop(c *cli.Context) (err error) {
 		return errInvalidBuildNumber
 	}
 
-	var job int
-
-	jobIdStr := c.Args().Get(2)
-	if len(jobIdStr) == 0 {
+	job, err := strconv.Atoi(c.Args().Get(2))
+	if job == 0 {
 		job = 1
-	} else {
-		job, err = strconv.Atoi(jobIdStr)
-		if err != nil {
-			return errInvalidJobNumber
-		}
+	} else if err != nil {
+		return errInvalidJobNumber
 	}
 
 	client, err := internal.NewClient(c)

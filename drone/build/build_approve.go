@@ -2,10 +2,10 @@ package build
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
-	"strconv"
 )
 
 var buildApproveCmd = cli.Command{
