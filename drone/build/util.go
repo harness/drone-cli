@@ -2,11 +2,13 @@ package build
 
 import (
 	"fmt"
-	"strconv"
 	"github.com/drone/drone-go/drone"
+	"strconv"
 	"strings"
 )
 
+// parses a string into a build #, with no support for resolving the latest build
+// returns very friendly errors as opposed to strconv errors
 func parseBuildArg(arg string) (buildNumber int, err error) {
 	if len(arg) == 0 {
 		err = fmt.Errorf("Error: missing build number after repository.")
@@ -20,6 +22,16 @@ func parseBuildArg(arg string) (buildNumber int, err error) {
 	return
 }
 
+// parses a string, which is one of "last" or an exact build number.
+// the returned value is the latest build, it's number
+//
+// this is redundant but more often than not you don't actually want/need the actual build,
+// just it's number; you can use _ to throw away the build and 'number' to access just the number
+//
+// this is an example
+//
+// _, number, err := getBuildWithArg(c.Args().Get(1), owner, repo, client)
+//
 func getBuildWithArg(arg, owner, repo string, client drone.Client) (build *drone.Build, number int, err error) {
 	arg = strings.ToLower(arg)
 	switch arg {
