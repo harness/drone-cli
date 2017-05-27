@@ -7,6 +7,7 @@ import (
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
+	"strconv"
 )
 
 var buildStartCmd = cli.Command{
@@ -34,9 +35,18 @@ func buildStart(c *cli.Context) (err error) {
 		return err
 	}
 
-	_, number, err := getBuildWithArg(c.Args().Get(1), owner, name, client)
-	if err != nil {
-		return err
+	buildArgStr := c.Args().Get(1)
+	var number int
+	if buildArgStr == "last" {
+		build, err := client.BuildLast(owner, repo, "")
+		if err != nil {
+			return err
+		}
+		number = build.Number
+	} else if parsedNumber, err := strconv.Atoi(buildArgStr); err != nil {
+		return errInvalidBuildNumber
+	} else {
+		number = parsedNumber
 	}
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))

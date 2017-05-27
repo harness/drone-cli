@@ -5,6 +5,7 @@ import (
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
+	"strconv"
 )
 
 var buildApproveCmd = cli.Command{
@@ -20,9 +21,9 @@ func buildApprove(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := parseBuildArg(c.Args().Get(1))
+	number, err := strconv.Atoi(c.Args().Get(1))
 	if err != nil {
-		return err
+		return errInvalidBuildNumber
 	}
 
 	client, err := internal.NewClient(c)

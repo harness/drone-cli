@@ -21,10 +21,12 @@ func buildStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := parseBuildArg(c.Args().Get(1))
+
+	number, err := strconv.Atoi(c.Args().Get(1))
 	if err != nil {
-		return err
+		return errInvalidBuildNumber
 	}
+
 	var job int
 
 	jobIdStr := c.Args().Get(2)
