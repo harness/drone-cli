@@ -25,10 +25,21 @@ pipeline:
     when:
       event: tag
 
-  docker_publish:
+ publish_latest:
     image: plugins/docker
-    repo: drone/drone-cli
+    repo: ${DRONE_REPO}
+    tags: [ 'latest' ]
     secrets: [ docker_username, docker_password ]
-    tag: [ latest ]
     when:
-      event: tag
+      event: [ push ]
+      branch: [ master ]
+
+  publish_tag:
+    image: plugins/docker
+    repo: ${DRONE_REPO}
+    tags: [ '${DRONE_TAG}' ]
+    secrets: [ docker_username, docker_password ]
+    group: release
+    when:
+      event: [ tag ]
+      branch: [ refs/tags/* ]
