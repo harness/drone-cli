@@ -24,3 +24,11 @@ pipeline:
         target: github_release_api_key
     when:
       event: tag
+
+  docker_publish:
+    image: plugins/docker
+    repo: drone/drone-cli
+    secrets: [ docker_username, docker_password ]
+    tag: [ latest ]
+    when:
+      event: tag
