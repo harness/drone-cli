@@ -1,0 +1,192 @@
+#compdef drone
+#
+# zsh completion for drone-cli (http://drone.io)
+#
+
+_drone() {
+  typeset -A opt_args
+  local -a commands
+  commands=(
+  'build:manage builds'
+  'repo:manage repos'
+  'exec:executes a local build'
+  'node:manage node build'
+  'user:manage users'
+  'secure:creates a secure yaml file'
+  'help:Shows a list of commands or help for one command'
+  )
+
+  _arguments \
+    '(-t --token)'{-t,--token}'[Server auth token [$DRONE_TOKEN]:token]' \
+    '(-s --server)'{-s,--server}'[server location [$DRONE_SERVER]:server]' \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '(-v --version)'{-v,--version}'[print the version]' \
+    '1: :{_describe "command" commands}' \
+    '*::arg:->args'
+
+  case $state in
+    args)
+      case $words[1] in
+        (build)
+          local -a subcommands
+          subcommands=(
+          'info:show build information'
+          'list:list recent builds'
+          'last:last build (push only)'
+          'logs:show build logs'
+          'start:start a stopped build'
+          'fork:fork and execute a build'
+          'stop:stop a running build job'
+          'help:Shows a list of commands or help for one command'
+          'h:Shows a list of commands or help for one command'
+          )
+
+          _arguments \
+            '1: :{_describe "command" subcommands}' \
+            '*::arg:->arg'
+            case "$state" in
+              arg)
+                case $words[1] in
+                  (info|logs|start|fork|stop)
+                    _arguments \
+                      '1:repositories:_repos' \
+                      ':build number:_builds'
+                    ;;
+                  (list|last)
+                    _arguments '1:repositories:_repos'
+                    ;;
+                esac
+                ;;
+            esac
+          ;;
+        (repo)
+          local -a subcommands
+          subcommands=(
+          'ls:lists repositories'
+          'info:show repository details'
+          'add:add a repository'
+          'rm:remove a repository'
+          'help:Shows a list of commands or help for one command'
+          'h:Shows a list of commands or help for one command'
+          )
+
+          _arguments \
+            '1: :{_describe "command" subcommands}' \
+            '*::arg:->arg'
+            case "$state" in
+              arg)
+                case $words[1] in
+                  (info|add|rm)
+                    _arguments '1:repositories:_repos'
+                    ;;
+                esac
+                ;;
+            esac
+          ;;
+        (node)
+          local -a subcommands
+          subcommands=(
+          'ls:list all nodes'
+          'info:show node details'
+          'create:creates a node'
+          'rm:remove a node'
+          'help:Shows a list of commands or help for one command'
+          'h:Shows a list of commands or help for one command'
+          )
+
+          _arguments \
+            '1: :{_describe "command" subcommands}' \
+            '*::arg:->arg'
+            case "$state" in
+              arg)
+                case $words[1] in
+                  (info|create|rm)
+                    _arguments '1:node:_nodes'
+                    ;;
+                esac
+                ;;
+            esac
+          ;;
+        (user)
+          local -a subcommands
+          subcommands=(
+          'ls:list all users'
+          'info:show user details'
+          'add:adds a user'
+          'rm:remove a user'
+          'self:show the current user details'
+          'help:Shows a list of commands or help for one command'
+          'h:Shows a list of commands or help for one command'
+          )
+
+          _arguments \
+            '1: :{_describe "command" subcommands}' \
+            '*::arg:->arg'
+            case "$state" in
+              arg)
+                case $words[1] in
+                  (info|add|rm)
+                    _arguments '1:user:_drone_users'
+                    ;;
+                esac
+                ;;
+            esac
+          ;;
+        (secure)
+          _arguments \
+            '--in[input path to the plaintext secret file (use - for stdin)]:secret:_files' \
+            '--out[output path for the encrypted secret file (use - for stdout)]:out:_files' \
+            '--repo[name of the repository]:name:_repos'\
+            '--yaml[path to .drone.yml file]:file:_files' \
+            '--checksum[calculate and encrypt the yaml checksum]'
+          ;;
+        (exec)
+          _arguments \
+            '--docker-host[docker deamon address \[$DOCKER_HOST\]]' \
+            '--docker-tls-verify[docker daemon supports tlsverify \[$DOCKER_TLS_VERIFY\]]' \
+            '--docker-cert-path[docker certificate directory \[$DOCKER_CERT_PATH\]]:path:_files' \
+            '-i[identify file injected in the container]:file:_files' \
+            '-e[secret environment variables]:option' \
+            '--trusted[enable elevated privilege]' \
+            '--cache[execute cache steps]' \
+            '--deploy[execute publish and deployment steps]' \
+            '--notify[execute notification steps]' \
+            '--pull[always pull the latest docker image]' \
+            '--event[hook event type]:event:(push)' \
+            '--debug[execute the build in debug mode]'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+(( $+functions[_repos] )) ||
+_repos() {
+  local -a repos
+  repos=($(drone repo ls))
+  _describe "repo" repos
+}
+
+(( $+functions[_builds] )) ||
+_builds() {
+  local -a builds
+  builds=($(drone build list $words[($CURRENT - 1)]))
+  _describe "build" builds
+}
+
+(( $+functions[_nodes] )) ||
+_nodes() {
+  local -a nodes
+  nodes=($(drone node ls | awk '{print $1}'))
+  _describe "node" nodes
+}
+
+(( $+functions[_drone_users] )) ||
+_drone_users() {
+  local -a users
+  users=($(drone user ls | sed 1,2d | awk '{print $1}'))
+  _describe "user" users
+}
+
+_drone
+# vim: ft=zsh sw=2 ts=2 et
