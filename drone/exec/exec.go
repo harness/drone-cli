@@ -83,7 +83,7 @@ var Command = cli.Command{
 		//
 		cli.StringFlag{
 			Name:   "workspace-base",
-			Value:  "/pipeline",
+			Value:  "/drone",
 			EnvVar: "DRONE_WORKSPACE_BASE",
 		},
 		cli.StringFlag{
