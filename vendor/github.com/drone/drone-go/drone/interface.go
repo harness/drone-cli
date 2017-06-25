@@ -100,6 +100,8 @@ type Client interface {
 	// SecretCreate creates a registry.
 	SecretCreate(owner, name string, secret *Secret) (*Secret, error)
 
+	Sign(owner, name string, in []byte) ([]byte, error)
+
 	// SecretUpdate updates a registry.
 	SecretUpdate(owner, name string, secret *Secret) (*Secret, error)
 

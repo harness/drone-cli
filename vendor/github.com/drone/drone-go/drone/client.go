@@ -25,6 +25,7 @@ const (
 	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
 	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
 	pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
+	pathSign           = "%s/api/repos/%s/%s/sign"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
@@ -356,6 +357,18 @@ func (c *client) SecretCreate(owner, name string, in *Secret) (*Secret, error) {
 	return out, err
 }
 
+// Sign returns a cryptographic signature for the input string.
+func (c *client) Sign(owner, name string, in []byte) ([]byte, error) {
+       uri := fmt.Sprintf(pathSign, c.addr, owner, name)
+
+       rc, err := c.stream(uri, "POST", in, nil)
+       if err != nil {
+               return nil, err
+       }
+       defer rc.Close()
+       return ioutil.ReadAll(rc)
+}
+
 // SecretUpdate updates a secret.
 func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
 	out := new(Secret)
@@ -443,6 +456,36 @@ func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser
 		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
 	}
 	return resp.Body, nil
+}
+
+// helper function to stream an http request
+func (c *client) stream(rawurl, method string, in, out []byte) (io.ReadCloser, error) {
+       uri, err := url.Parse(rawurl)
+       if err != nil {
+               return nil, err
+       }
+
+       buf := new(bytes.Buffer)
+       buf.Write(in)
+
+       req, err := http.NewRequest(method, uri.String(), buf)
+       if err != nil {
+               return nil, err
+       }
+
+       req.Header.Set("Content-Type", "plain/text")
+
+       resp, err := c.client.Do(req)
+       if err != nil {
+               return nil, err
+       }
+
+       if resp.StatusCode > http.StatusPartialContent {
+               defer resp.Body.Close()
+               out, _ := ioutil.ReadAll(resp.Body)
+	       return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
+       }
+       return resp.Body, nil
 }
 
 // mapValues converts a map to url.Values
