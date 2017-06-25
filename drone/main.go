@@ -11,6 +11,7 @@ import (
 	"github.com/drone/drone-cli/drone/registry"
 	"github.com/drone/drone-cli/drone/repo"
 	"github.com/drone/drone-cli/drone/secret"
+	"github.com/drone/drone-cli/drone/sign"
 	"github.com/drone/drone-cli/drone/user"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -62,6 +63,7 @@ func main() {
 		info.Command,
 		registry.Command,
 		secret.Command,
+		sign.Command,
 		repo.Command,
 		user.Command,
 	}
