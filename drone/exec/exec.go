@@ -375,7 +375,6 @@ func exec(c *cli.Context) error {
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),
-		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
@@ -451,6 +450,9 @@ var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reade
 	if err != nil {
 		return err
 	}
-	io.Copy(os.Stderr, part)
+
+	logstream := NewLineWriter(proc.Alias)
+	io.Copy(logstream, part)
+
 	return nil
 })
