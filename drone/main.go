@@ -37,7 +37,7 @@ func getConfig() {
 	// config will be handled on usage.
 	config = Config{}
 	usr, _ := osuser.Current()
-	file, _ := ioutil.ReadFile(usr.HomeDir + "/.dronerc")
+	file, _ := ioutil.ReadFile(usr.HomeDir + "/.drone.yml")
 	yaml.Unmarshal(file, &config)
 }
 
