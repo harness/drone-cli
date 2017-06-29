@@ -327,6 +327,7 @@ func exec(c *cli.Context) error {
 			workspacePath = c.String("workspace-path")
 		}
 		dir, _ := filepath.Abs(filepath.Dir(file))
+		volumes = append(volumes, "drone_default:"+workspaceBase)
 		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
 	}
 
