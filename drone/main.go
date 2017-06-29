@@ -48,6 +48,7 @@ func main() {
 	app.Name = "drone"
 	app.Version = version
 	app.Usage = "command line utility"
+	app.EnableBashCompletion = true
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "t, token",
