@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"io/ioutil"
+	osuser "os/user"
 
 	"github.com/drone/drone-cli/drone/build"
 	"github.com/drone/drone-cli/drone/deploy"
@@ -15,12 +17,33 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
+
+	"gopkg.in/yaml.v2"
 )
+
+type Config struct {
+	Server string `yaml:"server"`
+	Token string `yaml:"token"`
+}
 
 // drone version number
 var version string
 
+// configuration
+var config Config
+
+func getConfig() {
+	// Errors are deliberately ignored here as missing/incorrect
+	// config will be handled on usage.
+	config = Config{}
+	usr, _ := osuser.Current()
+	file, _ := ioutil.ReadFile(usr.HomeDir + "/.drone.yml")
+	yaml.Unmarshal(file, &config)
+}
+
 func main() {
+	getConfig()
+
 	app := cli.NewApp()
 	app.Name = "drone"
 	app.Version = version
@@ -30,11 +53,13 @@ func main() {
 		cli.StringFlag{
 			Name:   "t, token",
 			Usage:  "server auth token",
+			Value: 	config.Token,
 			EnvVar: "DRONE_TOKEN",
 		},
 		cli.StringFlag{
 			Name:   "s, server",
 			Usage:  "server location",
+			Value: 	config.Server, 
 			EnvVar: "DRONE_SERVER",
 		},
 		cli.BoolFlag{
