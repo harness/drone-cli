@@ -330,12 +330,7 @@ func exec(c *cli.Context) error {
 		dir, _ := filepath.Abs(filepath.Dir(file))
 
 		if runtime.GOOS == "windows" {
-			base := filepath.VolumeName(dir)
-			if len(base) == 2 {
-				dir = dir[2:]
-				base = strings.ToLower(base[:1])
-				dir = "/" + base + filepath.ToSlash(dir)
-			}
+			dir = convertPathForWindows(dir)
 		}
 		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
 		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
@@ -454,6 +449,17 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 			Arch: c.String("system-arch"),
 		},
 	}
+}
+
+func convertPathForWindows(path string) string {
+	base := filepath.VolumeName(path)
+	if len(base) == 2 {
+		path = strings.TrimPrefix(path, base)
+		base = strings.ToLower(strings.TrimSuffix(base, ":"))
+		return "/" + base + filepath.ToSlash(path)
+	}
+
+	return filepath.ToSlash(path)
 }
 
 var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
