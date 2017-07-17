@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -327,6 +328,15 @@ func exec(c *cli.Context) error {
 			workspacePath = c.String("workspace-path")
 		}
 		dir, _ := filepath.Abs(filepath.Dir(file))
+
+		if runtime.GOOS == "windows" {
+			base := filepath.VolumeName(dir)
+			if len(base) == 2 {
+				dir = dir[2:]
+				base = strings.ToLower(base[:1])
+				dir = "/" + base + filepath.ToSlash(dir)
+			}
+		}
 		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
 		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
 	}
