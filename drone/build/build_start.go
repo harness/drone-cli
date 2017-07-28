@@ -39,7 +39,7 @@ func buildStart(c *cli.Context) (err error) {
 
 	buildArg := c.Args().Get(1)
 	var number int
-	if buildArg == "last" {
+	if buildArg == "last" || len(buildArg) == 0 {
 		// Fetch the build number from the last build
 		build, err := client.BuildLast(owner, name, "")
 		if err != nil {
