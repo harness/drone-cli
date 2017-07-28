@@ -1,6 +1,7 @@
 package build
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -39,7 +40,7 @@ func buildStart(c *cli.Context) (err error) {
 
 	buildArg := c.Args().Get(1)
 	var number int
-	if buildArg == "last" || len(buildArg) == 0 {
+	if buildArg == "last" {
 		// Fetch the build number from the last build
 		build, err := client.BuildLast(owner, name, "")
 		if err != nil {
@@ -47,6 +48,9 @@ func buildStart(c *cli.Context) (err error) {
 		}
 		number = build.Number
 	} else {
+		if len(buildArg) == 0 {
+			return errors.New("missing job number")
+		}
 		number, err = strconv.Atoi(buildArg)
 		if err != nil {
 			return err
