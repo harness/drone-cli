@@ -11,9 +11,10 @@ import (
 )
 
 var secretUpdateCmd = cli.Command{
-	Name:   "update",
-	Usage:  "update a secret",
-	Action: secretUpdate,
+	Name:      "update",
+	Usage:     "update a secret",
+	ArgsUsage: "[repo/name]",
+	Action:    secretUpdate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

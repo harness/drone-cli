@@ -11,9 +11,10 @@ import (
 
 // Command exports the info command.
 var Command = cli.Command{
-	Name:   "info",
-	Usage:  "show information about the current user",
-	Action: info,
+	Name:      "info",
+	Usage:     "show information about the current user",
+	ArgsUsage: " ",
+	Action:    info,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:   "format",

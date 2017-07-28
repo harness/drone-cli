@@ -11,9 +11,10 @@ import (
 )
 
 var repoUpdateCmd = cli.Command{
-	Name:   "update",
-	Usage:  "update a repository",
-	Action: repoUpdate,
+	Name:      "update",
+	Usage:     "update a repository",
+	ArgsUsage: "<repo/name>",
+	Action:    repoUpdate,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "trusted",

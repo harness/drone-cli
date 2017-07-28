@@ -9,9 +9,10 @@ import (
 )
 
 var buildStopCmd = cli.Command{
-	Name:   "stop",
-	Usage:  "stop a build",
-	Action: buildStop,
+	Name:      "stop",
+	Usage:     "stop a build",
+	ArgsUsage: "<repo/name> [build] [job]",
+	Action:    buildStop,
 }
 
 func buildStop(c *cli.Context) (err error) {

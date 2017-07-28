@@ -10,9 +10,10 @@ import (
 )
 
 var secretInfoCmd = cli.Command{
-	Name:   "info",
-	Usage:  "display secret info",
-	Action: secretInfo,
+	Name:      "info",
+	Usage:     "display secret info",
+	ArgsUsage: "[repo/name]",
+	Action:    secretInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

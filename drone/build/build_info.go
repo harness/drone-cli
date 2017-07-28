@@ -10,9 +10,10 @@ import (
 )
 
 var buildInfoCmd = cli.Command{
-	Name:   "info",
-	Usage:  "show build details",
-	Action: buildInfo,
+	Name:      "info",
+	Usage:     "show build details",
+	ArgsUsage: "<repo/name> [build]",
+	Action:    buildInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

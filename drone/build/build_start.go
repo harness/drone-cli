@@ -11,9 +11,10 @@ import (
 )
 
 var buildStartCmd = cli.Command{
-	Name:   "start",
-	Usage:  "start a build",
-	Action: buildStart,
+	Name:      "start",
+	Usage:     "start a build",
+	ArgsUsage: "<repo/name> [build]",
+	Action:    buildStart,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "fork",
