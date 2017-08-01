@@ -9,9 +9,10 @@ import (
 )
 
 var userRemoveCmd = cli.Command{
-	Name:   "rm",
-	Usage:  "remove a user",
-	Action: userRemove,
+	Name:      "rm",
+	Usage:     "remove a user",
+	ArgsUsage: "<username>",
+	Action:    userRemove,
 }
 
 func userRemove(c *cli.Context) error {

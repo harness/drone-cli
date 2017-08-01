@@ -11,9 +11,10 @@ import (
 )
 
 var registryUpdateCmd = cli.Command{
-	Name:   "update",
-	Usage:  "update a registry",
-	Action: registryUpdate,
+	Name:      "update",
+	Usage:     "update a registry",
+	ArgsUsage: "[repo/name]",
+	Action:    registryUpdate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

@@ -8,9 +8,10 @@ import (
 )
 
 var repoChownCmd = cli.Command{
-	Name:   "chown",
-	Usage:  "assume ownership of a repository",
-	Action: repoChown,
+	Name:      "chown",
+	Usage:     "assume ownership of a repository",
+	ArgsUsage: "<repo/name>",
+	Action:    repoChown,
 }
 
 func repoChown(c *cli.Context) error {

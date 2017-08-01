@@ -9,9 +9,10 @@ import (
 )
 
 var buildApproveCmd = cli.Command{
-	Name:   "approve",
-	Usage:  "approve a build",
-	Action: buildApprove,
+	Name:      "approve",
+	Usage:     "approve a build",
+	ArgsUsage: "<repo/name> <build>",
+	Action:    buildApprove,
 }
 
 func buildApprove(c *cli.Context) (err error) {

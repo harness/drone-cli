@@ -11,9 +11,10 @@ import (
 )
 
 var registryCreateCmd = cli.Command{
-	Name:   "add",
-	Usage:  "adds a registry",
-	Action: registryCreate,
+	Name:      "add",
+	Usage:     "adds a registry",
+	ArgsUsage: "[repo/name]",
+	Action:    registryCreate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

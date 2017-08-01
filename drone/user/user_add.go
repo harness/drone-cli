@@ -10,9 +10,10 @@ import (
 )
 
 var userAddCmd = cli.Command{
-	Name:   "add",
-	Usage:  "adds a user",
-	Action: userAdd,
+	Name:      "add",
+	Usage:     "adds a user",
+	ArgsUsage: "<username>",
+	Action:    userAdd,
 }
 
 func userAdd(c *cli.Context) error {

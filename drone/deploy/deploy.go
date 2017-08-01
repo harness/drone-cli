@@ -14,9 +14,10 @@ import (
 
 // Command exports the deploy command.
 var Command = cli.Command{
-	Name:   "deploy",
-	Usage:  "deploy code",
-	Action: deploy,
+	Name:      "deploy",
+	Usage:     "deploy code",
+	ArgsUsage: "<repo/name> <build> <environment>",
+	Action:    deploy,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

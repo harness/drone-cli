@@ -7,9 +7,10 @@ import (
 )
 
 var buildLogsCmd = cli.Command{
-	Name:   "logs",
-	Usage:  "show build logs",
-	Action: buildLogs,
+	Name:      "logs",
+	Usage:     "show build logs",
+	ArgsUsage: "<repo/name> [build] [job]",
+	Action:    buildLogs,
 }
 
 func buildLogs(c *cli.Context) error {
