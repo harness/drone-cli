@@ -8,14 +8,15 @@ import (
 	"github.com/urfave/cli"
 )
 
-var buildApproveCmd = cli.Command{
-	Name:      "approve",
-	Usage:     "approve a build",
+var buildKillCmd = cli.Command{
+	Name:      "kill",
+	Usage:     "force kill a build",
 	ArgsUsage: "<repo/name> <build>",
-	Action:    buildApprove,
+	Action:    buildKill,
+	Hidden:    true,
 }
 
-func buildApprove(c *cli.Context) (err error) {
+func buildKill(c *cli.Context) (err error) {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -31,11 +32,11 @@ func buildApprove(c *cli.Context) (err error) {
 		return err
 	}
 
-	_, err = client.BuildApprove(owner, name, number)
+	err = client.BuildKill(owner, name, number)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Approving build %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Force killing build %s/%s#%d\n", owner, name, number)
 	return nil
 }

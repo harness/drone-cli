@@ -11,9 +11,10 @@ import (
 )
 
 var userInfoCmd = cli.Command{
-	Name:   "info",
-	Usage:  "show user details",
-	Action: userInfo,
+	Name:      "info",
+	Usage:     "show user details",
+	ArgsUsage: "<username>",
+	Action:    userInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -26,8 +27,9 @@ import (
 
 // Command exports the exec command.
 var Command = cli.Command{
-	Name:  "exec",
-	Usage: "execute a local build",
+	Name:      "exec",
+	Usage:     "execute a local build",
+	ArgsUsage: "[path/to/.drone.yml]",
 	Action: func(c *cli.Context) {
 		if err := exec(c); err != nil {
 			log.Fatalln(err)
@@ -83,7 +85,7 @@ var Command = cli.Command{
 		//
 		cli.StringFlag{
 			Name:   "workspace-base",
-			Value:  "/pipeline",
+			Value:  "/drone",
 			EnvVar: "DRONE_WORKSPACE_BASE",
 		},
 		cli.StringFlag{
@@ -327,6 +329,11 @@ func exec(c *cli.Context) error {
 			workspacePath = c.String("workspace-path")
 		}
 		dir, _ := filepath.Abs(filepath.Dir(file))
+
+		if runtime.GOOS == "windows" {
+			dir = convertPathForWindows(dir)
+		}
+		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
 		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
 	}
 
@@ -375,7 +382,6 @@ func exec(c *cli.Context) error {
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),
-		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
@@ -446,11 +452,25 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 	}
 }
 
+func convertPathForWindows(path string) string {
+	base := filepath.VolumeName(path)
+	if len(base) == 2 {
+		path = strings.TrimPrefix(path, base)
+		base = strings.ToLower(strings.TrimSuffix(base, ":"))
+		return "/" + base + filepath.ToSlash(path)
+	}
+
+	return filepath.ToSlash(path)
+}
+
 var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
 	part, err := rc.NextPart()
 	if err != nil {
 		return err
 	}
-	io.Copy(os.Stderr, part)
+
+	logstream := NewLineWriter(proc.Alias)
+	io.Copy(logstream, part)
+
 	return nil
 })

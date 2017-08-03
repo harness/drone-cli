@@ -10,9 +10,10 @@ import (
 )
 
 var buildQueueCmd = cli.Command{
-	Name:   "queue",
-	Usage:  "show build queue",
-	Action: buildQueue,
+	Name:      "queue",
+	Usage:     "show build queue",
+	ArgsUsage: " ",
+	Action:    buildQueue,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

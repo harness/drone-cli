@@ -7,9 +7,10 @@ import (
 )
 
 var registryDeleteCmd = cli.Command{
-	Name:   "rm",
-	Usage:  "remove a registry",
-	Action: registryDelete,
+	Name:      "rm",
+	Usage:     "remove a registry",
+	ArgsUsage: "[repo/name]",
+	Action:    registryDelete,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

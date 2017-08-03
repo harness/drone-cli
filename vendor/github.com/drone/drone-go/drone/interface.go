@@ -72,6 +72,9 @@ type Client interface {
 	// BuildDecline declines a blocked build.
 	BuildDecline(string, string, int) (*Build, error)
 
+	// BuildKill force kills the running build.
+	BuildKill(string, string, int) error
+
 	// Deploy triggers a deployment for an existing build using the specified
 	// target environment.
 	Deploy(string, string, int, string, map[string]string) (*Build, error)

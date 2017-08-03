@@ -11,9 +11,10 @@ import (
 )
 
 var secretListCmd = cli.Command{
-	Name:   "ls",
-	Usage:  "list secrets",
-	Action: secretList,
+	Name:      "ls",
+	Usage:     "list secrets",
+	ArgsUsage: "[repo/name]",
+	Action:    secretList,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

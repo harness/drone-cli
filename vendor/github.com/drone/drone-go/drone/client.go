@@ -276,6 +276,13 @@ func (c *client) BuildDecline(owner, name string, num int) (*Build, error) {
 	return out, err
 }
 
+// BuildKill force kills the running build.
+func (c *client) BuildKill(owner, name string, num int) error {
+	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+	err := c.delete(uri)
+	return err
+}
+
 // BuildLogs returns the build logs for the specified job.
 func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
 	return nil, errors.New("Method not implemented")

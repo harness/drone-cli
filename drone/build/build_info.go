@@ -10,9 +10,10 @@ import (
 )
 
 var buildInfoCmd = cli.Command{
-	Name:   "info",
-	Usage:  "show build details",
-	Action: buildInfo,
+	Name:      "info",
+	Usage:     "show build details",
+	ArgsUsage: "<repo/name> [build]",
+	Action:    buildInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",
@@ -36,7 +37,7 @@ func buildInfo(c *cli.Context) error {
 	}
 
 	var number int
-	if buildArg == "last" {
+	if buildArg == "last" || len(buildArg) == 0 {
 		// Fetch the build number from the last build
 		build, err := client.BuildLast(owner, name, "")
 		if err != nil {

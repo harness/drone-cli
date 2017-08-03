@@ -9,9 +9,10 @@ import (
 )
 
 var buildListCmd = cli.Command{
-	Name:   "list",
-	Usage:  "show build history",
-	Action: buildList,
+	Name:      "list",
+	Usage:     "show build history",
+	ArgsUsage: "<repo/name>",
+	Action:    buildList,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

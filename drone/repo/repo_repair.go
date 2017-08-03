@@ -6,9 +6,10 @@ import (
 )
 
 var repoRepairCmd = cli.Command{
-	Name:   "repair",
-	Usage:  "repair repository webhooks",
-	Action: repoRepair,
+	Name:      "repair",
+	Usage:     "repair repository webhooks",
+	ArgsUsage: "<repo/name>",
+	Action:    repoRepair,
 }
 
 func repoRepair(c *cli.Context) error {

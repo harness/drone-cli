@@ -1,6 +1,7 @@
 package build
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -10,9 +11,10 @@ import (
 )
 
 var buildStartCmd = cli.Command{
-	Name:   "start",
-	Usage:  "start a build",
-	Action: buildStart,
+	Name:      "start",
+	Usage:     "start a build",
+	ArgsUsage: "<repo/name> [build]",
+	Action:    buildStart,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "fork",
@@ -47,6 +49,9 @@ func buildStart(c *cli.Context) (err error) {
 		}
 		number = build.Number
 	} else {
+		if len(buildArg) == 0 {
+			return errors.New("missing job number")
+		}
 		number, err = strconv.Atoi(buildArg)
 		if err != nil {
 			return err

@@ -10,9 +10,10 @@ import (
 )
 
 var registryInfoCmd = cli.Command{
-	Name:   "info",
-	Usage:  "display registry info",
-	Action: registryInfo,
+	Name:      "info",
+	Usage:     "display registry info",
+	ArgsUsage: "[repo/name]",
+	Action:    registryInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

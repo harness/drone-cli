@@ -8,9 +8,10 @@ import (
 )
 
 var repoAddCmd = cli.Command{
-	Name:   "add",
-	Usage:  "add a repository",
-	Action: repoAdd,
+	Name:      "add",
+	Usage:     "add a repository",
+	ArgsUsage: "<repo/name>",
+	Action:    repoAdd,
 }
 
 func repoAdd(c *cli.Context) error {

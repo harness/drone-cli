@@ -9,9 +9,10 @@ import (
 )
 
 var buildDeclineCmd = cli.Command{
-	Name:   "decline",
-	Usage:  "decline a build",
-	Action: buildDecline,
+	Name:      "decline",
+	Usage:     "decline a build",
+	ArgsUsage: "<repo/name> <build>",
+	Action:    buildDecline,
 }
 
 func buildDecline(c *cli.Context) (err error) {
