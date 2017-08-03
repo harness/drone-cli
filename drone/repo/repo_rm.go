@@ -9,9 +9,10 @@ import (
 )
 
 var repoRemoveCmd = cli.Command{
-	Name:   "rm",
-	Usage:  "remove a repository",
-	Action: repoRemove,
+	Name:      "rm",
+	Usage:     "remove a repository",
+	ArgsUsage: "<repo/name>",
+	Action:    repoRemove,
 }
 
 func repoRemove(c *cli.Context) error {

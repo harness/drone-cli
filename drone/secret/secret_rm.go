@@ -7,9 +7,10 @@ import (
 )
 
 var secretDeleteCmd = cli.Command{
-	Name:   "rm",
-	Usage:  "remove a secret",
-	Action: secretDelete,
+	Name:      "rm",
+	Usage:     "remove a secret",
+	ArgsUsage: "[repo/name]",
+	Action:    secretDelete,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "repository",

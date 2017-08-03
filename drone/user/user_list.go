@@ -10,9 +10,10 @@ import (
 )
 
 var userListCmd = cli.Command{
-	Name:   "ls",
-	Usage:  "list all users",
-	Action: userList,
+	Name:      "ls",
+	Usage:     "list all users",
+	ArgsUsage: " ",
+	Action:    userList,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

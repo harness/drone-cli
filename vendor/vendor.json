@@ -273,10 +273,10 @@
 			"revisionTime": "2017-05-14T17:21:45Z"
 		},
 		{
-			"checksumSHA1": "hCvDBLoVfOQBsVFLrJmCE1c2i04=",
+			"checksumSHA1": "qLAnM1gmgrZfYrGCNE+nKYFrJAY=",
 			"path": "github.com/drone/drone-go/drone",
-			"revision": "4c3fa553f6b82974aa6c94c46de00b65ed42777b",
-			"revisionTime": "2017-05-22T22:46:34Z"
+			"revision": "327c9594f784216a651dbaed30731600e496dd4e",
+			"revisionTime": "2017-08-01T19:17:01Z"
 		},
 		{
 			"checksumSHA1": "pjMV8mwWcQ0Kk9cbLWweTGiqYPk=",

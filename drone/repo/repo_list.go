@@ -9,9 +9,10 @@ import (
 )
 
 var repoListCmd = cli.Command{
-	Name:   "ls",
-	Usage:  "list all repos",
-	Action: repoList,
+	Name:      "ls",
+	Usage:     "list all repos",
+	ArgsUsage: " ",
+	Action:    repoList,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

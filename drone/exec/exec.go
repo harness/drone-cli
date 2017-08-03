@@ -27,8 +27,9 @@ import (
 
 // Command exports the exec command.
 var Command = cli.Command{
-	Name:  "exec",
-	Usage: "execute a local build",
+	Name:      "exec",
+	Usage:     "execute a local build",
+	ArgsUsage: "[path/to/.drone.yml]",
 	Action: func(c *cli.Context) {
 		if err := exec(c); err != nil {
 			log.Fatalln(err)

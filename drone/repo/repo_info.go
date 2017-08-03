@@ -9,9 +9,10 @@ import (
 )
 
 var repoInfoCmd = cli.Command{
-	Name:   "info",
-	Usage:  "show repository details",
-	Action: repoInfo,
+	Name:      "info",
+	Usage:     "show repository details",
+	ArgsUsage: "<repo/name>",
+	Action:    repoInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",

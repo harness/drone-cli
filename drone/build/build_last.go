@@ -9,9 +9,10 @@ import (
 )
 
 var buildLastCmd = cli.Command{
-	Name:   "last",
-	Usage:  "show latest build details",
-	Action: buildLast,
+	Name:      "last",
+	Usage:     "show latest build details",
+	ArgsUsage: "<repo/name>",
+	Action:    buildLast,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",
