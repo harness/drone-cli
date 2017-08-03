@@ -39,7 +39,6 @@ pipeline:
     repo: ${DRONE_REPO}
     tags: [ '${DRONE_TAG}' ]
     secrets: [ docker_username, docker_password ]
-    group: release
     when:
       event: [ tag ]
       branch: [ refs/tags/* ]
