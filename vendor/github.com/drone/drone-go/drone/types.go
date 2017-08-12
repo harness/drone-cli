@@ -46,6 +46,7 @@ type (
 		AllowPush   *bool   `json:"allow_push,omitempty"`
 		AllowDeploy *bool   `json:"allow_deploy,omitempty"`
 		AllowTag    *bool   `json:"allow_tag,omitempty"`
+		BuildCounter *int `json:"build_counter,omitempty"`
 	}
 
 	// Build defines a build object.

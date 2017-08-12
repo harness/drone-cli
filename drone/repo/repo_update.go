@@ -36,6 +36,14 @@ var repoUpdateCmd = cli.Command{
 			Name:  "config",
 			Usage: "repository configuration path (e.g. .drone.yml)",
 		},
+		cli.IntFlag{
+			Name: "build-counter",
+			Usage: "repository starting build number",
+		},
+		cli.BoolFlag{
+			Name: "unsafe",
+			Usage: "validate updating the build-counter is unsafe",
+		},
 	},
 }
 
@@ -57,6 +65,8 @@ func repoUpdate(c *cli.Context) error {
 		timeout    = c.Duration("timeout")
 		trusted    = c.Bool("trusted")
 		gated      = c.Bool("gated")
+		buildCounter   = c.Int("build-counter")
+		unsafe		= c.Bool("unsafe")
 	)
 
 	patch := new(drone.RepoPatch)
@@ -78,6 +88,12 @@ func repoUpdate(c *cli.Context) error {
 		case "public", "private", "internal":
 			patch.Visibility = &visibility
 		}
+	}
+	if c.IsSet("build-counter") && !unsafe {
+		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
+	}
+	if c.IsSet("build-counter") && unsafe {
+		patch.BuildCounter = & buildCounter
 	}
 
 	if _, err := client.RepoPatch(owner, name, patch); err != nil {
