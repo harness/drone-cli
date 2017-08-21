@@ -4,10 +4,9 @@ import (
 	"fmt"
 
 	"github.com/drone/drone-cli/drone/internal"
-	"github.com/drone/drone-go/drone"
-
 	"github.com/urfave/cli"
 )
+
 var repoMoveCmd = cli.Command{
 	Name:      "mv",
 	Usage:     "move the repository to a new location",
@@ -24,14 +23,11 @@ var repoMoveCmd = cli.Command{
 func repoMove(c *cli.Context) error {
 	repo := c.Args().Get(0)
 	newRepo := c.Args().Get(1)
-
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
 		return err
 	}
-
-
-	newOwner, newName, newErr := internal.ParseRepo(newRepo)
+	_, _, newErr := internal.ParseRepo(newRepo)
 	if newErr != nil {
 		return newErr
 	}
@@ -44,19 +40,15 @@ func repoMove(c *cli.Context) error {
 	var (
 		unsafe = c.Bool("unsafe")
 	)
-	patch := new(drone.RepoPatch)
-	if  !unsafe {
-		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
+	if !unsafe {
+		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed\n")
 		return nil
 	}
-	patch.Owner = &newOwner
-	patch.Name = &newName
-	if _, err := client.RepoPatch(owner, name, patch); err != nil {
+
+	if err := client.RepoMove(owner, name, newRepo); err != nil {
 		return err
 	}
-	if repairErr := client.RepoRepair(newOwner, newName); repairErr != nil {
-		return repairErr
-	}
-	fmt.Printf("Successfully moved repository from %s/%s to %s/%s\n", owner, name, newOwner, newName)
+
+	fmt.Printf("Successfully moved repository from %s/%s to %s\n", owner, name, newRepo)
 	return nil
 }
