@@ -33,6 +33,9 @@ type Client interface {
 	// RepoPatch updates a repository.
 	RepoPatch(string, string, *RepoPatch) (*Repo, error)
 
+	// RepoMove moves the repository
+	RepoMove(string, string, string) error
+
 	// RepoChown updates a repository owner.
 	RepoChown(string, string) (*Repo, error)
 

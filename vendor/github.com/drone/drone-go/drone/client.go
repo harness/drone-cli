@@ -17,6 +17,7 @@ const (
 	pathFeed           = "%s/api/user/feed"
 	pathRepos          = "%s/api/user/repos"
 	pathRepo           = "%s/api/repos/%s/%s"
+	pathRepoMove       = "%s/api/repos/%s/%s/move?to=%s"
 	pathChown          = "%s/api/repos/%s/%s/chown"
 	pathRepair         = "%s/api/repos/%s/%s/repair"
 	pathBuilds         = "%s/api/repos/%s/%s/builds"
@@ -400,6 +401,13 @@ func (c *client) put(rawurl string, in, out interface{}) error {
 func (c *client) patch(rawurl string, in, out interface{}) error {
 	return c.do(rawurl, "PATCH", in, out)
 }
+
+// RepoMove moves a repository
+func (c *client) RepoMove(owner, name, newFullName string) error {
+	uri := fmt.Sprintf(pathRepoMove, c.addr, owner, name, newFullName)
+	return c.post(uri, nil, nil)
+}
+
 
 // helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {
