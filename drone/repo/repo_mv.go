@@ -41,7 +41,7 @@ func repoMove(c *cli.Context) error {
 		unsafe = c.Bool("unsafe")
 	)
 	if !unsafe {
-		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed\n")
+		fmt.Printf("Moving the repo is an unsafe operation that could put your repository in an inconsistent state. You must also manually sync the repos before running this operation. Please use --unsafe to proceed\n")
 		return nil
 	}
 
