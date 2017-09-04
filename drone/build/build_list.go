@@ -9,7 +9,7 @@ import (
 )
 
 var buildListCmd = cli.Command{
-	Name:      "list",
+	Name:      "ls",
 	Usage:     "show build history",
 	ArgsUsage: "<repo/name>",
 	Action:    buildList,
