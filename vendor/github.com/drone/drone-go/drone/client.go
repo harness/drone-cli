@@ -17,6 +17,7 @@ const (
 	pathFeed           = "%s/api/user/feed"
 	pathRepos          = "%s/api/user/repos"
 	pathRepo           = "%s/api/repos/%s/%s"
+	pathRepoMove       = "%s/api/repos/%s/%s/move?to=%s"
 	pathChown          = "%s/api/repos/%s/%s/chown"
 	pathRepair         = "%s/api/repos/%s/%s/repair"
 	pathBuilds         = "%s/api/repos/%s/%s/builds"
@@ -249,17 +250,6 @@ func (c *client) BuildStop(owner, name string, num, job int) error {
 	return err
 }
 
-// BuildFork re-starts a stopped build with a new build number,
-// preserving the prior history.
-func (c *client) BuildFork(owner, name string, num int, params map[string]string) (*Build, error) {
-	out := new(Build)
-	val := mapValues(params)
-	val.Set("fork", "true")
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
-	return out, err
-}
-
 // BuildApprove approves a blocked build.
 func (c *client) BuildApprove(owner, name string, num int) (*Build, error) {
 	out := new(Build)
@@ -293,7 +283,6 @@ func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, err
 func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Build, error) {
 	out := new(Build)
 	val := mapValues(params)
-	val.Set("fork", "true")
 	val.Set("event", "deployment")
 	val.Set("deploy_to", env)
 	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
@@ -400,6 +389,13 @@ func (c *client) put(rawurl string, in, out interface{}) error {
 func (c *client) patch(rawurl string, in, out interface{}) error {
 	return c.do(rawurl, "PATCH", in, out)
 }
+
+// RepoMove moves a repository
+func (c *client) RepoMove(owner, name, newFullName string) error {
+	uri := fmt.Sprintf(pathRepoMove, c.addr, owner, name, newFullName)
+	return c.post(uri, nil, nil)
+}
+
 
 // helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {
