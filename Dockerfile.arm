@@ -1,4 +1,4 @@
-FROM plugins/base:multiarch
+FROM drone/ca-certs
 MAINTAINER Drone.IO Community <drone-dev@googlegroups.com>
 
 LABEL org.label-schema.version=latest

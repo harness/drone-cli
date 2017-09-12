@@ -47,7 +47,7 @@ pipeline:
       - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/linux/arm/drone github.com/drone/drone-cli/drone
       - tar -cvzf release/drone_linux_arm.tar.gz     -C release/linux/arm     drone
 
-  build_windows:
+  build_windows_amd64:
     image: golang:1.9
     pull: true
     group: build
@@ -71,17 +71,12 @@ pipeline:
       - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/darwin/amd64/drone github.com/drone/drone-cli/drone
       - tar -cvzf release/drone_darwin_amd64.tar.gz  -C release/darwin/amd64  drone
 
-  generate_shas:
-    image: golang:1.9
-    pull: true
-    commands:
-      - sha256sum release/*.tar.gz > release/drone_checksums.txt
-
   publish_github_release:
     image: plugins/github-release
     files:
       - release/drone_*.tar.gz
-      - release/drone_checksums.txt
+    checksum:
+      - sha256
     secrets:
       - source: github_token
         target: github_release_api_key
