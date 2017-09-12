@@ -14,14 +14,14 @@ pipeline:
     image: golang:1.8
     commands: sh .drone.sh
 
-  docker:
+  snapshot:
     image: plugins/docker
     repo: drone/cli
     when:
       branch: master
       event: push
 
-  release_github:
+  release:
     image: plugins/github-release
     files:
       - release/drone_*.tar.gz
