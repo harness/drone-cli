@@ -59,13 +59,13 @@ pipeline:
       - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/windows/adm64/drone github.com/drone/drone-cli/drone
       - tar -cvzf release/drone_windows_amd64.tar.gz -C release/windows/amd64 drone
 
-  build_darwin:
+  build_darwin_amd64:
     image: golang:1.9
     pull: true
     group: build
     environment:
-      - GOOS=linux
-      - GOARCH=arm
+      - GOOS=darwin
+      - GOARCH=amd64
       - CGO_ENABLED=0
     commands:
       - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/darwin/amd64/drone github.com/drone/drone-cli/drone
