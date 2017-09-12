@@ -17,6 +17,7 @@ pipeline:
   snapshot:
     image: plugins/docker
     repo: drone/cli
+    secrets: [docker_username, docker_password]
     when:
       branch: master
       event: push
