@@ -4,23 +4,114 @@ workspace:
 
 pipeline:
   test:
-    image: golang:1.8
+    image: golang:1.9
     commands:
       - echo starting
       - cd drone
       - go test
 
-  build:
-    image: golang:1.8
-    commands: sh .drone.sh
+  build_linux_amd64:
+    image: golang:1.9
+    pull: true
+    group: build
+    environment:
+      - GOOS=linux
+      - GOARCH=amd64
+      - CGO_ENABLED=0
+    commands:
+      - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/linux/amd64/drone github.com/drone/drone-cli/drone
+      - tar -cvzf release/drone_linux_amd64.tar.gz   -C release/linux/amd64   drone
 
-  publish:
+  build_linux_arm64:
+    image: golang:1.9
+    pull: true
+    group: build
+    environment:
+      - GOOS=linux
+      - GOARCH=arm64
+      - CGO_ENABLED=0
+    commands:
+      - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/linux/arm64/drone github.com/drone/drone-cli/drone
+      - tar -cvzf release/drone_linux_arm64.tar.gz   -C release/linux/arm64   drone
+
+  build_linux_arm:
+    image: golang:1.9
+    pull: true
+    group: build
+    environment:
+      - GOOS=linux
+      - GOARCH=arm
+      - CGO_ENABLED=0
+      - GOARM=7
+    commands:
+      - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/linux/arm/drone github.com/drone/drone-cli/drone
+      - tar -cvzf release/drone_linux_arm.tar.gz     -C release/linux/arm     drone
+
+  build_windows_amd64:
+    image: golang:1.9
+    pull: true
+    group: build
+    environment:
+      - GOOS=windows
+      - GOARCH=amd64
+      - CGO_ENABLED=0
+    commands:
+      - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/windows/adm64/drone github.com/drone/drone-cli/drone
+      - tar -cvzf release/drone_windows_amd64.tar.gz -C release/windows/amd64 drone
+
+  build_darwin_amd64:
+    image: golang:1.9
+    pull: true
+    group: build
+    environment:
+      - GOOS=darwin
+      - GOARCH=amd64
+      - CGO_ENABLED=0
+    commands:
+      - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -o release/darwin/amd64/drone github.com/drone/drone-cli/drone
+      - tar -cvzf release/drone_darwin_amd64.tar.gz  -C release/darwin/amd64  drone
+
+  publish_github_release:
     image: plugins/github-release
     files:
       - release/drone_*.tar.gz
-      - release/drone_checksums.txt
+    checksum:
+      - sha256
     secrets:
       - source: github_token
         target: github_release_api_key
     when:
       event: tag
+
+  publish_docker_linux_amd64:
+    image: plugins/docker:17.05
+    pull: true
+    repo: drone/drone-cli
+    tags: [ latest, 0.8.0, 0.8 ]
+    secrets: [ docker_username, docker_password ]
+    dockerfile: Dockerfile
+    when:
+      branch: master
+      event: push
+
+  publish_docker_linux_arm64:
+    image: plugins/docker:17.05
+    pull: true
+    repo: drone/drone-cli
+    tags: [ linux-arm64 ]
+    secrets: [ docker_username, docker_password ]
+    dockerfile: Dockerfile.arm64
+    when:
+      branch: master
+      event: push
+
+  publish_docker_linux_arm:
+    image: plugins/docker:17.05
+    pull: true
+    repo: drone/drone-cli
+    tags: [ linux-arm ]
+    secrets: [ docker_username, docker_password ]
+    dockerfile: Dockerfile.arm
+    when:
+      branch: master
+      event: push
