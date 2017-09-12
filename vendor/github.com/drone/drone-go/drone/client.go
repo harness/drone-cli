@@ -250,17 +250,6 @@ func (c *client) BuildStop(owner, name string, num, job int) error {
 	return err
 }
 
-// BuildFork re-starts a stopped build with a new build number,
-// preserving the prior history.
-func (c *client) BuildFork(owner, name string, num int, params map[string]string) (*Build, error) {
-	out := new(Build)
-	val := mapValues(params)
-	val.Set("fork", "true")
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
-	return out, err
-}
-
 // BuildApprove approves a blocked build.
 func (c *client) BuildApprove(owner, name string, num int) (*Build, error) {
 	out := new(Build)
@@ -294,7 +283,6 @@ func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, err
 func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Build, error) {
 	out := new(Build)
 	val := mapValues(params)
-	val.Set("fork", "true")
 	val.Set("event", "deployment")
 	val.Set("deploy_to", env)
 	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
