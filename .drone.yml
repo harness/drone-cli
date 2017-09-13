@@ -14,7 +14,15 @@ pipeline:
     image: golang:1.8
     commands: sh .drone.sh
 
-  publish:
+  snapshot:
+    image: plugins/docker
+    repo: drone/cli
+    secrets: [docker_username, docker_password]
+    when:
+      branch: master
+      event: push
+
+  release:
     image: plugins/github-release
     files:
       - release/drone_*.tar.gz
