@@ -291,7 +291,7 @@ func exec(c *cli.Context) error {
 	}
 	for _, env := range os.Environ() {
 		k := strings.Split(env, "=")[0]
-		v := strings.Split(env, "=")[1]
+		v := strings.SplitN(env, "=", 2)[1]
 		environ[k] = v
 		secrets = append(secrets, compiler.Secret{
 			Name:  k,
