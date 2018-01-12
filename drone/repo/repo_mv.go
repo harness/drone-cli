@@ -37,9 +37,8 @@ func repoMove(c *cli.Context) error {
 		return err
 	}
 
-	var (
-		unsafe = c.Bool("unsafe")
-	)
+	unsafe := c.Bool("unsafe");
+
 	if !unsafe {
 		fmt.Printf("Moving the repo is an unsafe operation that could put your repository in an inconsistent state. You must also manually sync the repos before running this operation. Please use --unsafe to proceed\n")
 		return nil
