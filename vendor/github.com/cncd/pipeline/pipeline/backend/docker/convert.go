@@ -44,16 +44,22 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 			Memory:     proc.MemLimit,
 			MemorySwap: proc.MemSwapLimit,
 		},
+		LogConfig: container.LogConfig{
+			Type: "json-file",
+		},
 		Privileged: proc.Privileged,
 		ShmSize:    proc.ShmSize,
+		Sysctls:    proc.Sysctls,
 	}
+
 	// if len(proc.VolumesFrom) != 0 {
 	// 	config.VolumesFrom = proc.VolumesFrom
 	// }
 	if len(proc.NetworkMode) != 0 {
-		config.NetworkMode = container.NetworkMode(
-			proc.NetworkMode,
-		)
+		config.NetworkMode = container.NetworkMode(proc.NetworkMode)
+	}
+	if len(proc.IpcMode) != 0 {
+		config.IpcMode = container.IpcMode(proc.IpcMode)
 	}
 	if len(proc.DNS) != 0 {
 		config.DNS = proc.DNS
@@ -69,6 +75,15 @@ func toHostConfig(proc *backend.Step) *container.HostConfig {
 	}
 	if len(proc.Volumes) != 0 {
 		config.Binds = proc.Volumes
+	}
+	config.Tmpfs = map[string]string{}
+	for _, path := range proc.Tmpfs {
+		if strings.Index(path, ":") == -1 {
+			config.Tmpfs[path] = ""
+			continue
+		}
+		parts := strings.Split(path, ":")
+		config.Tmpfs[parts[0]] = parts[1]
 	}
 	// if proc.OomKillDisable {
 	// 	config.OomKillDisable = &proc.OomKillDisable

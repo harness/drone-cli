@@ -9,7 +9,7 @@ import (
 	"github.com/cncd/pipeline/pipeline/frontend/yaml"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml.Container) *backend.Step {
+func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
 	var (
 		detached   bool
 		workingdir string
@@ -20,6 +20,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 		command      = container.Command
 		image        = expandImage(container.Image)
 		network_mode = container.NetworkMode
+		ipc_mode     = container.IpcMode
 		// network    = container.Network
 	)
 
@@ -62,30 +63,39 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 	// TODO: This is here for backward compatibility and will eventually be removed.
 	environment["DRONE_WORKSPACE"] = path.Join(c.base, c.path)
 
-	if !isService(container) {
-		workingdir = path.Join(c.base, c.path)
-	}
-
-	if isService(container) {
+	if section == "services" || container.Detached {
 		detached = true
 	}
 
-	if isPlugin(container) {
-		paramsToEnv(container.Vargs, environment)
+	if detached == false || len(container.Commands) != 0 {
+		workingdir = path.Join(c.base, c.path)
+	}
 
-		if matchImage(container.Image, c.escalated...) {
-			privileged = true
-			entrypoint = []string{}
-			command = []string{}
+	if detached == false {
+		paramsToEnv(container.Vargs, environment)
+	}
+
+	if len(container.Commands) != 0 {
+		if c.metadata.Sys.Arch == "windows/amd64" {
+			// TODO provide windows implementation
+			entrypoint = []string{"/bin/sh", "-c"}
+			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
+			environment["HOME"] = "/root"
+			environment["SHELL"] = "/bin/sh"
+		} else {
+			entrypoint = []string{"/bin/sh", "-c"}
+			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+			environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
+			environment["HOME"] = "/root"
+			environment["SHELL"] = "/bin/sh"
 		}
 	}
 
-	if isShell(container) {
-		entrypoint = []string{"/bin/sh", "-c"}
-		command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-		environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
-		environment["HOME"] = "/root"
-		environment["SHELL"] = "/bin/sh"
+	if matchImage(container.Image, c.escalated...) {
+		privileged = true
+		entrypoint = []string{}
+		command = []string{}
 	}
 
 	authConfig := backend.Auth{
@@ -109,6 +119,31 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 		}
 	}
 
+	memSwapLimit := int64(container.MemSwapLimit)
+	if c.reslimit.MemSwapLimit != 0 {
+		memSwapLimit = c.reslimit.MemSwapLimit
+	}
+	memLimit := int64(container.MemLimit)
+	if c.reslimit.MemLimit != 0 {
+		memLimit = c.reslimit.MemLimit
+	}
+	shmSize := int64(container.ShmSize)
+	if c.reslimit.ShmSize != 0 {
+		shmSize = c.reslimit.ShmSize
+	}
+	cpuQuota := int64(container.CPUQuota)
+	if c.reslimit.CPUQuota != 0 {
+		cpuQuota = c.reslimit.CPUQuota
+	}
+	cpuShares := int64(container.CPUShares)
+	if c.reslimit.CPUShares != 0 {
+		cpuShares = c.reslimit.CPUShares
+	}
+	cpuSet := container.CPUSet
+	if c.reslimit.CPUSet != "" {
+		cpuSet = c.reslimit.CPUSet
+	}
+
 	return &backend.Step{
 		Name:         name,
 		Alias:        container.Name,
@@ -123,33 +158,24 @@ func (c *Compiler) createProcess(name string, container *yaml.Container) *backen
 		Command:      command,
 		ExtraHosts:   container.ExtraHosts,
 		Volumes:      volumes,
+		Tmpfs:        container.Tmpfs,
 		Devices:      container.Devices,
 		Networks:     networks,
 		DNS:          container.DNS,
 		DNSSearch:    container.DNSSearch,
-		MemSwapLimit: int64(container.MemSwapLimit),
-		MemLimit:     int64(container.MemLimit),
-		ShmSize:      int64(container.ShmSize),
-		CPUQuota:     int64(container.CPUQuota),
-		CPUShares:    int64(container.CPUShares),
-		CPUSet:       container.CPUSet,
+		MemSwapLimit: memSwapLimit,
+		MemLimit:     memLimit,
+		ShmSize:      shmSize,
+		Sysctls:      container.Sysctls,
+		CPUQuota:     cpuQuota,
+		CPUShares:    cpuShares,
+		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
 		OnSuccess:    container.Constraints.Status.Match("success"),
 		OnFailure: (len(container.Constraints.Status.Include)+
 			len(container.Constraints.Status.Exclude) != 0) &&
 			container.Constraints.Status.Match("failure"),
 		NetworkMode: network_mode,
+		IpcMode:     ipc_mode,
 	}
-}
-
-func isPlugin(c *yaml.Container) bool {
-	return len(c.Vargs) != 0
-}
-
-func isShell(c *yaml.Container) bool {
-	return len(c.Commands) != 0
-}
-
-func isService(c *yaml.Container) bool {
-	return c.Detached || (isPlugin(c) == false && isShell(c) == false)
 }
