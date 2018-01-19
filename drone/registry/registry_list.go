@@ -11,7 +11,7 @@ import (
 
 var registryListCmd = cli.Command{
 	Name:      "ls",
-	Usage:     "list regitries",
+	Usage:     "list registries",
 	ArgsUsage: "[repo/name]",
 	Action:    registryList,
 	Flags: []cli.Flag{
