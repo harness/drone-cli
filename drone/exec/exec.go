@@ -443,6 +443,7 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 		},
 		Job: frontend.Job{
 			Number: c.Int("job-number"),
+			Matrix: availableEnvironment(),
 		},
 		Sys: frontend.System{
 			Name: c.String("system-name"),
@@ -450,6 +451,17 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 			Arch: c.String("system-arch"),
 		},
 	}
+}
+
+func availableEnvironment() map[string]string {
+	result := make(map[string]string, 0)
+
+	for _, env := range os.Environ() {
+		pair := strings.SplitN(env, "=", 2)
+		result[pair[0]] = pair[1]
+	}
+
+	return result
 }
 
 func convertPathForWindows(path string) string {
