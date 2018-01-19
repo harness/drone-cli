@@ -289,13 +289,11 @@ func exec(c *cli.Context) error {
 	for k, v := range metadata.EnvironDrone() {
 		environ[k] = v
 	}
-	for _, env := range os.Environ() {
-		k := strings.Split(env, "=")[0]
-		v := strings.SplitN(env, "=", 2)[1]
-		environ[k] = v
+	for key, val := range metadata.Job.Matrix {
+		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
-			Name:  k,
-			Value: v,
+			Name:  key,
+			Value: val,
 		})
 	}
 
