@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/drone/drone-cli/drone/internal"
-	"github.com/drone/drone-go/drone"
 	"github.com/urfave/cli"
 )
 
@@ -16,10 +15,6 @@ var buildStartCmd = cli.Command{
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildStart,
 	Flags: []cli.Flag{
-		cli.BoolFlag{
-			Name:  "fork",
-			Usage: "fork the build",
-		},
 		cli.StringSliceFlag{
 			Name:  "param, p",
 			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
@@ -60,12 +55,7 @@ func buildStart(c *cli.Context) (err error) {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	var build *drone.Build
-	if c.Bool("fork") {
-		build, err = client.BuildFork(owner, name, number, params)
-	} else {
-		build, err = client.BuildStart(owner, name, number, params)
-	}
+	build, err := client.BuildStart(owner, name, number, params)
 	if err != nil {
 		return err
 	}
