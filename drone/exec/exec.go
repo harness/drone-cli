@@ -289,13 +289,11 @@ func exec(c *cli.Context) error {
 	for k, v := range metadata.EnvironDrone() {
 		environ[k] = v
 	}
-	for _, env := range os.Environ() {
-		k := strings.Split(env, "=")[0]
-		v := strings.SplitN(env, "=", 2)[1]
-		environ[k] = v
+	for key, val := range metadata.Job.Matrix {
+		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
-			Name:  k,
-			Value: v,
+			Name:  key,
+			Value: val,
 		})
 	}
 
@@ -443,6 +441,7 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 		},
 		Job: frontend.Job{
 			Number: c.Int("job-number"),
+			Matrix: availableEnvironment(),
 		},
 		Sys: frontend.System{
 			Name: c.String("system-name"),
@@ -450,6 +449,17 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 			Arch: c.String("system-arch"),
 		},
 	}
+}
+
+func availableEnvironment() map[string]string {
+	result := make(map[string]string, 0)
+
+	for _, env := range os.Environ() {
+		pair := strings.SplitN(env, "=", 2)
+		result[pair[0]] = pair[1]
+	}
+
+	return result
 }
 
 func convertPathForWindows(path string) string {
