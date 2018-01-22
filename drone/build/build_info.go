@@ -37,7 +37,8 @@ func buildInfo(c *cli.Context) error {
 	var number int
 
 	buildArg := c.Args().Get(1)
-	if buildArg == "last" {
+	if buildArg == "last" || len(buildArg) == 0 {
+		// Fetch the build number from the last build
 		build, err := client.BuildLast(owner, name, "")
 		if err != nil {
 			return err

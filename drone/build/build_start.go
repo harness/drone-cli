@@ -37,11 +37,14 @@ func buildStart(c *cli.Context) (err error) {
 	buildArg := c.Args().Get(1)
 	var number int
 	if buildArg == "last" {
+		// Fetch the build number from the last build
 		build, err := client.BuildLast(owner, name, "")
 		if err != nil {
 			return err
 		}
 		number = build.Number
+	} else if len(buildArg) == 0 {
+		return errors.New("missing job number")	
 	} else if parsedNumber, err := strconv.Atoi(buildArg); err != nil {
 		return errInvalidBuildNumber
 	} else {
