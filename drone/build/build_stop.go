@@ -34,11 +34,8 @@ func buildStop(c *cli.Context) (err error) {
 	jobArg := c.Args().Get(2)
 	if jobArg == "" {
 		job = 1
-	} else {
-		job, err = strconv.Atoi(jobArg)
-		if err != nil {
-			return errInvalidJobNumber
-		}
+	} else if job, err = strconv.Atoi(jobArg); err != nil {
+		return errInvalidJobNumber
 	}
 
 	client, err := internal.NewClient(c)
