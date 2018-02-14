@@ -21,7 +21,6 @@ func NewUnixSocket(path string, gid int) (net.Listener, error) {
 		return nil, err
 	}
 	if err := os.Chown(path, 0, gid); err != nil {
-		l.Close()
 		return nil, err
 	}
 	if err := os.Chmod(path, 0660); err != nil {
