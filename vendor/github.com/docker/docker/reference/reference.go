@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/docker/distribution/digest"
 	distreference "github.com/docker/distribution/reference"
-	"github.com/docker/docker/pkg/stringid"
-	"github.com/opencontainers/go-digest"
+	"github.com/docker/docker/image/v1"
 )
 
 const (
@@ -163,10 +163,10 @@ func IsNameOnly(ref Named) bool {
 // ParseIDOrReference parses string for an image ID or a reference. ID can be
 // without a default prefix.
 func ParseIDOrReference(idOrRef string) (digest.Digest, Named, error) {
-	if err := stringid.ValidateID(idOrRef); err == nil {
+	if err := v1.ValidateID(idOrRef); err == nil {
 		idOrRef = "sha256:" + idOrRef
 	}
-	if dgst, err := digest.Parse(idOrRef); err == nil {
+	if dgst, err := digest.ParseDigest(idOrRef); err == nil {
 		return dgst, nil, nil
 	}
 	ref, err := ParseNamed(idOrRef)
@@ -209,7 +209,7 @@ func normalize(name string) (string, error) {
 }
 
 func validateName(name string) error {
-	if err := stringid.ValidateID(name); err == nil {
+	if err := v1.ValidateID(name); err == nil {
 		return fmt.Errorf("Invalid repository name (%s), cannot specify 64-byte hexadecimal strings", name)
 	}
 	return nil

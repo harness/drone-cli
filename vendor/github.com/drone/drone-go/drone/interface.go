@@ -1,7 +1,15 @@
 package drone
 
+import "net/http"
+
 // Client is used to communicate with a Drone server.
 type Client interface {
+	// SetClient sets the http.Client.
+	SetClient(*http.Client)
+
+	// SetAddress sets the server address.
+	SetAddress(string)
+
 	// Self returns the currently authenticated user.
 	Self() (*User, error)
 
@@ -107,4 +115,10 @@ type Client interface {
 
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
+
+	// Server returns the named servers details.
+	Server(name string) (*Server, error)
+
+	// ServerList returns a list of all active build servers.
+	ServerList() ([]*Server, error)
 }

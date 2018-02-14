@@ -139,4 +139,25 @@ type (
 		Avatar   string `json:"author_avatar,omitempty"`
 		Email    string `json:"author_email,omitempty"`
 	}
+
+	// Provider specifies the hosting provider.
+	Provider int
+
+	// Server represents a server node.
+	Server struct {
+		Provider Provider `json:"provider"`
+		UID      string   `json:"uid"`
+		Name     string   `json:"name"`
+		Image    string   `json:"image"`
+		Region   string   `json:"region"`
+		Size     string   `json:"size"`
+		Address  string   `json:"address"`
+		Secret   string   `json:"secret"`
+		Capacity int      `json:"capacity"`
+		Active   bool     `json:"active"`
+		Healthy  bool     `json:"healthy"`
+		Created  int64    `json:"created"`
+		Updated  int64    `json:"updated"`
+		Logs     string   `json:"logs,omitempty"`
+	}
 )

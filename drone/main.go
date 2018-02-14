@@ -11,6 +11,7 @@ import (
 	"github.com/drone/drone-cli/drone/registry"
 	"github.com/drone/drone-cli/drone/repo"
 	"github.com/drone/drone-cli/drone/secret"
+	"github.com/drone/drone-cli/drone/server"
 	"github.com/drone/drone-cli/drone/user"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -32,10 +33,16 @@ func main() {
 			Usage:  "server auth token",
 			EnvVar: "DRONE_TOKEN",
 		},
+
 		cli.StringFlag{
 			Name:   "s, server",
-			Usage:  "server location",
+			Usage:  "server address",
 			EnvVar: "DRONE_SERVER",
+		},
+		cli.StringFlag{
+			Name:   "autoscaler",
+			Usage:  "autoscaler address",
+			EnvVar: "DRONE_AUTOSCALER",
 		},
 		cli.BoolFlag{
 			Name:   "skip-verify",
@@ -65,6 +72,7 @@ func main() {
 		secret.Command,
 		repo.Command,
 		user.Command,
+		server.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {

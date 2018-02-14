@@ -3,15 +3,8 @@ workspace:
   path: src/github.com/drone/drone-cli
 
 pipeline:
-  test:
-    image: golang:1.8
-    commands:
-      - echo starting
-      - cd drone
-      - go test
-
   build:
-    image: golang:1.8
+    image: golang:1.9
     commands: sh .drone.sh
 
   snapshot:

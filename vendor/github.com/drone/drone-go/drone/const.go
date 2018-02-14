@@ -19,3 +19,12 @@ const (
 	StatusKilled  = "killed"
 	StatusError   = "error"
 )
+
+// Provider types.
+const (
+	ProviderUnknown Provider = iota
+	ProviderAmazon
+	ProviderAzure
+	ProviderDigitalOcean
+	ProviateGoogle
+)
