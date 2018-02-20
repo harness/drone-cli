@@ -7,13 +7,19 @@ pipeline:
     image: golang:1.9
     commands: sh .drone.sh
 
-  snapshot:
+  publish_latest:
     image: plugins/docker
     repo: drone/cli
     secrets: [docker_username, docker_password]
-    when:
-      branch: master
-      event: push
+    auto_tag: true
+
+  publish_alpine:
+    image: plugins/docker
+    repo: drone/cli
+    secrets: [docker_username, docker_password]
+    auto_tag: true
+    auto_tag_suffix: alpine
+    dockerfile: Dockerfile.alpine
 
   release:
     image: plugins/github-release
