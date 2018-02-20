@@ -66,6 +66,7 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		build.Command,
+		log.Command,
 		deploy.Command,
 		exec.Command,
 		info.Command,
