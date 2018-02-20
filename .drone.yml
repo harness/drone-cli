@@ -25,23 +25,23 @@ pipeline:
     when:
       event: [push, tag]
 
-  publish_arm:
+  publish_linux_arm:
     image: plugins/docker
     repo: drone/cli
     secrets: [docker_username, docker_password]
     auto_tag: true
-    auto_tag_suffix: arm
-    dockerfile: Dockerfile.arm
+    auto_tag_suffix: linux-arm
+    dockerfile: Dockerfile.linux.arm
     when:
       event: [push, tag]
 
-  publish_arm64:
+  publish_linux_arm64:
     image: plugins/docker
     repo: drone/cli
     secrets: [docker_username, docker_password]
     auto_tag: true
-    auto_tag_suffix: arm64
-    dockerfile: Dockerfile.arm64
+    auto_tag_suffix: linux-arm64
+    dockerfile: Dockerfile.linux.arm64
     when:
       event: [push, tag]
 
