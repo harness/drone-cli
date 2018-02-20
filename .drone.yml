@@ -21,6 +21,22 @@ pipeline:
     auto_tag_suffix: alpine
     dockerfile: Dockerfile.alpine
 
+  publish_arm:
+    image: plugins/docker
+    repo: drone/cli
+    secrets: [docker_username, docker_password]
+    auto_tag: true
+    auto_tag_suffix: arm
+    dockerfile: Dockerfile.arm
+
+  publish_arm64:
+    image: plugins/docker
+    repo: drone/cli
+    secrets: [docker_username, docker_password]
+    auto_tag: true
+    auto_tag_suffix: arm64
+    dockerfile: Dockerfile.arm64
+
   release:
     image: plugins/github-release
     files:
