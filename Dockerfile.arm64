@@ -1,0 +1,6 @@
+FROM drone/ca-certs
+
+ADD release/linux/arm64/drone /bin/
+
+ENTRYPOINT ["/bin/drone"]
+
