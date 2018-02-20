@@ -1,0 +1,7 @@
+FROM alpine:3.7
+
+RUN apk add -U --no-cache ca-certificates
+
+ADD release/linux/amd64/drone /bin/
+
+ENTRYPOINT ["/bin/drone"]
