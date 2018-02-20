@@ -1,5 +1,5 @@
 FROM drone/ca-certs
 
-ADD release/linux/arm/drone /bin/
+COPY release/linux/arm/drone /bin/
 
 ENTRYPOINT ["/bin/drone"]
