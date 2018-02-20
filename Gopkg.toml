@@ -49,7 +49,7 @@
 
 [[override]]
   name = "github.com/docker/distribution"
-  revision = "7a0972304e201e2a5336a69d00e112c27823f554"
+  revision = "7dba427612198a11b161a27f9d40bb2dca1ccd20"
 
 [[override]]
   name = "github.com/docker/go-connections"
