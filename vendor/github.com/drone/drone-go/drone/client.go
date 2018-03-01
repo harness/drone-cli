@@ -27,6 +27,7 @@ const (
 	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
 	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
 	pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
+	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
@@ -36,6 +37,10 @@ const (
 	pathBuildQueue     = "%s/api/builds"
 	pathServers        = "%s/api/servers"
 	pathServer         = "%s/api/servers/%s"
+	pathScalerPause    = "%s/api/pause"
+	pathScalerResume   = "%s/api/resume"
+	pathVarz           = "%s/varz"
+	pathVersion        = "%s/version"
 )
 
 type client struct {
@@ -309,6 +314,13 @@ func (c *client) Deploy(owner, name string, num int, env string, params map[stri
 	return out, err
 }
 
+// LogsPurge purges the build logs for the specified build.
+func (c *client) LogsPurge(owner, name string, num int) error {
+	uri := fmt.Sprintf(pathLogPurge, c.addr, owner, name, num)
+	err := c.delete(uri)
+	return err
+}
+
 // Registry returns a registry by hostname.
 func (c *client) Registry(owner, name, hostname string) (*Registry, error) {
 	out := new(Registry)
@@ -398,6 +410,40 @@ func (c *client) ServerList() ([]*Server, error) {
 	var out []*Server
 	uri := fmt.Sprintf(pathServers, c.addr)
 	err := c.get(uri, &out)
+	return out, err
+}
+
+// ServerCreate creates a new server.
+func (c *client) ServerCreate() (*Server, error) {
+	out := new(Server)
+	uri := fmt.Sprintf(pathServers, c.addr)
+	err := c.post(uri, nil, out)
+	return out, err
+}
+
+// ServerDelete terminates a server.
+func (c *client) ServerDelete(name string) error {
+	uri := fmt.Sprintf(pathServer, c.addr, name)
+	return c.delete(uri)
+}
+
+// AutoscalePause pauses the autoscaler.
+func (c *client) AutoscalePause() error {
+	uri := fmt.Sprintf(pathScalerPause, c.addr)
+	return c.post(uri, nil, nil)
+}
+
+// AutoscaleResume resumes the autoscaler.
+func (c *client) AutoscaleResume() error {
+	uri := fmt.Sprintf(pathScalerResume, c.addr)
+	return c.post(uri, nil, nil)
+}
+
+// AutoscaleVersion resumes the autoscaler.
+func (c *client) AutoscaleVersion() (*Version, error) {
+	out := new(Version)
+	uri := fmt.Sprintf(pathVersion, c.addr)
+	err := c.get(uri, out)
 	return out, err
 }
 

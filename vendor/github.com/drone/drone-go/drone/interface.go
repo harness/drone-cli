@@ -86,6 +86,9 @@ type Client interface {
 	// target environment.
 	Deploy(string, string, int, string, map[string]string) (*Build, error)
 
+	// LogsPurge purges the build logs for the specified build.
+	LogsPurge(string, string, int) error
+
 	// Registry returns a registry by hostname.
 	Registry(owner, name, hostname string) (*Registry, error)
 
@@ -121,4 +124,19 @@ type Client interface {
 
 	// ServerList returns a list of all active build servers.
 	ServerList() ([]*Server, error)
+
+	// ServerCreate creates a new server.
+	ServerCreate() (*Server, error)
+
+	// ServerDelete terminates a server.
+	ServerDelete(name string) error
+
+	// AutoscalePause pauses the autoscaler.
+	AutoscalePause() error
+
+	// AutoscaleResume resumes the autoscaler.
+	AutoscaleResume() error
+
+	// AutoscaleVersion returns the autoscaler version.
+	AutoscaleVersion() (*Version, error)
 }

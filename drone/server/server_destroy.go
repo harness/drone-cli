@@ -10,22 +10,22 @@ import (
 	"github.com/drone/drone-cli/drone/internal"
 )
 
-var serverInfoCmd = cli.Command{
-	Name:      "info",
-	Usage:     "show server details",
+var serverDestroyCmd = cli.Command{
+	Name:      "destroy",
+	Usage:     "destroy a server",
 	ArgsUsage: "<servername>",
-	Action:    serverInfo,
+	Action:    serverDestroy,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
-			Value:  tmplServerInfo,
+			Value:  tmplServerDestroy,
 			Hidden: true,
 		},
 	},
 }
 
-func serverInfo(c *cli.Context) error {
+func serverDestroy(c *cli.Context) error {
 	client, err := internal.NewAutoscaleClient(c)
 	if err != nil {
 		return err
@@ -34,6 +34,11 @@ func serverInfo(c *cli.Context) error {
 	name := c.Args().First()
 	if len(name) == 0 {
 		return fmt.Errorf("Missing or invalid server name")
+	}
+
+	err = client.ServerDelete(name)
+	if err != nil {
+		return err
 	}
 
 	server, err := client.Server(name)
@@ -48,8 +53,7 @@ func serverInfo(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, server)
 }
 
-// template for server information
-var tmplServerInfo = `Name: {{ .Name }}
+var tmplServerDestroy = `Name: {{ .Name }}
 Address: {{ .Address }}
 Region: {{ .Region }}
 Size: {{.Size}}

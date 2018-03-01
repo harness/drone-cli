@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"os"
 	"text/template"
 
@@ -10,33 +9,27 @@ import (
 	"github.com/drone/drone-cli/drone/internal"
 )
 
-var serverInfoCmd = cli.Command{
-	Name:      "info",
-	Usage:     "show server details",
-	ArgsUsage: "<servername>",
-	Action:    serverInfo,
+var serverCreateCmd = cli.Command{
+	Name:   "create",
+	Usage:  "crate a new server",
+	Action: serverCreate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
-			Value:  tmplServerInfo,
+			Value:  tmplServerCreate,
 			Hidden: true,
 		},
 	},
 }
 
-func serverInfo(c *cli.Context) error {
+func serverCreate(c *cli.Context) error {
 	client, err := internal.NewAutoscaleClient(c)
 	if err != nil {
 		return err
 	}
 
-	name := c.Args().First()
-	if len(name) == 0 {
-		return fmt.Errorf("Missing or invalid server name")
-	}
-
-	server, err := client.Server(name)
+	server, err := client.ServerCreate()
 	if err != nil {
 		return err
 	}
@@ -48,10 +41,6 @@ func serverInfo(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, server)
 }
 
-// template for server information
-var tmplServerInfo = `Name: {{ .Name }}
-Address: {{ .Address }}
-Region: {{ .Region }}
-Size: {{.Size}}
+var tmplServerCreate = `Name: {{ .Name }}
 State: {{ .State }}
 `

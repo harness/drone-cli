@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/drone/drone-cli/drone/autoscale"
 	"github.com/drone/drone-cli/drone/build"
 	"github.com/drone/drone-cli/drone/deploy"
 	"github.com/drone/drone-cli/drone/exec"
@@ -73,6 +74,7 @@ func main() {
 		repo.Command,
 		user.Command,
 		server.Command,
+		autoscale.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {

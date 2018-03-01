@@ -140,24 +140,29 @@ type (
 		Email    string `json:"author_email,omitempty"`
 	}
 
-	// Provider specifies the hosting provider.
-	Provider int
-
 	// Server represents a server node.
 	Server struct {
-		Provider Provider `json:"provider"`
-		UID      string   `json:"uid"`
-		Name     string   `json:"name"`
-		Image    string   `json:"image"`
-		Region   string   `json:"region"`
-		Size     string   `json:"size"`
-		Address  string   `json:"address"`
-		Secret   string   `json:"secret"`
-		Capacity int      `json:"capacity"`
-		Active   bool     `json:"active"`
-		Healthy  bool     `json:"healthy"`
-		Created  int64    `json:"created"`
-		Updated  int64    `json:"updated"`
-		Logs     string   `json:"logs,omitempty"`
+		ID       string `json:"id"`
+		Provider string `json:"provider"`
+		State    string `json:"state"`
+		Name     string `json:"name"`
+		Image    string `json:"image"`
+		Region   string `json:"region"`
+		Size     string `json:"size"`
+		Address  string `json:"address"`
+		Capacity int    `json:"capacity"`
+		Secret   string `json:"secret"`
+		Error    string `json:"Error"`
+		Created  int64  `json:"created"`
+		Updated  int64  `json:"updated"`
+		Started  int64  `json:"started"`
+		Stopped  int64  `json:"stopped"`
+	}
+
+	// Version provides system version details.
+	Version struct {
+		Source  string `json:"source,omitempty"`
+		Version string `json:"version,omitempty"`
+		Commit  string `json:"commit,omitempty"`
 	}
 )

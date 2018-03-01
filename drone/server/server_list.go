@@ -15,10 +15,15 @@ var serverListCmd = cli.Command{
 	ArgsUsage: " ",
 	Action:    serverList,
 	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "a",
+			Usage: "show all servers",
+		},
 		cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplServerList,
+			Name:   "format",
+			Usage:  "format output",
+			Value:  tmplServerList,
+			Hidden: true,
 		},
 	},
 }
@@ -28,6 +33,7 @@ func serverList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	all := c.Bool("a")
 
 	servers, err := client.ServerList()
 	if err != nil || len(servers) == 0 {
@@ -39,6 +45,9 @@ func serverList(c *cli.Context) error {
 		return err
 	}
 	for _, server := range servers {
+		if !all && server.State == "stopped" {
+			continue
+		}
 		tmpl.Execute(os.Stdout, server)
 	}
 	return nil
