@@ -152,7 +152,11 @@ type (
 		Address  string `json:"address"`
 		Capacity int    `json:"capacity"`
 		Secret   string `json:"secret"`
-		Error    string `json:"Error"`
+		Error    string `json:"error"`
+		CAKey    []byte `json:"ca_key"`
+		CACert   []byte `json:"ca_cert"`
+		TLSKey   []byte `json:"tls_key"`
+		TLSCert  []byte `json:"tls_cert"`
 		Created  int64  `json:"created"`
 		Updated  int64  `json:"updated"`
 		Started  int64  `json:"started"`

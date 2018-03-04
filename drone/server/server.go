@@ -12,5 +12,6 @@ var Command = cli.Command{
 		serverOpenCmd,
 		serverCreateCmd,
 		serverDestroyCmd,
+		serverEnvCmd,
 	},
 }
