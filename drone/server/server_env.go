@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"text/template"
 
 	"github.com/urfave/cli"
 
@@ -21,12 +22,16 @@ var serverEnvCmd = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "shell",
-			Usage: "specify the shell [bash, fish]",
+			Usage: "shell [bash, fish, powershell]",
 			Value: "bash",
 		},
 		cli.BoolFlag{
+			Name:  "no-proxy",
+			Usage: "configure the noproxy variable",
+		},
+		cli.BoolFlag{
 			Name:  "clear",
-			Usage: "clear cert cache",
+			Usage: "clear the certificate cache",
 		},
 	},
 }
@@ -94,44 +99,45 @@ func serverEnv(c *cli.Context) error {
 		}
 	}
 
-	switch c.String("shell") {
-	case "fish":
-		fmt.Fprintf(os.Stdout, fishf, base, server.Address, server.Name)
-	case "powershell":
-		fmt.Fprintf(os.Stdout, powershellf, base, server.Address, server.Name)
-	default:
-		fmt.Fprintf(os.Stdout, bashf, base, server.Address, server.Name)
-	}
-
-	return nil
+	return shellT.Execute(os.Stdout, map[string]interface{}{
+		"Name":    server.Name,
+		"Address": server.Address,
+		"Path":    base,
+		"Shell":   c.String("shell"),
+		"NoProxy": c.Bool("no-proxy"),
+	})
 }
 
-var bashf = `
-export DOCKER_TLS=1
-export DOCKER_TLS_VERIFY=
-export DOCKER_CERT_PATH=%q
-export DOCKER_HOST=tcp://%s:2376
-
-# Run this command to configure your shell:
-# eval "$(drone server env %s)"
-`
-
-var fishf = `
+var shellT = template.Must(template.New("_").Parse(`
+{{- if eq .Shell "fish" -}}
 sex -x DOCKER_TLS "1";
 set -x DOCKER_TLS_VERIFY "";
-set -x DOCKER_CERT_PATH %q;
-set -x DOCKER_HOST tcp://%s:2376;
-
+set -x DOCKER_CERT_PATH {{ printf "%q" .Path }};
+set -x DOCKER_HOST "tcp://{{ .Address }}:2376";
+{{ if .NoProxy -}}
+set -x NO_PROXY {{ printf "%q" .Address }};
+{{ end }}
 # Run this command to configure your shell:
-# eval "$(drone server env %s --shell=fish)"
-`
-
-var powershellf = `
+# eval "$(drone server env {{ .Name }} --shell=fish)"
+{{- else if eq .Shell "powershell" -}}
 $Env:DOCKER_TLS = "1"
 $Env:DOCKER_TLS_VERIFY = ""
-$Env:DOCKER_CERT_PATH = %q
-$Env:DOCKER_HOST = "tcp://%s:2376"
-
+$Env:DOCKER_CERT_PATH = {{ printf "%q" .Path }}
+$Env:DOCKER_HOST = "tcp://{{ .Address }}:2376"
+{{ if .NoProxy -}}
+$Env:NO_PROXY = {{ printf "%q" .Address }}
+{{ end }}
 # Run this command to configure your shell:
-# drone server env %s --shell=powershell | Invoke-Expression
-`
+# drone server env {{ .Name }} --shell=powershell | Invoke-Expression
+{{- else -}}
+export DOCKER_TLS=1
+export DOCKER_TLS_VERIFY=
+export DOCKER_CERT_PATH={{ .Path }}
+export DOCKER_HOST=tcp://{{ .Address }}:2376
+{{ if .NoProxy -}}
+export NO_PROXY={{ .Address }}
+{{ end }}
+# Run this command to configure your shell:
+# eval "$(drone server env {{ .Name }})"
+{{- end }}
+`))
