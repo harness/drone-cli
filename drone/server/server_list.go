@@ -1,12 +1,17 @@
 package server
 
 import (
+	"fmt"
 	"os"
+	"text/tabwriter"
 	"text/template"
+	"time"
 
+	"github.com/docker/go-units"
 	"github.com/urfave/cli"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
 )
 
 var serverListCmd = cli.Command{
@@ -17,7 +22,15 @@ var serverListCmd = cli.Command{
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "a",
-			Usage: "show all servers",
+			Usage: "include stopped servers",
+		},
+		cli.BoolFlag{
+			Name:  "l",
+			Usage: "list in long format",
+		},
+		cli.BoolTFlag{
+			Name:  "H",
+			Usage: "include columne headers",
 		},
 		cli.StringFlag{
 			Name:   "format",
@@ -33,24 +46,55 @@ func serverList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	all := c.Bool("a")
+	a := c.Bool("a")
+	l := c.Bool("l")
+	h := c.BoolT("H")
 
 	servers, err := client.ServerList()
 	if err != nil || len(servers) == 0 {
 		return err
 	}
 
+	if l && h {
+		printLong(servers, a, h)
+		return nil
+	}
+
 	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
+
 	for _, server := range servers {
-		if !all && server.State == "stopped" {
+		if !a && server.State == "stopped" {
 			continue
 		}
 		tmpl.Execute(os.Stdout, server)
 	}
 	return nil
+}
+
+func printLong(servers []*drone.Server, a, h bool) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+	if h {
+		fmt.Fprintln(w, "Name\tAddress\tState\tCreated")
+	}
+	for _, server := range servers {
+		if !a && server.State == "stopped" {
+			continue
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s ago\n",
+			server.Name,
+			server.Address,
+			server.State,
+			units.HumanDuration(
+				time.Now().Sub(
+					time.Unix(server.Created, 0),
+				),
+			),
+		)
+	}
+	w.Flush()
 }
 
 // template for server list items
