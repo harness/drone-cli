@@ -38,6 +38,10 @@ var serverListCmd = cli.Command{
 			Value:  tmplServerList,
 			Hidden: true,
 		},
+		cli.BoolFlag{
+			Name:   "la",
+			Hidden: true,
+		},
 	},
 }
 
@@ -49,6 +53,11 @@ func serverList(c *cli.Context) error {
 	a := c.Bool("a")
 	l := c.Bool("l")
 	h := c.BoolT("H")
+
+	if c.BoolT("la") {
+		l = true
+		a = true
+	}
 
 	servers, err := client.ServerList()
 	if err != nil || len(servers) == 0 {
