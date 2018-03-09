@@ -51,7 +51,10 @@ func serverInfo(c *cli.Context) error {
 // template for server information
 var tmplServerInfo = `Name: {{ .Name }}
 Address: {{ .Address }}
-Region: {{ .Region }}
-Size: {{.Size}}
-State: {{ .State }}
+Region:  {{ .Region }}
+Size:    {{.Size}}
+State:   {{ .State }}
+{{ if .Error -}}
+Error:   {{ .Error }}
+{{ end -}}
 `
