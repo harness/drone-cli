@@ -10,11 +10,18 @@ import (
 	"github.com/drone/drone-cli/drone/internal"
 )
 
+//
+// support for cadvisor was temporarily disabled, so
+// this command has been hidden from the --help menu
+// until available.
+//
+
 var serverOpenCmd = cli.Command{
 	Name:      "open",
 	Usage:     "open server dashboard",
 	ArgsUsage: "<servername>",
 	Action:    serverOpen,
+	Hidden:    true,
 }
 
 func serverOpen(c *cli.Context) error {
