@@ -274,6 +274,10 @@ var Command = cli.Command{
 			Name:   "job-number",
 			EnvVar: "DRONE_JOB_NUMBER",
 		},
+		cli.StringSliceFlag{
+			Name: "env, e",
+			EnvVar: "DRONE_ENV",
+		},
 	},
 }
 
@@ -295,6 +299,12 @@ func exec(c *cli.Context) error {
 			Name:  key,
 			Value: val,
 		})
+	}
+
+	drone_env := make(map[string]string)
+	for _, env := range c.StringSlice("env") {
+		envs := strings.Split(env, "=")
+		drone_env[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -367,6 +377,7 @@ func exec(c *cli.Context) error {
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
+		compiler.WithEnviron(drone_env),
 	).Compile(conf)
 
 	engine, err := docker.NewEnv()
