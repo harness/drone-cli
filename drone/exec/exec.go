@@ -303,7 +303,7 @@ func exec(c *cli.Context) error {
 
 	drone_env := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
-		envs := strings.Split(env, "=")
+		envs := strings.SplitN(env, "=", 2)
 		drone_env[envs[0]] = envs[1]
 	}
 
