@@ -275,8 +275,20 @@ var Command = cli.Command{
 			EnvVar: "DRONE_JOB_NUMBER",
 		},
 		cli.StringSliceFlag{
-			Name: "env, e",
+			Name:   "env, e",
 			EnvVar: "DRONE_ENV",
+		},
+		cli.StringFlag{
+			Name:   "registry-host",
+			EnvVar: "DRONE_REGISTRY_HOST",
+		},
+		cli.StringFlag{
+			Name:   "registry-user",
+			EnvVar: "DRONE_REGISTRY_USER",
+		},
+		cli.StringFlag{
+			Name:   "registry-password",
+			EnvVar: "DRONE_REGISTRY_PASSWORD",
 		},
 	},
 }
@@ -350,6 +362,14 @@ func exec(c *cli.Context) error {
 		return lerr
 	}
 
+	var registries []compiler.Registry
+	registries = append(registries, compiler.Registry{
+		Hostname: c.String("registry-host"),
+		Username: c.String("registry-user"),
+		Password: c.String("registry-password"),
+		Email:    "",
+	})
+
 	// compiles the yaml file
 	compiled := compiler.New(
 		compiler.WithEscalated(
@@ -378,6 +398,7 @@ func exec(c *cli.Context) error {
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(drone_env),
+		compiler.WithRegistry(registries...),
 	).Compile(conf)
 
 	engine, err := docker.NewEnv()
