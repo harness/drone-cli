@@ -274,6 +274,10 @@ var Command = cli.Command{
 			Name:   "job-number",
 			EnvVar: "DRONE_JOB_NUMBER",
 		},
+		cli.StringSliceFlag{
+			Name: "env, e",
+			EnvVar: "DRONE_ENV",
+		},
 	},
 }
 
@@ -289,14 +293,18 @@ func exec(c *cli.Context) error {
 	for k, v := range metadata.EnvironDrone() {
 		environ[k] = v
 	}
-	for _, env := range os.Environ() {
-		k := strings.Split(env, "=")[0]
-		v := strings.SplitN(env, "=", 2)[1]
-		environ[k] = v
+	for key, val := range metadata.Job.Matrix {
+		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
-			Name:  k,
-			Value: v,
+			Name:  key,
+			Value: val,
 		})
+	}
+
+	drone_env := make(map[string]string)
+	for _, env := range c.StringSlice("env") {
+		envs := strings.SplitN(env, "=", 2)
+		drone_env[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -369,6 +377,7 @@ func exec(c *cli.Context) error {
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
+		compiler.WithEnviron(drone_env),
 	).Compile(conf)
 
 	engine, err := docker.NewEnv()
@@ -443,6 +452,7 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 		},
 		Job: frontend.Job{
 			Number: c.Int("job-number"),
+			Matrix: availableEnvironment(),
 		},
 		Sys: frontend.System{
 			Name: c.String("system-name"),
@@ -450,6 +460,17 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 			Arch: c.String("system-arch"),
 		},
 	}
+}
+
+func availableEnvironment() map[string]string {
+	result := make(map[string]string, 0)
+
+	for _, env := range os.Environ() {
+		pair := strings.SplitN(env, "=", 2)
+		result[pair[0]] = pair[1]
+	}
+
+	return result
 }
 
 func convertPathForWindows(path string) string {

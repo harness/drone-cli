@@ -17,5 +17,6 @@ var Command = cli.Command{
 		buildDeclineCmd,
 		buildQueueCmd,
 		buildKillCmd,
+		buildPsCmd,
 	},
 }

@@ -71,6 +71,22 @@ func NewClient(c *cli.Context) (drone.Client, error) {
 	return drone.NewClient(server, auther), nil
 }
 
+// NewAutoscaleClient returns a new client from the CLI context.
+func NewAutoscaleClient(c *cli.Context) (drone.Client, error) {
+	client, err := NewClient(c)
+	if err != nil {
+		return nil, err
+	}
+	autoscaler := c.GlobalString("autoscaler")
+	if autoscaler == "" {
+		return nil, fmt.Errorf("Please provide the autoscaler address")
+	}
+	client.SetAddress(
+		strings.TrimSuffix(autoscaler, "/"),
+	)
+	return client, nil
+}
+
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
 	var parts = strings.Split(str, "/")
@@ -87,7 +103,7 @@ func ParseRepo(str string) (user, repo string, err error) {
 func ParseKeyPair(p []string) map[string]string {
 	params := map[string]string{}
 	for _, i := range p {
-		parts := strings.Split(i, "=")
+		parts := strings.SplitN(i, "=", 2)
 		if len(parts) != 2 {
 			continue
 		}

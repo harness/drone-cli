@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -26,6 +27,7 @@ const (
 	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
 	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
 	pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
+	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
@@ -33,6 +35,12 @@ const (
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
+	pathServers        = "%s/api/servers"
+	pathServer         = "%s/api/servers/%s"
+	pathScalerPause    = "%s/api/pause"
+	pathScalerResume   = "%s/api/resume"
+	pathVarz           = "%s/varz"
+	pathVersion        = "%s/version"
 )
 
 type client struct {
@@ -89,12 +97,22 @@ type client struct {
 
 // New returns a client at the specified url.
 func New(uri string) Client {
-	return &client{http.DefaultClient, uri}
+	return &client{http.DefaultClient, strings.TrimSuffix(uri, "/")}
 }
 
 // NewClient returns a client at the specified url.
 func NewClient(uri string, cli *http.Client) Client {
-	return &client{cli, uri}
+	return &client{cli, strings.TrimSuffix(uri, "/")}
+}
+
+// SetClient sets the http.Client.
+func (c *client) SetClient(client *http.Client) {
+	c.client = client
+}
+
+// SetAddress sets the server address.
+func (c *client) SetAddress(addr string) {
+	c.addr = addr
 }
 
 // Self returns the currently authenticated user.
@@ -198,6 +216,12 @@ func (c *client) RepoDel(owner, name string) error {
 	return err
 }
 
+// RepoMove moves a repository
+func (c *client) RepoMove(owner, name, newFullName string) error {
+	uri := fmt.Sprintf(pathRepoMove, c.addr, owner, name, newFullName)
+	return c.post(uri, nil, nil)
+}
+
 // Build returns a repository build by number.
 func (c *client) Build(owner, name string, num int) (*Build, error) {
 	out := new(Build)
@@ -290,6 +314,13 @@ func (c *client) Deploy(owner, name string, num int, env string, params map[stri
 	return out, err
 }
 
+// LogsPurge purges the build logs for the specified build.
+func (c *client) LogsPurge(owner, name string, num int) error {
+	uri := fmt.Sprintf(pathLogPurge, c.addr, owner, name, num)
+	err := c.delete(uri)
+	return err
+}
+
 // Registry returns a registry by hostname.
 func (c *client) Registry(owner, name, hostname string) (*Registry, error) {
 	out := new(Registry)
@@ -366,6 +397,56 @@ func (c *client) SecretDelete(owner, name, secret string) error {
 	return c.delete(uri)
 }
 
+// Server returns the named servers details.
+func (c *client) Server(name string) (*Server, error) {
+	out := new(Server)
+	uri := fmt.Sprintf(pathServer, c.addr, name)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// ServerList returns a list of all active build servers.
+func (c *client) ServerList() ([]*Server, error) {
+	var out []*Server
+	uri := fmt.Sprintf(pathServers, c.addr)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// ServerCreate creates a new server.
+func (c *client) ServerCreate() (*Server, error) {
+	out := new(Server)
+	uri := fmt.Sprintf(pathServers, c.addr)
+	err := c.post(uri, nil, out)
+	return out, err
+}
+
+// ServerDelete terminates a server.
+func (c *client) ServerDelete(name string) error {
+	uri := fmt.Sprintf(pathServer, c.addr, name)
+	return c.delete(uri)
+}
+
+// AutoscalePause pauses the autoscaler.
+func (c *client) AutoscalePause() error {
+	uri := fmt.Sprintf(pathScalerPause, c.addr)
+	return c.post(uri, nil, nil)
+}
+
+// AutoscaleResume resumes the autoscaler.
+func (c *client) AutoscaleResume() error {
+	uri := fmt.Sprintf(pathScalerResume, c.addr)
+	return c.post(uri, nil, nil)
+}
+
+// AutoscaleVersion resumes the autoscaler.
+func (c *client) AutoscaleVersion() (*Version, error) {
+	out := new(Version)
+	uri := fmt.Sprintf(pathVersion, c.addr)
+	err := c.get(uri, out)
+	return out, err
+}
+
 //
 // http request helper functions
 //
@@ -389,13 +470,6 @@ func (c *client) put(rawurl string, in, out interface{}) error {
 func (c *client) patch(rawurl string, in, out interface{}) error {
 	return c.do(rawurl, "PATCH", in, out)
 }
-
-// RepoMove moves a repository
-func (c *client) RepoMove(owner, name, newFullName string) error {
-	uri := fmt.Sprintf(pathRepoMove, c.addr, owner, name, newFullName)
-	return c.post(uri, nil, nil)
-}
-
 
 // helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {

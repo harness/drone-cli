@@ -1,7 +1,15 @@
 package drone
 
+import "net/http"
+
 // Client is used to communicate with a Drone server.
 type Client interface {
+	// SetClient sets the http.Client.
+	SetClient(*http.Client)
+
+	// SetAddress sets the server address.
+	SetAddress(string)
+
 	// Self returns the currently authenticated user.
 	Self() (*User, error)
 
@@ -78,6 +86,9 @@ type Client interface {
 	// target environment.
 	Deploy(string, string, int, string, map[string]string) (*Build, error)
 
+	// LogsPurge purges the build logs for the specified build.
+	LogsPurge(string, string, int) error
+
 	// Registry returns a registry by hostname.
 	Registry(owner, name, hostname string) (*Registry, error)
 
@@ -107,4 +118,25 @@ type Client interface {
 
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
+
+	// Server returns the named servers details.
+	Server(name string) (*Server, error)
+
+	// ServerList returns a list of all active build servers.
+	ServerList() ([]*Server, error)
+
+	// ServerCreate creates a new server.
+	ServerCreate() (*Server, error)
+
+	// ServerDelete terminates a server.
+	ServerDelete(name string) error
+
+	// AutoscalePause pauses the autoscaler.
+	AutoscalePause() error
+
+	// AutoscaleResume resumes the autoscaler.
+	AutoscaleResume() error
+
+	// AutoscaleVersion returns the autoscaler version.
+	AutoscaleVersion() (*Version, error)
 }
