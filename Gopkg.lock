@@ -97,6 +97,12 @@
   revision = "f4d1a8ef8670afc9eea1fb95ee09a979fd2763a3"
 
 [[projects]]
+  name = "github.com/fatih/color"
+  packages = ["."]
+  revision = "507f6050b8568533fb3f5504de8e5205fa62a114"
+  version = "v1.6.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/flynn/go-shlex"
   packages = ["."]
@@ -116,6 +122,17 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/google/go-jsonnet"
+  packages = [
+    ".",
+    "ast",
+    "parser"
+  ]
+  revision = "0274286eef945e5e24be6ebfc13a9deefdd312ee"
+  source = "https://github.com/drone/go-jsonnet.git"
+
+[[projects]]
+  branch = "master"
   name = "github.com/jackspirou/syscerts"
   packages = ["."]
   revision = "b68f5469dff16e102bd6a2d5b3e79341c938d736"
@@ -128,6 +145,18 @@
   ]
   revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
 
 [[projects]]
   name = "github.com/opencontainers/go-digest"
@@ -216,6 +245,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "adf49f8b501fa5d3ee778c63607482e72d073343bf7171e180d8bec26138da91"
+  inputs-digest = "d911cccbb4f85ae989fbe0e30dfce4947d524a508d79069353af5a075007c57b"
   solver-name = "gps-cdcl"
   solver-version = 1

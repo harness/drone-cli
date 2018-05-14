@@ -37,6 +37,11 @@
   branch = "master"
   name = "golang.org/x/oauth2"
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/google/go-jsonnet"
+  source = "https://github.com/drone/go-jsonnet.git"
+
 #
 # Some project dependencies hale from the dark ages
 # of Go dependnecy management and require that we point
