@@ -14,5 +14,6 @@ var Command = cli.Command{
 		repoRemoveCmd,
 		repoRepairCmd,
 		repoChownCmd,
+		repoSyncCmd,
 	},
 }

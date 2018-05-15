@@ -85,7 +85,7 @@
 [[projects]]
   name = "github.com/drone/drone-go"
   packages = ["drone"]
-  revision = "9b0e0d8b9a0e1ee7e24eb12f3d2f617501a1dcd0"
+  revision = "7f20e6c113d3ffa2af80401c4eba7d510c8fd875"
 
 [[projects]]
   branch = "master"
@@ -245,6 +245,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d911cccbb4f85ae989fbe0e30dfce4947d524a508d79069353af5a075007c57b"
+  inputs-digest = "3c2492a2f392e0e4d42f2247aca5631e020aed1e2dea238bb56e27739866927a"
   solver-name = "gps-cdcl"
   solver-version = 1

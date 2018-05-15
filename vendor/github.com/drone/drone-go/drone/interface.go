@@ -35,6 +35,10 @@ type Client interface {
 	// access in the host system.
 	RepoList() ([]*Repo, error)
 
+	// RepoListOpts returns a list of all repositories to which the user has
+	// explicit access in the host system.
+	RepoListOpts(bool, bool) ([]*Repo, error)
+
 	// RepoPost activates a repository.
 	RepoPost(string, string) (*Repo, error)
 
