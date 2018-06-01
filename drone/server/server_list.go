@@ -97,7 +97,7 @@ func printLong(servers []*drone.Server, a, h bool) {
 			server.Address,
 			server.State,
 			units.HumanDuration(
-				time.Now().Sub(
+				time.Since(
 					time.Unix(server.Created, 0),
 				),
 			),
