@@ -24,6 +24,22 @@ var repoUpdateCmd = cli.Command{
 			Name:  "gated",
 			Usage: "repository is gated",
 		},
+		cli.BoolFlag{
+			Name:  "tag",
+			Usage: "repository support tag hook",
+		},
+		cli.BoolFlag{
+			Name:  "pull",
+			Usage: "repository support pull hook",
+		},
+		cli.BoolFlag{
+			Name:  "push",
+			Usage: "repository support push hook",
+		},
+		cli.BoolFlag{
+			Name:  "deploy",
+			Usage: "repository support deploy hook",
+		},
 		cli.DurationFlag{
 			Name:  "timeout",
 			Usage: "repository timeout",
@@ -67,9 +83,25 @@ func repoUpdate(c *cli.Context) error {
 		gated        = c.Bool("gated")
 		buildCounter = c.Int("build-counter")
 		unsafe       = c.Bool("unsafe")
+		tag          = c.Bool("tag")
+		push         = c.Bool("push")
+		pull         = c.Bool("pull")
+		deploy       = c.Bool("deploy")
 	)
 
 	patch := new(drone.RepoPatch)
+	if c.IsSet("tag") {
+		patch.AllowTag = &tag
+	}
+	if c.IsSet("push") {
+		patch.AllowPush = &push
+	}
+	if c.IsSet("pull") {
+		patch.AllowPull = &pull
+	}
+	if c.IsSet("deploy") {
+		patch.AllowDeploy = &deploy
+	}
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}
