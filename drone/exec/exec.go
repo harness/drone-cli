@@ -301,10 +301,10 @@ func exec(c *cli.Context) error {
 		})
 	}
 
-	droneENV := make(map[string]string)
+	droneEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
-		droneENV[envs[0]] = envs[1]
+		droneEnv[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -377,7 +377,7 @@ func exec(c *cli.Context) error {
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(droneENV),
+		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
 
 	engine, err := docker.NewEnv()
