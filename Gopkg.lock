@@ -14,7 +14,7 @@
   version = "v1.0.4"
 
 [[projects]]
-  branch = "master"
+  branch = "feat/support-network-CheckDuplicate"
   name = "github.com/cncd/pipeline"
   packages = [
     "pipeline",
@@ -28,7 +28,8 @@
     "pipeline/interrupt",
     "pipeline/multipart"
   ]
-  revision = "3a09486affc9215ba52f55b1f6e10182458d1aba"
+  revision = "e6ea9bb10018f21225e359f26c2a8f0db0ddec4d"
+  source = "github.com/suzuki-shunsuke/pipeline"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -245,6 +246,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3c2492a2f392e0e4d42f2247aca5631e020aed1e2dea238bb56e27739866927a"
+  inputs-digest = "2ee741d53ee4d926367c9fcb25398f4dd060d49911d4391bf50f0614b5faa0b0"
   solver-name = "gps-cdcl"
   solver-version = 1

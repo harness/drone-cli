@@ -176,7 +176,7 @@ func (m *Metadata) EnvironDrone() map[string]string {
 	params := map[string]string{
 		"CI":                         "drone",
 		"DRONE":                      "true",
-		"DRONE_ARCH":                 "linux/amd64",
+		"DRONE_ARCH":                 m.Sys.Arch,
 		"DRONE_REPO":                 m.Repo.Name,
 		"DRONE_REPO_SCM":             "git",
 		"DRONE_REPO_OWNER":           owner,
