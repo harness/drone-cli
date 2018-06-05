@@ -275,7 +275,7 @@ var Command = cli.Command{
 			EnvVar: "DRONE_JOB_NUMBER",
 		},
 		cli.StringSliceFlag{
-			Name: "env, e",
+			Name:   "env, e",
 			EnvVar: "DRONE_ENV",
 		},
 	},
@@ -379,6 +379,13 @@ func exec(c *cli.Context) error {
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(drone_env),
 	).Compile(conf)
+	// https://github.com/moby/moby/issues/18864
+	// https://godoc.org/github.com/docker/docker/api/types#NetworkCreate
+	// Set CheckDuplicate to prevent network name collistions.
+	// drone exec executes a local build, so it is natural to make CheckDuplicate true.
+	for _, network := range compiled.Networks {
+		network.CheckDuplicate = true
+	}
 
 	engine, err := docker.NewEnv()
 	if err != nil {

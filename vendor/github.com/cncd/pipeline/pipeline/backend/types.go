@@ -65,9 +65,10 @@ type (
 
 	// Network defines a container network.
 	Network struct {
-		Name       string            `json:"name,omitempty"`
-		Driver     string            `json:"driver,omitempty"`
-		DriverOpts map[string]string `json:"driver_opts,omitempty"`
+		Name           string            `json:"name,omitempty"`
+		Driver         string            `json:"driver,omitempty"`
+		DriverOpts     map[string]string `json:"driver_opts,omitempty"`
+		CheckDuplicate bool              `json:"check_duplicate,omitempty"`
 	}
 
 	// Volume defines a container volume.

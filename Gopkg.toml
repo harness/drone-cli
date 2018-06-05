@@ -3,7 +3,8 @@
 
 [[constraint]]
   name = "github.com/cncd/pipeline"
-  branch = "master"
+  source = "github.com/suzuki-shunsuke/pipeline"
+  branch = "feat/support-network-CheckDuplicate"
 
 [[constraint]]
   name = "github.com/drone/drone-go"
