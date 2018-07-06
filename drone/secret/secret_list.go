@@ -13,6 +13,7 @@ import (
 
 var secretListCmd = cli.Command{
 	Name:      "ls",
+	Aliases:   []string{"list"},
 	Usage:     "list secrets",
 	ArgsUsage: "[repo/name]",
 	Action:    secretList,
