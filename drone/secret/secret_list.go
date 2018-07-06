@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
 )
 
 var secretListCmd = cli.Command{
@@ -49,14 +50,21 @@ func secretList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	for _, secret := range list {
+		err = printSecret(secret, format)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func printSecret(secret *drone.Secret, format string) error {
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err
 	}
-	for _, registry := range list {
-		tmpl.Execute(os.Stdout, registry)
-	}
-	return nil
+	return tmpl.Execute(os.Stdout, secret)
 }
 
 // template for secret list items

@@ -1,9 +1,6 @@
 package secret
 
 import (
-	"html/template"
-	"os"
-
 	"github.com/urfave/cli"
 
 	"github.com/drone/drone-cli/drone/internal"
@@ -53,9 +50,5 @@ func secretInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, secret)
+	return printSecret(secret, format)
 }

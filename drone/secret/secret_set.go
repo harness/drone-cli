@@ -1,11 +1,7 @@
 package secret
 
 import (
-	"io/ioutil"
-	"strings"
-
 	"github.com/drone/drone-cli/drone/internal"
-	"github.com/drone/drone-go/drone"
 
 	"github.com/urfave/cli"
 )
@@ -15,28 +11,7 @@ var secretUpdateCmd = cli.Command{
 	Usage:     "update a secret",
 	ArgsUsage: "[repo/name]",
 	Action:    secretUpdate,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
-		cli.StringFlag{
-			Name:  "name",
-			Usage: "secret name",
-		},
-		cli.StringFlag{
-			Name:  "value",
-			Usage: "secret value",
-		},
-		cli.StringSliceFlag{
-			Name:  "event",
-			Usage: "secret limited to these events",
-		},
-		cli.StringSliceFlag{
-			Name:  "image",
-			Usage: "secret limited to these images",
-		},
-	},
+	Flags:     flags,
 }
 
 func secretUpdate(c *cli.Context) error {
@@ -52,20 +27,13 @@ func secretUpdate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	secret := &drone.Secret{
-		Name:   c.String("name"),
-		Value:  c.String("value"),
-		Images: c.StringSlice("image"),
-		Events: c.StringSlice("event"),
-	}
-	if strings.HasPrefix(secret.Value, "@") {
-		path := strings.TrimPrefix(secret.Value, "@")
-		out, ferr := ioutil.ReadFile(path)
-		if ferr != nil {
-			return ferr
-		}
-		secret.Value = string(out)
+	secret, err := makeSecret(c)
+	if err != nil {
+		return err
 	}
 	_, err = client.SecretUpdate(owner, name, secret)
+	if err == nil {
+		return printSecret(secret, tmplSecretList)
+	}
 	return err
 }
