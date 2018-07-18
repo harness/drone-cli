@@ -45,7 +45,7 @@ func buildStart(c *cli.Context) (err error) {
 		number = build.Number
 	} else {
 		if len(buildArg) == 0 {
-			return errors.New("missing job number")
+			return errors.New("Missing job number")
 		}
 		number, err = strconv.Atoi(buildArg)
 		if err != nil {
