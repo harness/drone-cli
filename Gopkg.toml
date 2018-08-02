@@ -7,7 +7,7 @@
 
 [[constraint]]
   name = "github.com/drone/drone-go"
-  revision = "9b0e0d8b9a0e1ee7e24eb12f3d2f617501a1dcd0"
+  revision = "7f20e6c113d3ffa2af80401c4eba7d510c8fd875"
 
 [[constraint]]
   branch = "master"
@@ -36,6 +36,11 @@
 [[constraint]]
   branch = "master"
   name = "golang.org/x/oauth2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/google/go-jsonnet"
+  source = "https://github.com/drone/go-jsonnet.git"
 
 #
 # Some project dependencies hale from the dark ages

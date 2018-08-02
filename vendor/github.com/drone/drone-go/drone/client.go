@@ -179,6 +179,15 @@ func (c *client) RepoList() ([]*Repo, error) {
 	return out, err
 }
 
+// RepoListOpts returns a list of all repositories to which
+// the user has explicit access in the host system.
+func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
+	var out []*Repo
+	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
+	err := c.get(uri, &out)
+	return out, err
+}
+
 // RepoPost activates a repository.
 func (c *client) RepoPost(owner string, name string) (*Repo, error) {
 	out := new(Repo)
