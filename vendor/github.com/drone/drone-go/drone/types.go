@@ -163,6 +163,19 @@ type (
 		Stopped  int64  `json:"stopped"`
 	}
 
+	// Cron represents a cron job.
+	Cron struct {
+		ID      int64  `json:"id"`
+		RepoID  int64  `json:"repo_id"`
+		Name    string `json:"name"`
+		Expr    string `json:"expr"`
+		Next    int64  `json:"next"`
+		Prev    int64  `json:"prev"`
+		Branch  string `json:"branch"`
+		Created int64  `json:"created"`
+		Updated int64  `json:"updated"`
+	}
+
 	// Version provides system version details.
 	Version struct {
 		Source  string `json:"source,omitempty"`

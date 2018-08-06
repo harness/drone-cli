@@ -32,6 +32,9 @@ const (
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
 	pathRepoRegistry   = "%s/api/repos/%s/%s/registry/%s"
+	pathEncrypt        = "%s/api/repos/%s/%s/encrypt"
+	pathCrons          = "%s/api/repos/%s/%s/cron"
+	pathCron           = "%s/api/repos/%s/%s/cron/%s"
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
@@ -405,6 +408,72 @@ func (c *client) SecretDelete(owner, name, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
 	return c.delete(uri)
 }
+
+//
+// encryption
+//
+
+type (
+	encryptRequest struct {
+		Algorithm string `json:"algorithm"`
+		Plaintext string `json:"plaintext"`
+	}
+
+	encryptResponse struct {
+		Algorithm  string `json:"algorithm"`
+		Ciphertext string `json:"ciphertext"`
+	}
+)
+
+// Encrypt returns an encrypted secret
+func (c *client) Encrypt(owner, name, plaintext, algorithm string) (string, error) {
+	in := &encryptRequest{
+		Algorithm: algorithm,
+		Plaintext: plaintext,
+	}
+	out := &encryptResponse{}
+	uri := fmt.Sprintf(pathEncrypt, c.addr, owner, name)
+	err := c.post(uri, in, out)
+	return out.Ciphertext, err
+}
+
+//
+// cron jobs
+//
+
+// Cron returns a cronjob by name.
+func (c *client) Cron(owner, name, cron string) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// CronList returns a list of all repository cronjobs.
+func (c *client) CronList(owner string, name string) ([]*Cron, error) {
+	var out []*Cron
+	uri := fmt.Sprintf(pathCrons, c.addr, owner, name)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// CronCreate creates a cronjob.
+func (c *client) CronCreate(owner, name string, in *Cron) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathCrons, c.addr, owner, name)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// CronDelete deletes a cronjob.
+func (c *client) CronDelete(owner, name, cron string) error {
+	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
+	return c.delete(uri)
+}
+
+//
+// autoscaler
+//
 
 // Server returns the named servers details.
 func (c *client) Server(name string) (*Server, error) {

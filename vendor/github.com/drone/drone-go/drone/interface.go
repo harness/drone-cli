@@ -123,6 +123,21 @@ type Client interface {
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
 
+	// Encrypt returns an encrypted secret
+	Encrypt(owner, name, plaintext, algorithm string) (string, error)
+
+	// Cron returns a cronjob by name.
+	Cron(owner, name, cron string) (*Cron, error)
+
+	// CronList returns a list of all repository cronjobs.
+	CronList(owner string, name string) ([]*Cron, error)
+
+	// CronCreate creates a cronjob.
+	CronCreate(owner, name string, in *Cron) (*Cron, error)
+
+	// CronDelete deletes a cronjob.
+	CronDelete(owner, name, cron string) error
+
 	// Server returns the named servers details.
 	Server(name string) (*Server, error)
 

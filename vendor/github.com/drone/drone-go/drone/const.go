@@ -19,3 +19,9 @@ const (
 	StatusKilled  = "killed"
 	StatusError   = "error"
 )
+
+// Encryption algorithms
+const (
+	EncryptAesgcm    = "aesgcm"
+	EncryptSecretbox = "secretbox"
+)

@@ -6,7 +6,9 @@ import (
 
 	"github.com/drone/drone-cli/drone/autoscale"
 	"github.com/drone/drone-cli/drone/build"
+	"github.com/drone/drone-cli/drone/cron"
 	"github.com/drone/drone-cli/drone/deploy"
+	"github.com/drone/drone-cli/drone/encrypt"
 	"github.com/drone/drone-cli/drone/exec"
 	"github.com/drone/drone-cli/drone/info"
 	"github.com/drone/drone-cli/drone/jsonnet"
@@ -68,8 +70,10 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		build.Command,
+		cron.Command,
 		log.Command,
 		deploy.Command,
+		encrypt.Command,
 		exec.Command,
 		info.Command,
 		registry.Command,
