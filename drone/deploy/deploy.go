@@ -85,7 +85,7 @@ func deploy(c *cli.Context) error {
 			}
 		}
 		if number == 0 {
-			return fmt.Errorf("Cannot deploy failure build")
+			return fmt.Errorf("Cannot deploy failure build.")
 		}
 	} else {
 		number, err = strconv.Atoi(buildArg)
@@ -96,7 +96,7 @@ func deploy(c *cli.Context) error {
 
 	env := c.Args().Get(2)
 	if env == "" {
-		return fmt.Errorf("Please specify the target environment (ie production)")
+		return fmt.Errorf("Error: Please specify the target environment (e.g. production).")
 	}
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
