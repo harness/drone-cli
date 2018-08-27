@@ -21,10 +21,4 @@
       [if pull == true then 'pull']: pull,
     },
   },
-
-  docker:: import './steps/docker.libsonnet',
-  githubRelease:: import './steps/githubRelease.libsonnet',
-  gpgsign:: import './steps/gpgsign.libsonnet',
-  manifest:: import './steps/manifest.libsonnet',
-  webhook:: import './steps/webhook.libsonnet',
 }
