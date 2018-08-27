@@ -40,7 +40,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/google/go-jsonnet"
-  source = "https://github.com/drone/go-jsonnet.git"
 
 #
 # Some project dependencies hale from the dark ages

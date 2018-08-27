@@ -1,9 +1,12 @@
 package jsonnet
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
+	"github.com/drone/drone-cli/drone/jsonnet/stdlib"
 	"github.com/fatih/color"
 	"github.com/google/go-jsonnet"
 	"github.com/urfave/cli"
@@ -21,8 +24,10 @@ var Command = cli.Command{
 	},
 	Flags: []cli.Flag{
 		cli.BoolFlag{
-			Name:   "string",
-			Hidden: true,
+			Name: "stream",
+		},
+		cli.BoolTFlag{
+			Name: "string",
 		},
 		cli.IntFlag{
 			Name:  "max-stack",
@@ -57,30 +62,83 @@ func generate(c *cli.Context) error {
 	}
 
 	vm := jsonnet.MakeVM()
-	vm.KeepOrder = true
-	vm.StringOutput = c.Bool("string")
 	vm.MaxStack = c.Int("max-stack")
-	// vm.ExtVar
-	// vm.ExtCode
-	// vm.TLAVar
-	// vm.TLACode
-	// vm.Importer(&jsonnet.FileImporter{})
-
+	vm.StringOutput = c.BoolT("string")
 	vm.ErrorFormatter.SetMaxStackTraceSize(
 		c.Int("max-trace"),
 	)
 	vm.ErrorFormatter.SetColorFormatter(
 		color.New(color.FgRed).Fprintf,
 	)
+	vm.Importer(
+		stdlib.Importer(),
+	)
 
-	raw, err := vm.EvaluateSnippet(input, string(snippet))
+	var result string
+	var resultArray []string
+	if c.Bool("stream") {
+		resultArray, err = vm.EvaluateSnippetStream(input, string(snippet))
+	} else {
+		result, err = vm.EvaluateSnippet(input, string(snippet))
+	}
 	if err != nil {
 		return err
 	}
 
-	if c.Bool("stdout") {
-		println(raw)
+	if c.Bool("stream") {
+		return writeOutputStream(resultArray, output)
+	}
+	return writeOutputFile(result, output)
+}
+
+// writeOutputStream writes the output as a YAML stream.
+func writeOutputStream(output []string, outputFile string) error {
+	var f *os.File
+
+	if outputFile == "" {
+		f = os.Stdout
+	} else {
+		var err error
+		f, err = os.Create(outputFile)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+	}
+
+	for _, doc := range output {
+		_, err := f.WriteString("---\n")
+		if err != nil {
+			return err
+		}
+		_, err = f.WriteString(doc)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(output) > 0 {
+		_, err := f.WriteString("...\n")
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func writeOutputFile(output string, outputFile string) error {
+	if outputFile == "" {
+		fmt.Print(output)
 		return nil
 	}
-	return ioutil.WriteFile(output, []byte(raw), 0644)
+
+	f, err := os.Create(outputFile)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(output)
+	return err
 }

@@ -38,7 +38,6 @@ type VM struct {
 	importer       Importer
 	ErrorFormatter ErrorFormatter
 	StringOutput   bool
-	KeepOrder      bool
 }
 
 // External variable or top level argument provided before execution
@@ -109,11 +108,11 @@ func (vm *VM) evaluateSnippet(filename string, snippet string, kind evalKind) (o
 	}
 	switch kind {
 	case evalKindRegular:
-		output, err = evaluate(node, vm.ext, vm.tla, vm.nativeFuncs, vm.MaxStack, vm.KeepOrder, vm.importer, vm.StringOutput)
+		output, err = evaluate(node, vm.ext, vm.tla, vm.nativeFuncs, vm.MaxStack, vm.importer, vm.StringOutput)
 	case evalKindMulti:
-		output, err = evaluateMulti(node, vm.ext, vm.tla, vm.nativeFuncs, vm.MaxStack, vm.KeepOrder, vm.importer, vm.StringOutput)
+		output, err = evaluateMulti(node, vm.ext, vm.tla, vm.nativeFuncs, vm.MaxStack, vm.importer, vm.StringOutput)
 	case evalKindStream:
-		output, err = evaluateStream(node, vm.ext, vm.tla, vm.nativeFuncs, vm.MaxStack, vm.KeepOrder, vm.importer)
+		output, err = evaluateStream(node, vm.ext, vm.tla, vm.nativeFuncs, vm.MaxStack, vm.importer)
 	}
 	if err != nil {
 		return "", err
@@ -192,5 +191,5 @@ func SnippetToAST(filename string, snippet string) (ast.Node, error) {
 
 // Version returns the Jsonnet version number.
 func Version() string {
-	return "v0.10.0"
+	return "v0.11.2"
 }
