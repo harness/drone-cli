@@ -1,6 +1,10 @@
 package stdlib
 
-import jsonnet "github.com/google/go-jsonnet"
+import (
+	"path"
+
+	jsonnet "github.com/google/go-jsonnet"
+)
 
 //go:generate go run gen.go
 
@@ -17,8 +21,10 @@ type importer struct {
 }
 
 func (i *importer) Import(importedFrom, importedPath string) (contents jsonnet.Contents, foundAt string, err error) {
-	if contents, ok := files[importedPath]; ok {
-		return contents, importedPath, nil
+	dir, _ := path.Split(importedFrom)
+	path := path.Join(dir, importedPath)
+	if contents, ok := files[path]; ok {
+		return contents, path, nil
 	}
 	return i.base.Import(importedFrom, importedPath)
 }

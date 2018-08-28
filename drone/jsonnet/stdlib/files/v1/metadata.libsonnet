@@ -1,0 +1,7 @@
+{
+  new(
+    name
+  ):: {
+    name: name,
+  },
+}

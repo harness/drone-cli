@@ -1,5 +1,0 @@
-{
-  new(name):: {
-    name: name,
-  },
-}
