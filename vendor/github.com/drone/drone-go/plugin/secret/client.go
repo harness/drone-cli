@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package config
+package secret
 
 import (
 	"context"
@@ -34,8 +34,8 @@ type pluginClient struct {
 	client *client.Client
 }
 
-func (c *pluginClient) Find(ctx context.Context, in *Request) (*drone.Config, error) {
-	res := new(drone.Config)
+func (c *pluginClient) Find(ctx context.Context, in *Request) (*drone.Secret, error) {
+	res := new(drone.Secret)
 	err := c.client.Do(in, res)
 	return res, err
 }

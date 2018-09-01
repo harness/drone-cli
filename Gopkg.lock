@@ -95,9 +95,10 @@
     "plugin/config",
     "plugin/internal/aesgcm",
     "plugin/internal/client",
-    "plugin/logger"
+    "plugin/logger",
+    "plugin/secret"
   ]
-  revision = "f543e903b5258a10a8366be9b54eff9cbbe27f61"
+  revision = "f20367001814122ef27ab6429f80f1afc7944106"
 
 [[projects]]
   branch = "master"
@@ -256,6 +257,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aca412028286676436058e45765e1d9761ac1b3fd92ed40ecf6319410d52dadb"
+  inputs-digest = "91643bb81fbe5b3550faa04cee35d59f91bf2bf86cd18a7309a55930510abe92"
   solver-name = "gps-cdcl"
   solver-version = 1

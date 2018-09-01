@@ -12,30 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package config
+package secret
 
 import (
 	"context"
 
 	"github.com/drone/drone-go/drone"
-	"github.com/drone/drone-go/plugin/internal/client"
 )
 
-// Client returns a new plugin client.
-func Client(endpoint, secret string, skipverify bool) Plugin {
-	client := client.New(endpoint, secret, skipverify)
-	client.Accept = V1
-	return &pluginClient{
-		client: client,
+// V1 is version 1 of the secrets API
+const V1 = "application/vnd.drone.secret.v1+json"
+
+type (
+	// Request defines a secret request.
+	Request struct {
+		Name  string      `json:"name"`
+		Repo  drone.Repo  `json:"repo,omitempty"`
+		Build drone.Build `json:"build,omitempty"`
 	}
-}
 
-type pluginClient struct {
-	client *client.Client
-}
-
-func (c *pluginClient) Find(ctx context.Context, in *Request) (*drone.Config, error) {
-	res := new(drone.Config)
-	err := c.client.Do(in, res)
-	return res, err
-}
+	// Plugin responds to a secret request.
+	Plugin interface {
+		Find(context.Context, *Request) (*drone.Secret, error)
+	}
+)

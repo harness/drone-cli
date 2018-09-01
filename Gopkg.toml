@@ -7,7 +7,7 @@
 
 [[constraint]]
   name = "github.com/drone/drone-go"
-  revision = "f543e903b5258a10a8366be9b54eff9cbbe27f61"
+  revision = "f20367001814122ef27ab6429f80f1afc7944106"
 
 [[constraint]]
   branch = "master"
