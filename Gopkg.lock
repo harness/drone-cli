@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/99designs/httpsignatures-go"
+  packages = ["."]
+  revision = "88528bf4ca7e0268c559d30cfa8825208313b3c0"
+
+[[projects]]
   name = "github.com/Microsoft/go-winio"
   packages = ["."]
   revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
@@ -84,8 +90,14 @@
 
 [[projects]]
   name = "github.com/drone/drone-go"
-  packages = ["drone"]
-  revision = "dd0a126edb93bbff0df4d0c5deaba3aa70f0f931"
+  packages = [
+    "drone",
+    "plugin/config",
+    "plugin/internal/aesgcm",
+    "plugin/internal/client",
+    "plugin/logger"
+  ]
+  revision = "f543e903b5258a10a8366be9b54eff9cbbe27f61"
 
 [[projects]]
   branch = "master"
@@ -244,6 +256,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2925187867fbc21128606cc1ad862be7f96e4dc1fea4023fc86a305defb326f3"
+  inputs-digest = "aca412028286676436058e45765e1d9761ac1b3fd92ed40ecf6319410d52dadb"
   solver-name = "gps-cdcl"
   solver-version = 1

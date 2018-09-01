@@ -12,30 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package drone
+package config
 
-// Event values.
-const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+import (
+	"context"
+
+	"github.com/drone/drone-go/drone"
 )
 
-// Status values.
-const (
-	StatusBlocked = "blocked"
-	StatusSkipped = "skipped"
-	StatusPending = "pending"
-	StatusRunning = "running"
-	StatusSuccess = "success"
-	StatusFailure = "failure"
-	StatusKilled  = "killed"
-	StatusError   = "error"
-)
+// V1 is version 1 of the configuration API
+const V1 = "application/vnd.drone.config.v1+json"
 
-// Encryption algorithms
-const (
-	EncryptAesgcm    = "aesgcm"
-	EncryptSecretbox = "secretbox"
+type (
+	// Request defines a configuration request.
+	Request struct {
+		Build drone.Build `json:"build,omitempty"`
+		Repo  drone.Repo  `json:"repo,omitempty"`
+	}
+
+	// Plugin responds to a configuration request.
+	Plugin interface {
+		Find(context.Context, *Request) (*drone.Config, error)
+	}
 )

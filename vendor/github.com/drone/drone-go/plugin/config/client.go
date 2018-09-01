@@ -12,30 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package drone
+package config
 
-// Event values.
-const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+import (
+	"context"
+
+	"github.com/drone/drone-go/drone"
+	"github.com/drone/drone-go/plugin/internal/client"
 )
 
-// Status values.
-const (
-	StatusBlocked = "blocked"
-	StatusSkipped = "skipped"
-	StatusPending = "pending"
-	StatusRunning = "running"
-	StatusSuccess = "success"
-	StatusFailure = "failure"
-	StatusKilled  = "killed"
-	StatusError   = "error"
-)
+// Client returns a new plugin client.
+func Client(endpoint, secret string, skipverify bool) Plugin {
+	return &pluginClient{
+		client: client.New(endpoint, secret, skipverify),
+	}
+}
 
-// Encryption algorithms
-const (
-	EncryptAesgcm    = "aesgcm"
-	EncryptSecretbox = "secretbox"
-)
+type pluginClient struct {
+	client *client.Client
+}
+
+func (c *pluginClient) Find(ctx context.Context, in *Request) (*drone.Config, error) {
+	res := new(drone.Config)
+	err := c.client.Do(in, res)
+	return res, err
+}

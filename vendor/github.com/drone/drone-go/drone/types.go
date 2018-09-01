@@ -1,3 +1,17 @@
+// Copyright 2018 Drone.IO Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package drone
 
 type (
@@ -15,7 +29,6 @@ type (
 	Repo struct {
 		ID          int64  `json:"id,omitempty"`
 		Owner       string `json:"owner"`
-		Name        string `json:"name"`
 		FullName    string `json:"full_name"`
 		Avatar      string `json:"avatar_url,omitempty"`
 		Link        string `json:"link_url,omitempty"`
@@ -33,6 +46,14 @@ type (
 		AllowDeploy bool   `json:"allow_deploys"`
 		AllowTag    bool   `json:"allow_tags"`
 		Config      string `json:"config_file"`
+
+		//
+		// fields added in 0.9
+		//
+
+		Namespace string `json:"namespace"`
+		Name      string `json:"name"`
+		Slug      string `json:"slug"`
 	}
 
 	// RepoPatch defines a repository patch request.
@@ -78,6 +99,16 @@ type (
 		Reviewer  string  `json:"reviewed_by"`
 		Reviewed  int64   `json:"reviewed_at"`
 		Procs     []*Proc `json:"procs,omitempty"`
+
+		//
+		// fields added in 0.9
+		//
+
+		Before string `json:"before"`
+		After  string `json:"after"`
+		Source string `json:"source"`
+		Target string `json:"target"`
+		Fork   string `json:"fork"`
 	}
 
 	// Proc represents a process in the build pipeline.
@@ -115,6 +146,14 @@ type (
 		Value  string   `json:"value,omitempty"`
 		Images []string `json:"image"`
 		Events []string `json:"event"`
+
+		//
+		// fields added in 0.9
+		//
+
+		Data string `json:"data,omitempty"`
+		Pull bool   `json:"pull,omitempty"`
+		Fork bool   `json:"fork,omitempty"`
 	}
 
 	// Activity represents an item in the user's feed or timeline.
@@ -174,6 +213,12 @@ type (
 		Branch  string `json:"branch"`
 		Created int64  `json:"created"`
 		Updated int64  `json:"updated"`
+	}
+
+	// Config represents a config file.
+	Config struct {
+		Data string `json:"data"`
+		Kind string `json:"kind"`
 	}
 
 	// Version provides system version details.

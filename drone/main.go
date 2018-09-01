@@ -13,6 +13,7 @@ import (
 	"github.com/drone/drone-cli/drone/info"
 	"github.com/drone/drone-cli/drone/jsonnet"
 	"github.com/drone/drone-cli/drone/log"
+	"github.com/drone/drone-cli/drone/plugins"
 	"github.com/drone/drone-cli/drone/registry"
 	"github.com/drone/drone-cli/drone/repo"
 	"github.com/drone/drone-cli/drone/secret"
@@ -83,6 +84,7 @@ func main() {
 		server.Command,
 		autoscale.Command,
 		jsonnet.Command,
+		plugins.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {
