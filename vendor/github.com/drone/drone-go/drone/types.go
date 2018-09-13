@@ -137,6 +137,12 @@ type (
 		Password string `json:"password,omitempty"`
 		Email    string `json:"email"`
 		Token    string `json:"token"`
+
+		//
+		// fields added in 0.9
+		//
+
+		Policy string `json:"policy,omitempty"`
 	}
 
 	// Secret represents a secret variable, such as a password or token.

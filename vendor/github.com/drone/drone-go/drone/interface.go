@@ -137,8 +137,11 @@ type Client interface {
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
 
-	// Encrypt returns an encrypted secret
-	Encrypt(owner, name, plaintext, algorithm string) (string, error)
+	// EncryptSecret returns an encrypted secret
+	EncryptSecret(owner, name string, secret *Secret) (string, error)
+
+	// EncryptRegistry returns an encrypted secret
+	EncryptRegistry(owner, name string, registry *Registry) (string, error)
 
 	// Cron returns a cronjob by name.
 	Cron(owner, name, cron string) (*Cron, error)

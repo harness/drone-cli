@@ -28,36 +28,37 @@ import (
 )
 
 const (
-	pathSelf           = "%s/api/user"
-	pathFeed           = "%s/api/user/feed"
-	pathRepos          = "%s/api/user/repos"
-	pathRepo           = "%s/api/repos/%s/%s"
-	pathRepoMove       = "%s/api/repos/%s/%s/move?to=%s"
-	pathChown          = "%s/api/repos/%s/%s/chown"
-	pathRepair         = "%s/api/repos/%s/%s/repair"
-	pathBuilds         = "%s/api/repos/%s/%s/builds"
-	pathBuild          = "%s/api/repos/%s/%s/builds/%v"
-	pathApprove        = "%s/api/repos/%s/%s/builds/%d/approve"
-	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
-	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
-	pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
-	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
-	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
-	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
-	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
-	pathRepoRegistry   = "%s/api/repos/%s/%s/registry/%s"
-	pathEncrypt        = "%s/api/repos/%s/%s/encrypt"
-	pathCrons          = "%s/api/repos/%s/%s/cron"
-	pathCron           = "%s/api/repos/%s/%s/cron/%s"
-	pathUsers          = "%s/api/users"
-	pathUser           = "%s/api/users/%s"
-	pathBuildQueue     = "%s/api/builds"
-	pathServers        = "%s/api/servers"
-	pathServer         = "%s/api/servers/%s"
-	pathScalerPause    = "%s/api/pause"
-	pathScalerResume   = "%s/api/resume"
-	pathVarz           = "%s/varz"
-	pathVersion        = "%s/version"
+	pathSelf            = "%s/api/user"
+	pathFeed            = "%s/api/user/feed"
+	pathRepos           = "%s/api/user/repos"
+	pathRepo            = "%s/api/repos/%s/%s"
+	pathRepoMove        = "%s/api/repos/%s/%s/move?to=%s"
+	pathChown           = "%s/api/repos/%s/%s/chown"
+	pathRepair          = "%s/api/repos/%s/%s/repair"
+	pathBuilds          = "%s/api/repos/%s/%s/builds"
+	pathBuild           = "%s/api/repos/%s/%s/builds/%v"
+	pathApprove         = "%s/api/repos/%s/%s/builds/%d/approve"
+	pathDecline         = "%s/api/repos/%s/%s/builds/%d/decline"
+	pathJob             = "%s/api/repos/%s/%s/builds/%d/%d"
+	pathLog             = "%s/api/repos/%s/%s/logs/%d/%d"
+	pathLogPurge        = "%s/api/repos/%s/%s/logs/%d"
+	pathRepoSecrets     = "%s/api/repos/%s/%s/secrets"
+	pathRepoSecret      = "%s/api/repos/%s/%s/secrets/%s"
+	pathRepoRegistries  = "%s/api/repos/%s/%s/registry"
+	pathRepoRegistry    = "%s/api/repos/%s/%s/registry/%s"
+	pathEncryptSecret   = "%s/api/repos/%s/%s/encrypt/secret"
+	pathEncryptRegistry = "%s/api/repos/%s/%s/encrypt/registry"
+	pathCrons           = "%s/api/repos/%s/%s/cron"
+	pathCron            = "%s/api/repos/%s/%s/cron/%s"
+	pathUsers           = "%s/api/users"
+	pathUser            = "%s/api/users/%s"
+	pathBuildQueue      = "%s/api/builds"
+	pathServers         = "%s/api/servers"
+	pathServer          = "%s/api/servers/%s"
+	pathScalerPause     = "%s/api/pause"
+	pathScalerResume    = "%s/api/resume"
+	pathVarz            = "%s/varz"
+	pathVersion         = "%s/version"
 )
 
 type client struct {
@@ -427,28 +428,24 @@ func (c *client) SecretDelete(owner, name, secret string) error {
 // encryption
 //
 
-type (
-	encryptRequest struct {
-		Algorithm string `json:"algorithm"`
-		Plaintext string `json:"plaintext"`
-	}
+type encryptResponse struct {
+	Data string `json:"data"`
+}
 
-	encryptResponse struct {
-		Algorithm  string `json:"algorithm"`
-		Ciphertext string `json:"ciphertext"`
-	}
-)
-
-// Encrypt returns an encrypted secret
-func (c *client) Encrypt(owner, name, plaintext, algorithm string) (string, error) {
-	in := &encryptRequest{
-		Algorithm: algorithm,
-		Plaintext: plaintext,
-	}
+// EncryptSecret returns an encrypted secret.
+func (c *client) EncryptSecret(owner, name string, secret *Secret) (string, error) {
 	out := &encryptResponse{}
-	uri := fmt.Sprintf(pathEncrypt, c.addr, owner, name)
-	err := c.post(uri, in, out)
-	return out.Ciphertext, err
+	uri := fmt.Sprintf(pathEncryptSecret, c.addr, owner, name)
+	err := c.post(uri, secret, out)
+	return out.Data, err
+}
+
+// EncryptRegistry returns an encrypted registry.
+func (c *client) EncryptRegistry(owner, name string, registry *Registry) (string, error) {
+	out := &encryptResponse{}
+	uri := fmt.Sprintf(pathEncryptRegistry, c.addr, owner, name)
+	err := c.post(uri, registry, out)
+	return out.Data, err
 }
 
 //
