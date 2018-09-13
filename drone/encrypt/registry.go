@@ -28,6 +28,7 @@ var encryptRegistryCommand = cli.Command{
 		cli.StringFlag{
 			Name:  "server",
 			Usage: "registry server",
+			Value: "docker.io",
 		},
 	},
 }
@@ -44,20 +45,30 @@ func encryptRegistry(c *cli.Context) error {
 		return err
 	}
 
-	plaintext := c.Args().Get(1)
-	if strings.HasPrefix(plaintext, "@") {
-		data, err := ioutil.ReadFile(plaintext)
+	password := c.String("password")
+	if strings.HasPrefix(password, "@") {
+		data, err := ioutil.ReadFile(password)
 		if err != nil {
 			return err
 		}
-		plaintext = string(data)
+		password = string(data)
 	}
 
-	secret := &drone.Secret{
-		Data: plaintext,
-		Pull: c.Bool("allow-pull-request"),
+	policy := "pull"
+	switch {
+	case c.Bool("push"):
+		policy = "push"
+	case c.Bool("push-pull-request"):
+		policy = "push-pull-request"
 	}
-	encrypted, err := client.EncryptSecret(owner, name, secret)
+
+	registry := &drone.Registry{
+		Address:  c.String("server"),
+		Username: c.String("username"),
+		Password: password,
+		Policy:   policy,
+	}
+	encrypted, err := client.EncryptRegistry(owner, name, registry)
 	if err != nil {
 		return err
 	}
