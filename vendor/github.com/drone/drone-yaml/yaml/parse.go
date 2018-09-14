@@ -12,36 +12,21 @@ import (
 
 // Parse parses the configuration from io.Reader r.
 func Parse(r io.Reader) (*Manifest, error) {
-	manifest := new(Manifest)
-	scanner := bufio.NewScanner(r)
-	row := 0
-	buf := new(bytes.Buffer)
-	for scanner.Scan() {
-		row++
-		txt := scanner.Text()
-		if strings.HasPrefix(txt, "---") && row != 1 {
-			resource, err := parse(buf.Bytes())
-			if err != nil {
-				return nil, err
-			}
-			manifest.Resources = append(
-				manifest.Resources,
-				resource,
-			)
-			buf.Reset()
-		} else {
-			buf.WriteString(txt)
-			buf.WriteByte('\n')
-		}
-	}
-	resource, err := parse(buf.Bytes())
+	resources, err := ParseRaw(r)
 	if err != nil {
 		return nil, err
 	}
-	manifest.Resources = append(
-		manifest.Resources,
-		resource,
-	)
+	manifest := new(Manifest)
+	for _, raw := range resources {
+		resource, err := parseRaw(raw)
+		if err != nil {
+			return nil, err
+		}
+		manifest.Resources = append(
+			manifest.Resources,
+			resource,
+		)
+	}
 	return manifest, nil
 }
 
@@ -69,14 +54,9 @@ func ParseFile(p string) (*Manifest, error) {
 	return Parse(f)
 }
 
-func parse(b []byte) (Resource, error) {
-	res := new(resource)
-	err := yaml.Unmarshal(b, res)
-	if err != nil {
-		return nil, err
-	}
+func parseRaw(r *RawResource) (Resource, error) {
 	var obj Resource
-	switch res.Kind {
+	switch r.Kind {
 	case "cron":
 		obj = new(Cron)
 	case "secret":
@@ -88,9 +68,85 @@ func parse(b []byte) (Resource, error) {
 	default:
 		obj = new(Pipeline)
 	}
-	err = yaml.Unmarshal(b, obj)
+	err := yaml.Unmarshal(r.Data, obj)
+	return obj, err
+}
+
+// ParseRaw parses the multi-document yaml from the
+// io.Reader and returns a slice of raw resources.
+func ParseRaw(r io.Reader) ([]*RawResource, error) {
+	const newline = '\n'
+	var resources []*RawResource
+	var resource *RawResource
+
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if isSeparator(line) {
+			resource = nil
+		}
+		if resource == nil {
+			resource = &RawResource{}
+			resources = append(resources, resource)
+		}
+		if isSeparator(line) {
+			continue
+		}
+		if isTerminator(line) {
+			break
+		}
+		if scanner.Err() == io.EOF {
+			break
+		}
+		resource.Data = append(
+			resource.Data,
+			line...,
+		)
+		resource.Data = append(
+			resource.Data,
+			newline,
+		)
+	}
+	for _, resource := range resources {
+		err := yaml.Unmarshal(resource.Data, resource)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resources, nil
+}
+
+// ParseRawString parses the multi-document yaml from s
+// and returns a slice of raw resources.
+func ParseRawString(s string) ([]*RawResource, error) {
+	return ParseRaw(
+		strings.NewReader(s),
+	)
+}
+
+// ParseRawBytes parses the multi-document yaml from b
+// and returns a slice of raw resources.
+func ParseRawBytes(b []byte) ([]*RawResource, error) {
+	return ParseRaw(
+		bytes.NewReader(b),
+	)
+}
+
+// ParseRawFile parses the multi-document yaml from path p
+// and returns a slice of raw resources.
+func ParseRawFile(p string) ([]*RawResource, error) {
+	f, err := os.Open(p)
 	if err != nil {
 		return nil, err
 	}
-	return obj, nil
+	defer f.Close()
+	return ParseRaw(f)
+}
+
+func isSeparator(s string) bool {
+	return strings.HasPrefix(s, "---")
+}
+
+func isTerminator(s string) bool {
+	return strings.HasPrefix(s, "...")
 }

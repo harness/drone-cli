@@ -1,13 +1,11 @@
 package sign
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 
 	"github.com/drone/drone-cli/drone/internal"
-	"github.com/drone/drone-yaml/yaml"
-	"github.com/drone/drone-yaml/yaml/pretty"
+	"github.com/drone/drone-yaml/yaml/signer"
 	"github.com/urfave/cli"
 )
 
@@ -57,34 +55,9 @@ func format(c *cli.Context) error {
 		return nil
 	}
 
-	manifest, err := yaml.ParseFile(path)
+	data, err = signer.WriteTo(data, hmac)
 	if err != nil {
 		return err
 	}
-
-	var append bool
-	for _, resource := range manifest.Resources {
-		signature, ok := resource.(*yaml.Signature)
-		if ok {
-			append = false
-			signature.Hmac = hmac
-			break
-		}
-	}
-	if append {
-		// TODO this is currently disabled becuase it is resulting
-		// in a compiler panic. I need to investigate this further.
-
-		// manifest.Resources = append(
-		// 	manifest.Resources,
-		// 	&yaml.Signature{
-		// 		Kind: "signature",
-		// 		Hmac: hmac,
-		// 	},
-		// )
-	}
-
-	buf := new(bytes.Buffer)
-	pretty.Print(buf, manifest)
-	return ioutil.WriteFile(path, buf.Bytes(), 0644)
+	return ioutil.WriteFile(path, data, 0644)
 }

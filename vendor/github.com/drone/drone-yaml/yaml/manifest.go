@@ -6,6 +6,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Resource enums.
+const (
+	KindPipeline  = "pipeline"
+	KindRegistry  = "registry"
+	KindSecret    = "secret"
+	KindSignature = "signature"
+)
+
 type (
 	// Manifest is a collection of Drone resources.
 	Manifest struct {
@@ -17,6 +25,14 @@ type (
 		// only objects in this package can
 		// define themselves as resources.
 		resource()
+	}
+
+	// RawResource is a raw encoded resource with the
+	// resource kind and type extracted.
+	RawResource struct {
+		Kind string
+		Type string
+		Data []byte `yaml:"-"`
 	}
 
 	resource struct {

@@ -114,7 +114,7 @@
     "yaml",
     "yaml/pretty"
   ]
-  revision = "81b1e130b8ddf4f352e6effc851b81f92d142c7c"
+  revision = "ce39b9af26bf5ace247e14a3ada3282dc32063e0"
 
 [[projects]]
   branch = "master"
