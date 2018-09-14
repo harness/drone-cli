@@ -48,6 +48,8 @@ const (
 	pathRepoRegistry    = "%s/api/repos/%s/%s/registry/%s"
 	pathEncryptSecret   = "%s/api/repos/%s/%s/encrypt/secret"
 	pathEncryptRegistry = "%s/api/repos/%s/%s/encrypt/registry"
+	pathSign            = "%s/api/repos/%s/%s/sign"
+	pathVerify          = "%s/api/repos/%s/%s/verify"
 	pathCrons           = "%s/api/repos/%s/%s/cron"
 	pathCron            = "%s/api/repos/%s/%s/cron/%s"
 	pathUsers           = "%s/api/users"
@@ -422,6 +424,34 @@ func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
 func (c *client) SecretDelete(owner, name, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
 	return c.delete(uri)
+}
+
+//
+// signature
+//
+
+type signatureRequest struct {
+	Data string `json:"data"`
+}
+
+type signatureResponse struct {
+	Data string `json:"data"`
+}
+
+// Sign signs the yaml file.
+func (c *client) Sign(owner, name, file string) (string, error) {
+	in := &signatureRequest{Data: file}
+	out := &signatureResponse{}
+	uri := fmt.Sprintf(pathSign, c.addr, owner, name)
+	err := c.post(uri, in, out)
+	return out.Data, err
+}
+
+// Verify verifies the yaml signature.
+func (c *client) Verify(owner, name, file string) error {
+	in := &signatureRequest{Data: file}
+	uri := fmt.Sprintf(pathVerify, c.addr, owner, name)
+	return c.post(uri, in, nil)
 }
 
 //

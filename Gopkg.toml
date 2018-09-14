@@ -10,6 +10,10 @@
   branch = "master"
 
 [[constraint]]
+  name = "github.com/drone/drone-yaml"
+  branch = "master"
+
+[[constraint]]
   branch = "master"
   name = "github.com/drone/envsubst"
 

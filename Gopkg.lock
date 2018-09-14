@@ -20,6 +20,12 @@
   version = "v1.0.4"
 
 [[projects]]
+  name = "github.com/bmatcuk/doublestar"
+  packages = ["."]
+  revision = "85a78806aa1b4707d1dbace9be592cf1ece91ab3"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/cncd/pipeline"
   packages = [
@@ -99,7 +105,16 @@
     "plugin/logger",
     "plugin/secret"
   ]
-  revision = "b9f6248345b1de5e2797bd144a1048734786a08d"
+  revision = "b320d99c80703685b42e6d3126adbaad5c52a96d"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/drone/drone-yaml"
+  packages = [
+    "yaml",
+    "yaml/pretty"
+  ]
+  revision = "81b1e130b8ddf4f352e6effc851b81f92d142c7c"
 
 [[projects]]
   branch = "master"
@@ -258,6 +273,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "23d7191e8ff0e828597816f45a6d26784daf115d929f8d3d4923b5c3795a0e28"
+  inputs-digest = "e7b6d1501054975085ecd3a25e8ea5fa6107378b92afb0d328aae936aa2402b1"
   solver-name = "gps-cdcl"
   solver-version = 1

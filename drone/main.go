@@ -10,6 +10,7 @@ import (
 	"github.com/drone/drone-cli/drone/deploy"
 	"github.com/drone/drone-cli/drone/encrypt"
 	"github.com/drone/drone-cli/drone/exec"
+	"github.com/drone/drone-cli/drone/format"
 	"github.com/drone/drone-cli/drone/info"
 	"github.com/drone/drone-cli/drone/jsonnet"
 	"github.com/drone/drone-cli/drone/log"
@@ -18,6 +19,7 @@ import (
 	"github.com/drone/drone-cli/drone/repo"
 	"github.com/drone/drone-cli/drone/secret"
 	"github.com/drone/drone-cli/drone/server"
+	"github.com/drone/drone-cli/drone/sign"
 	"github.com/drone/drone-cli/drone/user"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -83,6 +85,8 @@ func main() {
 		user.Command,
 		server.Command,
 		autoscale.Command,
+		format.Command,
+		sign.Command,
 		jsonnet.Command,
 		plugins.Command,
 	}

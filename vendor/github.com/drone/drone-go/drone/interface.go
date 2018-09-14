@@ -137,6 +137,12 @@ type Client interface {
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
 
+	// Sign signs the yaml file.
+	Sign(owner, name, file string) (string, error)
+
+	// Verify verifies the yaml signature.
+	Verify(owner, name, file string) error
+
 	// EncryptSecret returns an encrypted secret
 	EncryptSecret(owner, name string, secret *Secret) (string, error)
 
