@@ -112,9 +112,10 @@
   name = "github.com/drone/drone-yaml"
   packages = [
     "yaml",
-    "yaml/pretty"
+    "yaml/pretty",
+    "yaml/signer"
   ]
-  revision = "ce39b9af26bf5ace247e14a3ada3282dc32063e0"
+  revision = "0251f1d7d6ad59b83268464a422478f079425df7"
 
 [[projects]]
   branch = "master"
@@ -273,6 +274,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e7b6d1501054975085ecd3a25e8ea5fa6107378b92afb0d328aae936aa2402b1"
+  inputs-digest = "5a0c0e97900f93c09409243d5984bfcc4c0c0aade4ef6f3c22358c92addeb2d9"
   solver-name = "gps-cdcl"
   solver-version = 1

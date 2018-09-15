@@ -1,8 +1,6 @@
 package pretty
 
 import (
-	"sort"
-
 	"github.com/drone/drone-yaml/yaml"
 )
 
@@ -14,15 +12,15 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 	w.WriteTagValue("name", v.Name)
 	w.WriteByte('\n')
 
-	if v.Platform != nil {
+	if !isPlatformEmpty(v.Platform) {
 		printPlatform(w, v.Platform)
 	} else {
 		printPlatformDefault(w)
 	}
-	if v.Clone != nil {
+	if !isCloneEmpty(v.Clone) {
 		printClone(w, v.Clone)
 	}
-	if v.Workspace != nil {
+	if !isWorkspaceEmpty(v.Workspace) {
 		printWorkspace(w, v.Workspace)
 	}
 
@@ -53,8 +51,8 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 		w.WriteByte('\n')
 	}
 
-	if len(v.Trigger) != 0 {
-		printConditionMap(w, "trigger", v.Trigger)
+	if !isConditionsEmpty(v.Trigger) {
+		printConditions(w, "trigger", v.Trigger)
 		w.WriteByte('\n')
 	}
 
@@ -67,7 +65,7 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 }
 
 // helper function pretty prints the clone block.
-func printClone(w writer, v *yaml.Clone) {
+func printClone(w writer, v yaml.Clone) {
 	w.WriteTag("clone")
 	w.IndentIncrease()
 	w.WriteTagValue("depth", v.Depth)
@@ -77,23 +75,38 @@ func printClone(w writer, v *yaml.Clone) {
 }
 
 // helper function pretty prints the conditions mapping.
-func printConditionMap(w writer, name string, v map[string]*yaml.Condition) {
+func printConditions(w writer, name string, v yaml.Conditions) {
 	w.WriteTag(name)
-	var keys []string
-	for k := range v {
-		keys = append(keys, k)
+	w.IndentIncrease()
+	if !isConditionEmpty(v.Branch) {
+		printCondition(w, "branch", v.Branch)
 	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		v := v[k]
-		w.IndentIncrease()
-		printCondition(w, k, v)
-		w.IndentDecrease()
+	if !isConditionEmpty(v.Event) {
+		printCondition(w, "event", v.Event)
 	}
+	if !isConditionEmpty(v.Instance) {
+		printCondition(w, "instance", v.Instance)
+	}
+	if !isConditionEmpty(v.Paths) {
+		printCondition(w, "paths", v.Paths)
+	}
+	if !isConditionEmpty(v.Ref) {
+		printCondition(w, "ref", v.Ref)
+	}
+	if !isConditionEmpty(v.Repo) {
+		printCondition(w, "repo", v.Repo)
+	}
+	if !isConditionEmpty(v.Status) {
+		printCondition(w, "status", v.Status)
+	}
+	if !isConditionEmpty(v.Target) {
+		printCondition(w, "target", v.Target)
+	}
+	w.IndentDecrease()
 }
 
 // helper function pretty prints a condition mapping.
-func printCondition(w writer, k string, v *yaml.Condition) {
+func printCondition(w writer, k string, v yaml.Condition) {
 	w.WriteTag(k)
 	if len(v.Include) != 0 && len(v.Exclude) == 0 {
 		w.WriteByte('\n')
@@ -113,7 +126,7 @@ func printCondition(w writer, k string, v *yaml.Condition) {
 }
 
 // helper function pretty prints the target platform.
-func printPlatform(w writer, v *yaml.Platform) {
+func printPlatform(w writer, v yaml.Platform) {
 	w.WriteTag("platform")
 	w.IndentIncrease()
 	w.WriteTagValue("os", v.OS)
@@ -164,11 +177,52 @@ func printVolumes(w writer, v []*yaml.Volume) {
 }
 
 // helper function pretty prints the workspace block.
-func printWorkspace(w writer, v *yaml.Workspace) {
+func printWorkspace(w writer, v yaml.Workspace) {
 	w.WriteTag("workspace")
 	w.IndentIncrease()
 	w.WriteTagValue("base", v.Base)
 	w.WriteTagValue("path", v.Path)
 	w.WriteByte('\n')
 	w.IndentDecrease()
+}
+
+// helper function returns true if the workspace
+// object is empty.
+func isWorkspaceEmpty(v yaml.Workspace) bool {
+	return v.Path == "" && v.Base == ""
+}
+
+// helper function returns true if the platform
+// object is empty.
+func isPlatformEmpty(v yaml.Platform) bool {
+	return v.OS == "" &&
+		v.Arch == "" &&
+		v.Variant == "" &&
+		v.Version == ""
+}
+
+// helper function returns true if the clone
+// object is empty.
+func isCloneEmpty(v yaml.Clone) bool {
+	return v.Depth == 0 &&
+		v.Disable == false
+}
+
+// helper function returns true if the conditions
+// object is empty.
+func isConditionsEmpty(v yaml.Conditions) bool {
+	return isConditionEmpty(v.Branch) &&
+		isConditionEmpty(v.Event) &&
+		isConditionEmpty(v.Instance) &&
+		isConditionEmpty(v.Paths) &&
+		isConditionEmpty(v.Ref) &&
+		isConditionEmpty(v.Repo) &&
+		isConditionEmpty(v.Status) &&
+		isConditionEmpty(v.Target)
+}
+
+// helper function returns true if the condition
+// object is empty.
+func isConditionEmpty(v yaml.Condition) bool {
+	return len(v.Exclude) == 0 && len(v.Include) == 0
 }

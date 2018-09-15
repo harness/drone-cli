@@ -2,6 +2,18 @@ package yaml
 
 import filepath "github.com/bmatcuk/doublestar"
 
+// Conditions defines a group of conditions.
+type Conditions struct {
+	Ref      Condition
+	Repo     Condition
+	Instance Condition
+	Target   Condition
+	Event    Condition
+	Branch   Condition
+	Status   Condition
+	Paths    Condition
+}
+
 // Condition defines a runtime condition.
 type Condition struct {
 	Include []string `yaml:"include,omitempty" json:"include,omitempty"`

@@ -49,8 +49,8 @@ func printContainer(w writer, v *yaml.Container) {
 	if len(v.Volumes) > 0 {
 		printVolumeMounts(w, v.Volumes)
 	}
-	if len(v.When) != 0 {
-		printConditionMap(w, "when", v.When)
+	if !isConditionsEmpty(v.When) {
+		printConditions(w, "when", v.When)
 	}
 	if len(v.DependsOn) > 0 {
 		printDependsOn(w, v.DependsOn)

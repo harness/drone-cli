@@ -1,9 +1,5 @@
 package yaml
 
-// TODO(bradrydzewski) add cpu min and max
-// TODO(bradrydzewski) add ram min and max
-// TODO(bradrydzewski) add plugin configuration
-
 type (
 	// Pipeline is a resource that defines a continuous
 	// delivery pipeline.
@@ -12,14 +8,14 @@ type (
 		Type string `json:"type,omitempty"`
 		Name string `json:"name,omitempty"`
 
-		Clone     *Clone                `json:"clone,omitempty"`
-		DependsOn []string              `json:"depends_on,omitempty" yaml:"depends_on" `
-		Platform  *Platform             `json:"platform,omitempty"`
-		Services  []*Container          `json:"services,omitempty"`
-		Steps     []*Container          `json:"steps,omitempty"`
-		Trigger   map[string]*Condition `json:"trigger,omitempty"`
-		Volumes   []*Volume             `json:"volumes,omitempty"`
-		Workspace *Workspace            `json:"workspace,omitempty"`
+		Clone     Clone        `json:"clone,omitempty"`
+		DependsOn []string     `json:"depends_on,omitempty" yaml:"depends_on" `
+		Platform  Platform     `json:"platform,omitempty"`
+		Services  []*Container `json:"services,omitempty"`
+		Steps     []*Container `json:"steps,omitempty"`
+		Trigger   Conditions   `json:"trigger,omitempty"`
+		Volumes   []*Volume    `json:"volumes,omitempty"`
+		Workspace Workspace    `json:"workspace,omitempty"`
 	}
 
 	// Clone configures the git clone.
@@ -49,7 +45,7 @@ type (
 		Settings    map[string]*Parameter `json:"settings,omitempty"`
 		Shell       string                `json:"shell,omitempty"`
 		Volumes     []*VolumeMount        `json:"volumes,omitempty"`
-		When        map[string]*Condition `json:"when,omitempty"`
+		When        Conditions            `json:"when,omitempty"`
 		WorkingDir  string                `json:"working_dir,omitempty" yaml:"working_dir"`
 	}
 
