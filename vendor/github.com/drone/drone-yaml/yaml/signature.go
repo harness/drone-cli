@@ -13,6 +13,9 @@ type (
 	}
 )
 
+// GetKind returns the resource kind.
+func (s *Signature) GetKind() string { return s.Kind }
+
 // Validate returns an error if the signature is invalid.
 func (s Signature) Validate() error {
 	if s.Hmac == "" {

@@ -51,6 +51,11 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 		w.WriteByte('\n')
 	}
 
+	if len(v.Node) > 0 {
+		printNode(w, v.Node)
+		w.WriteByte('\n')
+	}
+
 	if !isConditionsEmpty(v.Trigger) {
 		printConditions(w, "trigger", v.Trigger)
 		w.WriteByte('\n')
@@ -123,6 +128,11 @@ func printCondition(w writer, k string, v yaml.Condition) {
 		w.WriteTagValue("exclude", v.Include)
 		w.IndentDecrease()
 	}
+}
+
+// helper function pretty prints the node mapping.
+func printNode(w writer, v map[string]string) {
+	w.WriteTagValue("node", v)
 }
 
 // helper function pretty prints the target platform.

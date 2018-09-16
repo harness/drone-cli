@@ -8,6 +8,7 @@ import (
 
 // Resource enums.
 const (
+	KindCron      = "cron"
 	KindPipeline  = "pipeline"
 	KindRegistry  = "registry"
 	KindSecret    = "secret"
@@ -22,9 +23,8 @@ type (
 
 	// Resource represents a Drone resource.
 	Resource interface {
-		// only objects in this package can
-		// define themselves as resources.
-		resource()
+		// GetKind returns the resource kind.
+		GetKind() string
 	}
 
 	// RawResource is a raw encoded resource with the
@@ -85,13 +85,3 @@ func (m *Manifest) MarshalJSON() ([]byte, error) {
 func (m *Manifest) MarshalYAML() (interface{}, error) {
 	return yaml.Marshal(m.Resources)
 }
-
-//
-// structures that implement is_resource
-//
-
-func (*Cron) resource()      {}
-func (*Pipeline) resource()  {}
-func (*Registry) resource()  {}
-func (*Secret) resource()    {}
-func (*Signature) resource() {}

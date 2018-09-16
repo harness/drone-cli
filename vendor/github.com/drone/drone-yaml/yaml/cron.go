@@ -26,6 +26,9 @@ type (
 	}
 )
 
+// GetKind returns the resource kind.
+func (c *Cron) GetKind() string { return c.Kind }
+
 // Validate returns an error if the cron is invalid.
 func (c Cron) Validate() error {
 	switch {

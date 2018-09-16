@@ -1,23 +1,27 @@
 package yaml
 
+// Pipeline is a resource that defines a continuous
+// delivery pipeline.
+type Pipeline struct {
+	Kind string `json:"kind,omitempty"`
+	Type string `json:"type,omitempty"`
+	Name string `json:"name,omitempty"`
+
+	Clone     Clone             `json:"clone,omitempty"`
+	DependsOn []string          `json:"depends_on,omitempty" yaml:"depends_on" `
+	Node      map[string]string `json:"node,omitempty" yaml:"node"`
+	Platform  Platform          `json:"platform,omitempty"`
+	Services  []*Container      `json:"services,omitempty"`
+	Steps     []*Container      `json:"steps,omitempty"`
+	Trigger   Conditions        `json:"trigger,omitempty"`
+	Volumes   []*Volume         `json:"volumes,omitempty"`
+	Workspace Workspace         `json:"workspace,omitempty"`
+}
+
+// GetKind returns the resource kind.
+func (p *Pipeline) GetKind() string { return p.Kind }
+
 type (
-	// Pipeline is a resource that defines a continuous
-	// delivery pipeline.
-	Pipeline struct {
-		Kind string `json:"kind,omitempty"`
-		Type string `json:"type,omitempty"`
-		Name string `json:"name,omitempty"`
-
-		Clone     Clone        `json:"clone,omitempty"`
-		DependsOn []string     `json:"depends_on,omitempty" yaml:"depends_on" `
-		Platform  Platform     `json:"platform,omitempty"`
-		Services  []*Container `json:"services,omitempty"`
-		Steps     []*Container `json:"steps,omitempty"`
-		Trigger   Conditions   `json:"trigger,omitempty"`
-		Volumes   []*Volume    `json:"volumes,omitempty"`
-		Workspace Workspace    `json:"workspace,omitempty"`
-	}
-
 	// Clone configures the git clone.
 	Clone struct {
 		Disable bool `json:"disable,omitempty"`

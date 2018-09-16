@@ -4,14 +4,14 @@ import filepath "github.com/bmatcuk/doublestar"
 
 // Conditions defines a group of conditions.
 type Conditions struct {
-	Ref      Condition
-	Repo     Condition
-	Instance Condition
-	Target   Condition
-	Event    Condition
-	Branch   Condition
-	Status   Condition
-	Paths    Condition
+	Ref      Condition `json:"ref,omitempty"`
+	Repo     Condition `json:"repo,omitempty"`
+	Instance Condition `json:"instance,omitempty"`
+	Target   Condition `json:"target,omitempty"`
+	Event    Condition `json:"event,omitempty"`
+	Branch   Condition `json:"branch,omitempty"`
+	Status   Condition `json:"status,omitempty"`
+	Paths    Condition `json:"paths,omitempty"`
 }
 
 // Condition defines a runtime condition.

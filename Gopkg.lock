@@ -115,7 +115,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "0251f1d7d6ad59b83268464a422478f079425df7"
+  revision = "99abc8bea067acaaca4a35a2a912b76cb7f0624f"
 
 [[projects]]
   branch = "master"

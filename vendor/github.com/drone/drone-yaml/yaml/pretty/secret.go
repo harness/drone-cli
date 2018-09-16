@@ -2,6 +2,7 @@ package pretty
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/drone/drone-yaml/yaml"
 )
@@ -37,6 +38,7 @@ func printData(w writer, d map[string]string) {
 		w.WriteByte(' ')
 		w.WriteByte('>')
 		w.IndentIncrease()
+		v = spaceReplacer.Replace(v)
 		for _, s := range chunk(v, 60) {
 			w.WriteByte('\n')
 			w.Indent()
@@ -46,3 +48,6 @@ func printData(w writer, d map[string]string) {
 	}
 	w.IndentDecrease()
 }
+
+// replace spaces and newlines.
+var spaceReplacer = strings.NewReplacer(" ", "", "\n", "")

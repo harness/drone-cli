@@ -13,6 +13,9 @@ type (
 	}
 )
 
+// GetKind returns the resource kind.
+func (s *Secret) GetKind() string { return s.Kind }
+
 // Validate returns an error if the secret is invalid.
 func (s *Secret) Validate() error {
 	if len(s.Data) == 0 {
