@@ -18,6 +18,9 @@ func Parse(r io.Reader) (*Manifest, error) {
 	}
 	manifest := new(Manifest)
 	for _, raw := range resources {
+		if raw == nil {
+			continue
+		}
 		resource, err := parseRaw(raw)
 		if err != nil {
 			return nil, err

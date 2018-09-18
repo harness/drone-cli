@@ -27,6 +27,9 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 	if len(v.Steps) > 0 {
 		w.WriteTag("steps")
 		for _, step := range v.Steps {
+			if step == nil {
+				continue
+			}
 			seq := new(indexWriter)
 			seq.writer = w
 			seq.IndentIncrease()
@@ -38,6 +41,9 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 	if len(v.Services) > 0 {
 		w.WriteTag("services")
 		for _, step := range v.Services {
+			if step == nil {
+				continue
+			}
 			seq := new(indexWriter)
 			seq.writer = w
 			seq.IndentIncrease()
