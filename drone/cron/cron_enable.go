@@ -6,14 +6,14 @@ import (
 	"github.com/urfave/cli"
 )
 
-var cronDeleteCmd = cli.Command{
-	Name:      "rm",
-	Usage:     "display cron rm",
+var cronEnableCmd = cli.Command{
+	Name:      "enable",
+	Usage:     "enable cron jobs",
 	ArgsUsage: "[repo/name]",
-	Action:    cronDelete,
+	Action:    cronEnable,
 }
 
-func cronDelete(c *cli.Context) error {
+func cronEnable(c *cli.Context) error {
 	slug := c.Args().First()
 	owner, name, err := internal.ParseRepo(slug)
 	if err != nil {
@@ -24,5 +24,5 @@ func cronDelete(c *cli.Context) error {
 		return err
 	}
 	cronjob := c.Args().Get(1)
-	return client.CronDelete(owner, name, cronjob)
+	return client.CronDisable(owner, name, cronjob)
 }

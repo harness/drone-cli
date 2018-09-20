@@ -58,6 +58,6 @@ Event: {{ .Event }}
 Commit: {{ .Commit }}
 Branch: {{ .Branch }}
 Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Author: {{ .Author }} {{ if .AuthorEmail }}<{{.AuthorEmail}}>{{ end }}
 Message: {{ .Message }}
 `

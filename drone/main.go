@@ -7,7 +7,6 @@ import (
 	"github.com/drone/drone-cli/drone/autoscale"
 	"github.com/drone/drone-cli/drone/build"
 	"github.com/drone/drone-cli/drone/cron"
-	"github.com/drone/drone-cli/drone/deploy"
 	"github.com/drone/drone-cli/drone/encrypt"
 	"github.com/drone/drone-cli/drone/exec"
 	"github.com/drone/drone-cli/drone/format"
@@ -15,9 +14,7 @@ import (
 	"github.com/drone/drone-cli/drone/jsonnet"
 	"github.com/drone/drone-cli/drone/log"
 	"github.com/drone/drone-cli/drone/plugins"
-	"github.com/drone/drone-cli/drone/registry"
 	"github.com/drone/drone-cli/drone/repo"
-	"github.com/drone/drone-cli/drone/secret"
 	"github.com/drone/drone-cli/drone/server"
 	"github.com/drone/drone-cli/drone/sign"
 	"github.com/drone/drone-cli/drone/user"
@@ -75,12 +72,9 @@ func main() {
 		build.Command,
 		cron.Command,
 		log.Command,
-		deploy.Command,
 		encrypt.Command,
 		exec.Command,
 		info.Command,
-		registry.Command,
-		secret.Command,
 		repo.Command,
 		user.Command,
 		server.Command,

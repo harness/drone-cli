@@ -16,26 +16,23 @@ package drone
 
 // Event values.
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+	EventPush        = "push"
+	EventPullRequest = "pull_request"
+	EventTag         = "tag"
+	EventPromote     = "promote"
+	EventRollback    = "rollback"
 )
 
 // Status values.
 const (
-	StatusBlocked = "blocked"
-	StatusSkipped = "skipped"
-	StatusPending = "pending"
-	StatusRunning = "running"
-	StatusSuccess = "success"
-	StatusFailure = "failure"
-	StatusKilled  = "killed"
-	StatusError   = "error"
-)
-
-// Encryption algorithms
-const (
-	EncryptAesgcm    = "aesgcm"
-	EncryptSecretbox = "secretbox"
+	StatusSkipped  = "skipped"
+	StatusBlocked  = "blocked"
+	StatusDeclined = "declined"
+	StatusWaiting  = "waiting_on_dependencies"
+	StatusPending  = "pending"
+	StatusRunning  = "running"
+	StatusPassing  = "success"
+	StatusFailing  = "failure"
+	StatusKilled   = "killed"
+	StatusError    = "error"
 )

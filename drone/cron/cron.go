@@ -7,9 +7,9 @@ var Command = cli.Command{
 	Name:  "cron",
 	Usage: "manage cron jobs",
 	Subcommands: []cli.Command{
-		cronCreateCmd,
-		cronDeleteCmd,
-		cronInfoCmd,
 		cronListCmd,
+		cronInfoCmd,
+		cronDisableCmd,
+		cronEnableCmd,
 	},
 }

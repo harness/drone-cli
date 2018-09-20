@@ -105,7 +105,7 @@ func secretFind(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	println(res.Name)
+	println(req.Name)
 	println(res.Data)
 	return nil
 }

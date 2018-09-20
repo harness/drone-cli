@@ -8,8 +8,8 @@ import (
 )
 
 var repoAddCmd = cli.Command{
-	Name:      "add",
-	Usage:     "add a repository",
+	Name:      "enable",
+	Usage:     "enable a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoAdd,
 }
@@ -26,7 +26,7 @@ func repoAdd(c *cli.Context) error {
 		return err
 	}
 
-	if _, err := client.RepoPost(owner, name); err != nil {
+	if _, err := client.RepoEnable(owner, name); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully activated repository %s/%s\n", owner, name)

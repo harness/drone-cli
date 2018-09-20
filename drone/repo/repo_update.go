@@ -21,8 +21,8 @@ var repoUpdateCmd = cli.Command{
 			Usage: "repository is trusted",
 		},
 		cli.BoolFlag{
-			Name:  "gated",
-			Usage: "repository is gated",
+			Name:  "protected",
+			Usage: "repository is protected",
 		},
 		cli.DurationFlag{
 			Name:  "timeout",
@@ -64,17 +64,17 @@ func repoUpdate(c *cli.Context) error {
 		config       = c.String("config")
 		timeout      = c.Duration("timeout")
 		trusted      = c.Bool("trusted")
-		gated        = c.Bool("gated")
+		protected    = c.Bool("protected")
 		buildCounter = c.Int("build-counter")
 		unsafe       = c.Bool("unsafe")
 	)
 
 	patch := new(drone.RepoPatch)
 	if c.IsSet("trusted") {
-		patch.IsTrusted = &trusted
+		patch.Trusted = &trusted
 	}
-	if c.IsSet("gated") {
-		patch.IsGated = &gated
+	if c.IsSet("protected") {
+		patch.Protected = &protected
 	}
 	if c.IsSet("timeout") {
 		v := int64(timeout / time.Minute)
@@ -93,10 +93,10 @@ func repoUpdate(c *cli.Context) error {
 		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
 	}
 	if c.IsSet("build-counter") && unsafe {
-		patch.BuildCounter = &buildCounter
+		patch.Counter = &buildCounter
 	}
 
-	if _, err := client.RepoPatch(owner, name, patch); err != nil {
+	if _, err := client.RepoUpdate(owner, name, patch); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully updated repository %s/%s\n", owner, name)

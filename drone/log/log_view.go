@@ -1,21 +1,20 @@
-package build
+package log
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
 )
 
-var buildDeclineCmd = cli.Command{
-	Name:      "decline",
-	Usage:     "decline a build stage",
-	ArgsUsage: "<repo/name> <build> <stage>",
-	Action:    buildDecline,
+var logViewCmd = cli.Command{
+	Name:      "view",
+	Usage:     "display the step logs",
+	ArgsUsage: "<repo/name> <build> <stage> <step>",
+	Action:    logView,
 }
 
-func buildDecline(c *cli.Context) (err error) {
+func logView(c *cli.Context) (err error) {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -29,17 +28,23 @@ func buildDecline(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+	step, err := strconv.Atoi(c.Args().Get(3))
+	if err != nil {
+		return err
+	}
 
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	err = client.Decline(owner, name, number, stage)
+	lines, err := client.Logs(owner, name, number, stage, step)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Declining build %s/%s#%d\n", owner, name, number)
+	for _, line := range lines {
+		print(line.Message)
+	}
 	return nil
 }

@@ -10,8 +10,8 @@ import (
 )
 
 var buildStartCmd = cli.Command{
-	Name:      "start",
-	Usage:     "start a build",
+	Name:      "restart",
+	Usage:     "restart a build",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildStart,
 	Flags: []cli.Flag{
@@ -42,7 +42,7 @@ func buildStart(c *cli.Context) (err error) {
 		if err != nil {
 			return err
 		}
-		number = build.Number
+		number = int(build.Number)
 	} else {
 		if len(buildArg) == 0 {
 			return errors.New("missing job number")
@@ -55,7 +55,7 @@ func buildStart(c *cli.Context) (err error) {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	build, err := client.BuildStart(owner, name, number, params)
+	build, err := client.BuildRestart(owner, name, number, params)
 	if err != nil {
 		return err
 	}

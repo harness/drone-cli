@@ -8,5 +8,6 @@ var Command = cli.Command{
 	Usage: "manage logs",
 	Subcommands: []cli.Command{
 		logPurgeCmd,
+		logViewCmd,
 	},
 }

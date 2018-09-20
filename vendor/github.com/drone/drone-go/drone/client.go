@@ -17,7 +17,6 @@ package drone
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -37,11 +36,12 @@ const (
 	pathRepair          = "%s/api/repos/%s/%s/repair"
 	pathBuilds          = "%s/api/repos/%s/%s/builds"
 	pathBuild           = "%s/api/repos/%s/%s/builds/%v"
-	pathApprove         = "%s/api/repos/%s/%s/builds/%d/approve"
-	pathDecline         = "%s/api/repos/%s/%s/builds/%d/decline"
+	pathApprove         = "%s/api/repos/%s/%s/builds/%d/approve/%d"
+	pathDecline         = "%s/api/repos/%s/%s/builds/%d/decline/%d"
+	pathPromote         = "%s/api/repos/%s/%s/builds/%d/promote?%s"
+	pathRollback        = "%s/api/repos/%s/%s/builds/%d/rollback?%s"
 	pathJob             = "%s/api/repos/%s/%s/builds/%d/%d"
-	pathLog             = "%s/api/repos/%s/%s/logs/%d/%d"
-	pathLogPurge        = "%s/api/repos/%s/%s/logs/%d"
+	pathLog             = "%s/api/repos/%s/%s/builds/%d/logs/%d/%d"
 	pathRepoSecrets     = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret      = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries  = "%s/api/repos/%s/%s/registry"
@@ -54,12 +54,11 @@ const (
 	pathCron            = "%s/api/repos/%s/%s/cron/%s"
 	pathUsers           = "%s/api/users"
 	pathUser            = "%s/api/users/%s"
-	pathBuildQueue      = "%s/api/builds"
+	pathBuildQueue      = "%s/api/system/builds"
 	pathServers         = "%s/api/servers"
 	pathServer          = "%s/api/servers/%s"
 	pathScalerPause     = "%s/api/pause"
 	pathScalerResume    = "%s/api/resume"
-	pathVarz            = "%s/varz"
 	pathVersion         = "%s/version"
 )
 
@@ -67,53 +66,6 @@ type client struct {
 	client *http.Client
 	addr   string
 }
-
-// // Options provides a list of client options.
-// type Options struct {
-// 	token string
-// 	proxy string
-// 	pool  *x509.CertPool
-// 	conf  *tls.Config
-// 	skip  bool
-// }
-//
-// // Option defines client options.
-// type Option func(opts *Options)
-//
-// // WithToken returns an option to set the token.
-// func WithToken(token string) Option {
-// 	return func(opts *Options) {
-// 		opts.token = token
-// 	}
-// }
-//
-// // WithTLS returns an option to use custom tls configuration.
-// func WithTLS(conf *tls.Config) Option {
-// 	return func(opts *Options) {
-// 		opts.conf = conf
-// 	}
-// }
-//
-// // WithSocks returns a client option to provide a socks5 proxy.
-// func WithSocks(proxy string) Option {
-// 	return func(opts *Options) {
-// 		opts.proxy = proxy
-// 	}
-// }
-//
-// // WithSkipVerify returns a client option to skip ssl verification.
-// func WithSkipVerify(skip bool) Option {
-// 	return func(opts *Options) {
-// 		opts.skip = skip
-// 	}
-// }
-//
-// // WithCertPool returns a client option to provide a custom cert pool.
-// func WithCertPool(pool *x509.CertPool) Option {
-// 	return func(opts *Options) {
-// 		opts.pool = pool
-// 	}
-// }
 
 // New returns a client at the specified url.
 func New(uri string) Client {
@@ -159,24 +111,24 @@ func (c *client) UserList() ([]*User, error) {
 	return out, err
 }
 
-// UserPost creates a new user account.
-func (c *client) UserPost(in *User) (*User, error) {
+// UserCreate creates a new user account.
+func (c *client) UserCreate(in *User) (*User, error) {
 	out := new(User)
 	uri := fmt.Sprintf(pathUsers, c.addr)
 	err := c.post(uri, in, out)
 	return out, err
 }
 
-// UserPatch updates a user account.
-func (c *client) UserPatch(in *User) (*User, error) {
+// UserUpdate updates a user account.
+func (c *client) UserUpdate(in *User) (*User, error) {
 	out := new(User)
 	uri := fmt.Sprintf(pathUser, c.addr, in.Login)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
-// UserDel deletes a user account.
-func (c *client) UserDel(login string) error {
+// UserDelete deletes a user account.
+func (c *client) UserDelete(login string) error {
 	uri := fmt.Sprintf(pathUser, c.addr, login)
 	err := c.delete(uri)
 	return err
@@ -199,25 +151,40 @@ func (c *client) RepoList() ([]*Repo, error) {
 	return out, err
 }
 
-// RepoListOpts returns a list of all repositories to which
+// RepoListSync returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
+func (c *client) RepoListSync() ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
-	err := c.get(uri, &out)
+	uri := fmt.Sprintf(pathRepos, c.addr)
+	err := c.post(uri, nil, &out)
 	return out, err
 }
 
-// RepoPost activates a repository.
-func (c *client) RepoPost(owner string, name string) (*Repo, error) {
+// RepoEnable activates a repository.
+func (c *client) RepoEnable(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
+// RepoDisable disables a repository.
+func (c *client) RepoDisable(owner, name string) error {
+	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
+	err := c.delete(uri)
+	return err
+}
+
+// RepoUpdate updates a repository.
+func (c *client) RepoUpdate(owner, name string, in *RepoPatch) (*Repo, error) {
+	out := new(Repo)
+	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
 // RepoChown updates a repository owner.
-func (c *client) RepoChown(owner string, name string) (*Repo, error) {
+func (c *client) RepoChown(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathChown, c.addr, owner, name)
 	err := c.post(uri, nil, out)
@@ -225,29 +192,8 @@ func (c *client) RepoChown(owner string, name string) (*Repo, error) {
 }
 
 // RepoRepair repais the repository hooks.
-func (c *client) RepoRepair(owner string, name string) error {
+func (c *client) RepoRepair(owner, name string) error {
 	uri := fmt.Sprintf(pathRepair, c.addr, owner, name)
-	return c.post(uri, nil, nil)
-}
-
-// RepoPatch updates a repository.
-func (c *client) RepoPatch(owner, name string, in *RepoPatch) (*Repo, error) {
-	out := new(Repo)
-	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
-	err := c.patch(uri, in, out)
-	return out, err
-}
-
-// RepoDel deletes a repository.
-func (c *client) RepoDel(owner, name string) error {
-	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
-	err := c.delete(uri)
-	return err
-}
-
-// RepoMove moves a repository
-func (c *client) RepoMove(owner, name, newFullName string) error {
-	uri := fmt.Sprintf(pathRepoMove, c.addr, owner, name, newFullName)
 	return c.post(uri, nil, nil)
 }
 
@@ -280,207 +226,112 @@ func (c *client) BuildList(owner, name string) ([]*Build, error) {
 }
 
 // BuildQueue returns a list of enqueued builds.
-func (c *client) BuildQueue() ([]*Activity, error) {
-	var out []*Activity
+func (c *client) BuildQueue() ([]*Build, error) {
+	var out []*Build
 	uri := fmt.Sprintf(pathBuildQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err
 }
 
-// BuildStart re-starts a stopped build.
-func (c *client) BuildStart(owner, name string, num int, params map[string]string) (*Build, error) {
+// BuildRestart re-starts a stopped build.
+func (c *client) BuildRestart(owner, name string, build int, params map[string]string) (*Build, error) {
 	out := new(Build)
 	val := mapValues(params)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
+	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, build)
+	if len(params) > 0 {
+		uri = uri + "?" + val.Encode()
+	}
+	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildStop cancels the running job.
-func (c *client) BuildStop(owner, name string, num, job int) error {
-	uri := fmt.Sprintf(pathJob, c.addr, owner, name, num, job)
+// BuildCancel cancels the running job.
+func (c *client) BuildCancel(owner, name string, build int) error {
+	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, build)
 	err := c.delete(uri)
 	return err
 }
 
-// BuildApprove approves a blocked build.
-func (c *client) BuildApprove(owner, name string, num int) (*Build, error) {
+// Promote promotes a build to the target environment.
+func (c *client) Promote(namespace, name string, build int, target string, params map[string]string) (*Build, error) {
 	out := new(Build)
-	uri := fmt.Sprintf(pathApprove, c.addr, owner, name, num)
+	val := mapValues(params)
+	val.Set("target", target)
+	uri := fmt.Sprintf(pathPromote, c.addr, namespace, name, build, val.Encode())
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildDecline declines a blocked build.
-func (c *client) BuildDecline(owner, name string, num int) (*Build, error) {
+// Roolback reverts the target environment to an previous build.
+func (c *client) Rollback(namespace, name string, build int, target string, params map[string]string) (*Build, error) {
 	out := new(Build)
-	uri := fmt.Sprintf(pathDecline, c.addr, owner, name, num)
+	val := mapValues(params)
+	val.Set("target", target)
+	uri := fmt.Sprintf(pathRollback, c.addr, namespace, name, build, val.Encode())
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildKill force kills the running build.
-func (c *client) BuildKill(owner, name string, num int) error {
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
-	err := c.delete(uri)
+// Approve approves a blocked build stage.
+func (c *client) Approve(namespace, name string, build, stage int) error {
+	uri := fmt.Sprintf(pathApprove, c.addr, namespace, name, build, stage)
+	err := c.post(uri, nil, nil)
+	return err
+}
+
+// Decline declines a blocked build stage.
+func (c *client) Decline(namespace, name string, build, stage int) error {
+	uri := fmt.Sprintf(pathDecline, c.addr, namespace, name, build, stage)
+	err := c.post(uri, nil, nil)
 	return err
 }
 
 // BuildLogs returns the build logs for the specified job.
-func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
-	return nil, errors.New("Method not implemented")
-}
-
-// Deploy triggers a deployment for an existing build using the
-// specified target environment.
-func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Build, error) {
-	out := new(Build)
-	val := mapValues(params)
-	val.Set("event", "deployment")
-	val.Set("deploy_to", env)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
+func (c *client) Logs(owner, name string, build, stage, step int) ([]*Line, error) {
+	var out []*Line
+	uri := fmt.Sprintf(pathLog, c.addr, owner, name, build, stage, step)
+	err := c.get(uri, &out)
 	return out, err
 }
 
 // LogsPurge purges the build logs for the specified build.
-func (c *client) LogsPurge(owner, name string, num int) error {
-	uri := fmt.Sprintf(pathLogPurge, c.addr, owner, name, num)
+func (c *client) LogsPurge(owner, name string, build, stage, step int) error {
+	uri := fmt.Sprintf(pathLog, c.addr, owner, name, build, stage, step)
 	err := c.delete(uri)
 	return err
 }
 
-// Registry returns a registry by hostname.
-func (c *client) Registry(owner, name, hostname string) (*Registry, error) {
-	out := new(Registry)
-	uri := fmt.Sprintf(pathRepoRegistry, c.addr, owner, name, hostname)
-	err := c.get(uri, out)
-	return out, err
-}
-
-// RegistryList returns a list of all repository registries.
-func (c *client) RegistryList(owner string, name string) ([]*Registry, error) {
-	var out []*Registry
-	uri := fmt.Sprintf(pathRepoRegistries, c.addr, owner, name)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// RegistryCreate creates a registry.
-func (c *client) RegistryCreate(owner, name string, in *Registry) (*Registry, error) {
-	out := new(Registry)
-	uri := fmt.Sprintf(pathRepoRegistries, c.addr, owner, name)
-	err := c.post(uri, in, out)
-	return out, err
-}
-
-// RegistryUpdate updates a registry.
-func (c *client) RegistryUpdate(owner, name string, in *Registry) (*Registry, error) {
-	out := new(Registry)
-	uri := fmt.Sprintf(pathRepoRegistry, c.addr, owner, name, in.Address)
-	err := c.patch(uri, in, out)
-	return out, err
-}
-
-// RegistryDelete deletes a registry.
-func (c *client) RegistryDelete(owner, name, hostname string) error {
-	uri := fmt.Sprintf(pathRepoRegistry, c.addr, owner, name, hostname)
-	return c.delete(uri)
-}
-
-// Secret returns a secret by name.
-func (c *client) Secret(owner, name, secret string) (*Secret, error) {
-	out := new(Secret)
-	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
-	err := c.get(uri, out)
-	return out, err
-}
-
-// SecretList returns a list of all repository secrets.
-func (c *client) SecretList(owner string, name string) ([]*Secret, error) {
-	var out []*Secret
-	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// SecretCreate creates a secret.
-func (c *client) SecretCreate(owner, name string, in *Secret) (*Secret, error) {
-	out := new(Secret)
-	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
-	err := c.post(uri, in, out)
-	return out, err
-}
-
-// SecretUpdate updates a secret.
-func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
-	out := new(Secret)
-	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, in.Name)
-	err := c.patch(uri, in, out)
-	return out, err
-}
-
-// SecretDelete deletes a secret.
-func (c *client) SecretDelete(owner, name, secret string) error {
-	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
-	return c.delete(uri)
-}
-
-//
-// signature
-//
-
-type signatureRequest struct {
-	Data string `json:"data"`
-}
-
-type signatureResponse struct {
-	Data string `json:"data"`
-}
-
 // Sign signs the yaml file.
 func (c *client) Sign(owner, name, file string) (string, error) {
-	in := &signatureRequest{Data: file}
-	out := &signatureResponse{}
+	in := struct {
+		Data string `json:"data"`
+	}{Data: file}
+	out := struct {
+		Data string `json:"data"`
+	}{}
 	uri := fmt.Sprintf(pathSign, c.addr, owner, name)
-	err := c.post(uri, in, out)
+	err := c.post(uri, &in, &out)
 	return out.Data, err
 }
 
 // Verify verifies the yaml signature.
 func (c *client) Verify(owner, name, file string) error {
-	in := &signatureRequest{Data: file}
+	in := struct {
+		Data string `json:"data"`
+	}{Data: file}
 	uri := fmt.Sprintf(pathVerify, c.addr, owner, name)
-	return c.post(uri, in, nil)
+	return c.post(uri, &in, nil)
 }
 
-//
-// encryption
-//
-
-type encryptResponse struct {
-	Data string `json:"data"`
-}
-
-// EncryptSecret returns an encrypted secret.
-func (c *client) EncryptSecret(owner, name string, secret *Secret) (string, error) {
-	out := &encryptResponse{}
+// Encrypt returns an encrypted secret.
+func (c *client) Encrypt(owner, name string, secret *Secret) (string, error) {
+	out := struct {
+		Data string `json:"data"`
+	}{}
 	uri := fmt.Sprintf(pathEncryptSecret, c.addr, owner, name)
-	err := c.post(uri, secret, out)
+	err := c.post(uri, secret, &out)
 	return out.Data, err
 }
-
-// EncryptRegistry returns an encrypted registry.
-func (c *client) EncryptRegistry(owner, name string, registry *Registry) (string, error) {
-	out := &encryptResponse{}
-	uri := fmt.Sprintf(pathEncryptRegistry, c.addr, owner, name)
-	err := c.post(uri, registry, out)
-	return out.Data, err
-}
-
-//
-// cron jobs
-//
 
 // Cron returns a cronjob by name.
 func (c *client) Cron(owner, name, cron string) (*Cron, error) {
@@ -498,18 +349,18 @@ func (c *client) CronList(owner string, name string) ([]*Cron, error) {
 	return out, err
 }
 
-// CronCreate creates a cronjob.
-func (c *client) CronCreate(owner, name string, in *Cron) (*Cron, error) {
-	out := new(Cron)
-	uri := fmt.Sprintf(pathCrons, c.addr, owner, name)
-	err := c.post(uri, in, out)
-	return out, err
+// CronEnable ensables a cronjob.
+func (c *client) CronEnable(owner, name, cron string) error {
+	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
+	err := c.post(uri, nil, nil)
+	return err
 }
 
-// CronDelete deletes a cronjob.
-func (c *client) CronDelete(owner, name, cron string) error {
+// CronDisable disables a cronjob.
+func (c *client) CronDisable(owner, name, cron string) error {
 	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
-	return c.delete(uri)
+	err := c.delete(uri)
+	return err
 }
 
 //
@@ -580,11 +431,6 @@ func (c *client) post(rawurl string, in, out interface{}) error {
 	return c.do(rawurl, "POST", in, out)
 }
 
-// helper function for making an http PUT request.
-func (c *client) put(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PUT", in, out)
-}
-
 // helper function for making an http PATCH request.
 func (c *client) patch(rawurl string, in, out interface{}) error {
 	return c.do(rawurl, "PATCH", in, out)
@@ -633,7 +479,7 @@ func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode > http.StatusPartialContent {
+	if resp.StatusCode > 299 {
 		defer resp.Body.Close()
 		out, _ := ioutil.ReadAll(resp.Body)
 		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))

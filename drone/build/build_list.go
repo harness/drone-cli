@@ -71,7 +71,7 @@ func buildList(c *cli.Context) error {
 		if count >= limit {
 			break
 		}
-		if branch != "" && build.Branch != branch {
+		if branch != "" && build.Target != branch {
 			continue
 		}
 		if event != "" && build.Event != event {
@@ -90,9 +90,9 @@ func buildList(c *cli.Context) error {
 var tmplBuildList = "\x1b[33mBuild #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
+Commit: {{ .After }}
+Branch: {{ .Target }}
 Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Author: {{ .Author }} {{ if .AuthorEmail }}<{{.AuthorEmail}}>{{ end }}
 Message: {{ .Message }}
 `
