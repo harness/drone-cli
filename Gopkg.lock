@@ -97,7 +97,7 @@
     "runtime",
     "runtime/term"
   ]
-  revision = "026ea6047ab742bb806b8689694566ee9aa651b3"
+  revision = "18ed46cdaba01970970290a83715c871fb169db4"
 
 [[projects]]
   branch = "master"

@@ -58,8 +58,12 @@ func (e *dockerEngine) Setup(ctx context.Context, spec *engine.Spec) error {
 
 	// creates the default pod network. All containers
 	// defined in the pipeline are attached to this network.
+	driver := "bridge"
+	if spec.Platform.OS == "windows" {
+		driver = "nat"
+	}
 	_, err := e.client.NetworkCreate(ctx, spec.Metadata.UID, types.NetworkCreate{
-		Driver: "bridge",
+		Driver: driver,
 		Labels: spec.Metadata.Labels,
 	})
 
