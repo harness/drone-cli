@@ -2,28 +2,32 @@ package exec
 
 import (
 	"context"
-	"io"
+	"errors"
+	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
-	"path"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
-	"github.com/cncd/pipeline/pipeline"
-	"github.com/cncd/pipeline/pipeline/backend"
-	"github.com/cncd/pipeline/pipeline/backend/docker"
-	"github.com/cncd/pipeline/pipeline/frontend"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml/compiler"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml/linter"
-	"github.com/cncd/pipeline/pipeline/interrupt"
-	"github.com/cncd/pipeline/pipeline/multipart"
 	"github.com/drone/envsubst"
 
+	"github.com/drone/drone-runtime/engine"
+	"github.com/drone/drone-runtime/engine/docker"
+	"github.com/drone/drone-runtime/runtime"
+	"github.com/drone/drone-runtime/runtime/term"
+	"github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/compiler"
+	"github.com/drone/drone-yaml/yaml/compiler/transform"
+	"github.com/drone/drone-yaml/yaml/linter"
+	"github.com/drone/signal"
+
+	"github.com/joho/godotenv"
+	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli"
 )
+
+var tty = isatty.IsTerminal(os.Stdout.Fd())
 
 // Command exports the exec command.
 var Command = cli.Command{
@@ -36,33 +40,46 @@ var Command = cli.Command{
 		}
 	},
 	Flags: []cli.Flag{
-		cli.BoolTFlag{
-			Name:   "local",
-			Usage:  "build from local directory",
-			EnvVar: "DRONE_LOCAL",
-		},
-		cli.DurationFlag{
-			Name:   "timeout",
-			Usage:  "build timeout",
-			Value:  time.Hour,
-			EnvVar: "DRONE_TIMEOUT",
+		cli.StringFlag{
+			Name:  "pipeline",
+			Usage: "Name of the pipelie to execute",
 		},
 		cli.StringSliceFlag{
-			Name:   "volumes",
-			Usage:  "build volumes",
-			EnvVar: "DRONE_VOLUMES",
+			Name:  "include",
+			Usage: "Name of steps to include",
 		},
 		cli.StringSliceFlag{
-			Name:   "network",
-			Usage:  "external networks",
-			EnvVar: "DRONE_NETWORKS",
+			Name:  "exclude",
+			Usage: "Name of steps to exclude",
 		},
 		cli.StringFlag{
-			Name:   "prefix",
-			Value:  "drone",
-			Usage:  "prefix containers created by drone",
-			EnvVar: "DRONE_DOCKER_PREFIX",
-			Hidden: true,
+			Name:  "resume-at",
+			Usage: "Name of start to resume at",
+		},
+		cli.BoolFlag{
+			Name:  "clone",
+			Usage: "enable the clone step",
+		},
+		cli.BoolFlag{
+			Name:  "trusted",
+			Usage: "build is trusted",
+		},
+		cli.DurationFlag{
+			Name:  "timeout",
+			Usage: "build timeout",
+			Value: time.Hour,
+		},
+		cli.StringSliceFlag{
+			Name:  "volume",
+			Usage: "build volumes",
+		},
+		cli.StringSliceFlag{
+			Name:  "network",
+			Usage: "external networks",
+		},
+		cli.StringFlag{
+			Name:  "secret-file",
+			Usage: "secret file",
 		},
 		cli.StringSliceFlag{
 			Name:  "privileged",
@@ -75,208 +92,45 @@ var Command = cli.Command{
 		},
 
 		//
-		// Please note the below flags are mirrored in the pipec and
-		// should be kept synchronized. Do not edit directly
-		// https://github.com/cncd/pipeline/pipec
-		//
-
-		//
-		// workspace default
-		//
-		cli.StringFlag{
-			Name:   "workspace-base",
-			Value:  "/drone",
-			EnvVar: "DRONE_WORKSPACE_BASE",
-		},
-		cli.StringFlag{
-			Name:   "workspace-path",
-			Value:  "src",
-			EnvVar: "DRONE_WORKSPACE_PATH",
-		},
-		//
 		// netrc parameters
 		//
 		cli.StringFlag{
-			Name:   "netrc-username",
-			EnvVar: "DRONE_NETRC_USERNAME",
+			Name: "netrc-username",
 		},
 		cli.StringFlag{
-			Name:   "netrc-password",
-			EnvVar: "DRONE_NETRC_PASSWORD",
+			Name: "netrc-password",
 		},
 		cli.StringFlag{
-			Name:   "netrc-machine",
-			EnvVar: "DRONE_NETRC_MACHINE",
+			Name: "netrc-machine",
 		},
+
 		//
-		// metadata parameters
+		// trigger parameters
 		//
+
 		cli.StringFlag{
-			Name:   "system-arch",
-			Value:  "linux/amd64",
-			EnvVar: "DRONE_SYSTEM_ARCH",
-		},
-		cli.StringFlag{
-			Name:   "system-name",
-			Value:  "pipec",
-			EnvVar: "DRONE_SYSTEM_NAME",
+			Name:  "branch",
+			Usage: "branch name",
 		},
 		cli.StringFlag{
-			Name:   "system-link",
-			Value:  "https://github.com/cncd/pipec",
-			EnvVar: "DRONE_SYSTEM_LINK",
+			Name:  "event",
+			Usage: "build event name (push, pull_request, etc)",
 		},
 		cli.StringFlag{
-			Name:   "repo-name",
-			EnvVar: "DRONE_REPO_NAME",
+			Name:  "instance",
+			Usage: "instance hostname (e.g. drone.company.com)",
 		},
 		cli.StringFlag{
-			Name:   "repo-link",
-			EnvVar: "DRONE_REPO_LINK",
+			Name:  "ref",
+			Usage: "git reference",
 		},
 		cli.StringFlag{
-			Name:   "repo-remote-url",
-			EnvVar: "DRONE_REPO_REMOTE",
+			Name:  "repo",
+			Usage: "git repository name (e.g. ocotcat/hello-world)",
 		},
 		cli.StringFlag{
-			Name:   "repo-private",
-			EnvVar: "DRONE_REPO_PRIVATE",
-		},
-		cli.IntFlag{
-			Name:   "build-number",
-			EnvVar: "DRONE_BUILD_NUMBER",
-		},
-		cli.IntFlag{
-			Name:   "parent-build-number",
-			EnvVar: "DRONE_PARENT_BUILD_NUMBER",
-		},
-		cli.Int64Flag{
-			Name:   "build-created",
-			EnvVar: "DRONE_BUILD_CREATED",
-		},
-		cli.Int64Flag{
-			Name:   "build-started",
-			EnvVar: "DRONE_BUILD_STARTED",
-		},
-		cli.Int64Flag{
-			Name:   "build-finished",
-			EnvVar: "DRONE_BUILD_FINISHED",
-		},
-		cli.StringFlag{
-			Name:   "build-status",
-			EnvVar: "DRONE_BUILD_STATUS",
-		},
-		cli.StringFlag{
-			Name:   "build-event",
-			EnvVar: "DRONE_BUILD_EVENT",
-		},
-		cli.StringFlag{
-			Name:   "build-link",
-			EnvVar: "DRONE_BUILD_LINK",
-		},
-		cli.StringFlag{
-			Name:   "build-target",
-			EnvVar: "DRONE_BUILD_TARGET",
-		},
-		cli.StringFlag{
-			Name:   "commit-sha",
-			EnvVar: "DRONE_COMMIT_SHA",
-		},
-		cli.StringFlag{
-			Name:   "commit-ref",
-			EnvVar: "DRONE_COMMIT_REF",
-		},
-		cli.StringFlag{
-			Name:   "commit-refspec",
-			EnvVar: "DRONE_COMMIT_REFSPEC",
-		},
-		cli.StringFlag{
-			Name:   "commit-branch",
-			EnvVar: "DRONE_COMMIT_BRANCH",
-		},
-		cli.StringFlag{
-			Name:   "commit-message",
-			EnvVar: "DRONE_COMMIT_MESSAGE",
-		},
-		cli.StringFlag{
-			Name:   "commit-author-name",
-			EnvVar: "DRONE_COMMIT_AUTHOR_NAME",
-		},
-		cli.StringFlag{
-			Name:   "commit-author-avatar",
-			EnvVar: "DRONE_COMMIT_AUTHOR_AVATAR",
-		},
-		cli.StringFlag{
-			Name:   "commit-author-email",
-			EnvVar: "DRONE_COMMIT_AUTHOR_EMAIL",
-		},
-		cli.IntFlag{
-			Name:   "prev-build-number",
-			EnvVar: "DRONE_PREV_BUILD_NUMBER",
-		},
-		cli.Int64Flag{
-			Name:   "prev-build-created",
-			EnvVar: "DRONE_PREV_BUILD_CREATED",
-		},
-		cli.Int64Flag{
-			Name:   "prev-build-started",
-			EnvVar: "DRONE_PREV_BUILD_STARTED",
-		},
-		cli.Int64Flag{
-			Name:   "prev-build-finished",
-			EnvVar: "DRONE_PREV_BUILD_FINISHED",
-		},
-		cli.StringFlag{
-			Name:   "prev-build-status",
-			EnvVar: "DRONE_PREV_BUILD_STATUS",
-		},
-		cli.StringFlag{
-			Name:   "prev-build-event",
-			EnvVar: "DRONE_PREV_BUILD_EVENT",
-		},
-		cli.StringFlag{
-			Name:   "prev-build-link",
-			EnvVar: "DRONE_PREV_BUILD_LINK",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-sha",
-			EnvVar: "DRONE_PREV_COMMIT_SHA",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-ref",
-			EnvVar: "DRONE_PREV_COMMIT_REF",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-refspec",
-			EnvVar: "DRONE_PREV_COMMIT_REFSPEC",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-branch",
-			EnvVar: "DRONE_PREV_COMMIT_BRANCH",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-message",
-			EnvVar: "DRONE_PREV_COMMIT_MESSAGE",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-author-name",
-			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_NAME",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-author-avatar",
-			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_AVATAR",
-		},
-		cli.StringFlag{
-			Name:   "prev-commit-author-email",
-			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_EMAIL",
-		},
-		cli.IntFlag{
-			Name:   "job-number",
-			EnvVar: "DRONE_JOB_NUMBER",
-		},
-		cli.StringSliceFlag{
-			Name: "env, e",
-			EnvVar: "DRONE_ENV",
+			Name:  "deploy-to",
+			Usage: "deployment target (e.g. production)",
 		},
 	},
 }
@@ -287,211 +141,187 @@ func exec(c *cli.Context) error {
 		file = ".drone.yml"
 	}
 
-	metadata := metadataFromContext(c)
-	environ := metadata.Environ()
-	secrets := []compiler.Secret{}
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
-	for key, val := range metadata.Job.Matrix {
-		environ[key] = val
-		secrets = append(secrets, compiler.Secret{
-			Name:  key,
-			Value: val,
-		})
-	}
-
-	drone_env := make(map[string]string)
-	for _, env := range c.StringSlice("env") {
-		envs := strings.SplitN(env, "=", 2)
-		drone_env[envs[0]] = envs[1]
-	}
-
-	tmpl, err := envsubst.ParseFile(file)
+	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
 	}
-	confstr, err := tmpl.Execute(func(name string) string {
+
+	environ := getEnv(c)
+	dataS, err := envsubst.Eval(string(data), func(name string) string {
 		return environ[name]
 	})
 	if err != nil {
 		return err
 	}
 
-	conf, err := yaml.ParseString(confstr)
+	manifest, err := yaml.ParseString(dataS)
 	if err != nil {
 		return err
 	}
 
-	// configure volumes for local execution
-	volumes := c.StringSlice("volumes")
-	if c.Bool("local") {
-		var (
-			workspaceBase = conf.Workspace.Base
-			workspacePath = conf.Workspace.Path
-		)
-		if workspaceBase == "" {
-			workspaceBase = c.String("workspace-base")
+	var pipeline *yaml.Pipeline
+	filter := c.String("pipeline")
+	for _, resource := range manifest.Resources {
+		v, ok := resource.(*yaml.Pipeline)
+		if !ok {
+			continue
 		}
-		if workspacePath == "" {
-			workspacePath = c.String("workspace-path")
+		if filter == "" || filter == v.Name {
+			pipeline = v
+			break
 		}
-		dir, _ := filepath.Abs(filepath.Dir(file))
-
-		if runtime.GOOS == "windows" {
-			dir = convertPathForWindows(dir)
-		}
-		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
-		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
+	}
+	if pipeline == nil {
+		return errors.New("cannot find pipeline")
 	}
 
-	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint(conf); lerr != nil {
-		return lerr
+	trusted := c.Bool("trusted")
+	err = linter.Lint(pipeline, trusted)
+	if err != nil {
+		return err
 	}
 
-	// compiles the yaml file
-	compiled := compiler.New(
-		compiler.WithEscalated(
-			c.StringSlice("privileged")...,
+	// the user has the option to disable the git clone
+	// if the pipeline is being executed on the local
+	// codebase.
+	if c.Bool("clone") == false {
+		pipeline.Clone.Disable = true
+	}
+
+	comp := new(compiler.Compiler)
+	comp.PrivilegedFunc = compiler.DindFunc(
+		c.StringSlice("privileged"),
+	)
+	comp.SkipFunc = compiler.SkipFunc(
+		compiler.SkipData{
+			Branch:   environ["DRONE_BRANCH"],
+			Event:    environ["DRONE_EVENT"],
+			Instance: environ["DRONE_SYSTEM_HOST"],
+			Ref:      environ["DRONE_COMMIT_REF"],
+			Repo:     environ["DRONE_REPO"],
+			Target:   environ["DRONE_DEPLOY_TO"],
+		},
+	)
+	comp.TransformFunc = transform.Combine(
+		transform.Include(
+			c.StringSlice("include"),
 		),
-		compiler.WithVolumes(volumes...),
-		compiler.WithWorkspace(
-			c.String("workspace-base"),
-			c.String("workspace-path"),
+		transform.Exclude(
+			c.StringSlice("exclude"),
 		),
-		compiler.WithNetworks(
-			c.StringSlice("network")...,
+		transform.ResumeAt(
+			c.String("resume-at"),
 		),
-		compiler.WithPrefix(
-			c.String("prefix"),
+		transform.WithAuths(
+			toRegistry(
+				c.StringSlice("registry"),
+			),
 		),
-		compiler.WithProxy(),
-		compiler.WithLocal(
-			c.Bool("local"),
+		transform.WithEnviron(
+			readParams(
+				c.String("env-file"),
+			),
 		),
-		compiler.WithNetrc(
+		transform.WithEnviron(environ),
+		transform.WithLables(nil),
+		transform.WithLimits(0, 0),
+		transform.WithNetrc(
+			c.String("netrc-machine"),
 			c.String("netrc-username"),
 			c.String("netrc-password"),
-			c.String("netrc-machine"),
 		),
-		compiler.WithMetadata(metadata),
-		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(drone_env),
-	).Compile(conf)
+		transform.WithNetworks(
+			c.StringSlice("network"),
+		),
+		transform.WithProxy(),
+		transform.WithSecrets(
+			readParams(
+				c.String("env-file"),
+			),
+		),
+		transform.WithVolumes(
+			toVolumes(
+				c.StringSlice("volume"),
+			),
+		),
+	)
+	ir := comp.Compile(pipeline)
 
+	// the user has the option to disable the git clone
+	// if the pipeline is being executed on the local
+	// codebase.
+	if c.Bool("clone") == false {
+		pwd, _ := os.Getwd()
+		mountWorkspace(ir, pwd)
+	}
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		c.Duration("timeout"),
+	)
+	ctx = signal.WithContext(ctx)
+	defer cancel()
+
+	// creates a docker-based engine. eventually we will
+	// include the kubernetes and vmware fusion engines.
 	engine, err := docker.NewEnv()
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
-	defer cancel()
-	ctx = interrupt.WithContext(ctx)
-
-	return pipeline.New(compiled,
-		pipeline.WithContext(ctx),
-		pipeline.WithTracer(pipeline.DefaultTracer),
-		pipeline.WithLogger(defaultLogger),
-		pipeline.WithEngine(engine),
-	).Run()
-}
-
-// return the metadata from the cli context.
-func metadataFromContext(c *cli.Context) frontend.Metadata {
-	return frontend.Metadata{
-		Repo: frontend.Repo{
-			Name:    c.String("repo-name"),
-			Link:    c.String("repo-link"),
-			Remote:  c.String("repo-remote-url"),
-			Private: c.Bool("repo-private"),
-		},
-		Curr: frontend.Build{
-			Number:   c.Int("build-number"),
-			Parent:   c.Int("parent-build-number"),
-			Created:  c.Int64("build-created"),
-			Started:  c.Int64("build-started"),
-			Finished: c.Int64("build-finished"),
-			Status:   c.String("build-status"),
-			Event:    c.String("build-event"),
-			Link:     c.String("build-link"),
-			Target:   c.String("build-target"),
-			Commit: frontend.Commit{
-				Sha:     c.String("commit-sha"),
-				Ref:     c.String("commit-ref"),
-				Refspec: c.String("commit-refspec"),
-				Branch:  c.String("commit-branch"),
-				Message: c.String("commit-message"),
-				Author: frontend.Author{
-					Name:   c.String("commit-author-name"),
-					Email:  c.String("commit-author-email"),
-					Avatar: c.String("commit-author-avatar"),
-				},
-			},
-		},
-		Prev: frontend.Build{
-			Number:   c.Int("prev-build-number"),
-			Created:  c.Int64("prev-build-created"),
-			Started:  c.Int64("prev-build-started"),
-			Finished: c.Int64("prev-build-finished"),
-			Status:   c.String("prev-build-status"),
-			Event:    c.String("prev-build-event"),
-			Link:     c.String("prev-build-link"),
-			Commit: frontend.Commit{
-				Sha:     c.String("prev-commit-sha"),
-				Ref:     c.String("prev-commit-ref"),
-				Refspec: c.String("prev-commit-refspec"),
-				Branch:  c.String("prev-commit-branch"),
-				Message: c.String("prev-commit-message"),
-				Author: frontend.Author{
-					Name:   c.String("prev-commit-author-name"),
-					Email:  c.String("prev-commit-author-email"),
-					Avatar: c.String("prev-commit-author-avatar"),
-				},
-			},
-		},
-		Job: frontend.Job{
-			Number: c.Int("job-number"),
-			Matrix: availableEnvironment(),
-		},
-		Sys: frontend.System{
-			Name: c.String("system-name"),
-			Link: c.String("system-link"),
-			Arch: c.String("system-arch"),
-		},
-	}
-}
-
-func availableEnvironment() map[string]string {
-	result := make(map[string]string, 0)
-
-	for _, env := range os.Environ() {
-		pair := strings.SplitN(env, "=", 2)
-		result[pair[0]] = pair[1]
+	// creates a hook to print the step output to stdout,
+	// with per-step color coding if a tty.
+	hooks := &runtime.Hook{}
+	hooks.GotLine = term.WriteLine(os.Stdout)
+	if tty {
+		hooks.GotLine = term.WriteLinePretty(os.Stdout)
 	}
 
-	return result
+	return runtime.New(
+		runtime.WithEngine(engine),
+		runtime.WithConfig(ir),
+		runtime.WithHooks(hooks),
+	).Run(ctx)
 }
 
-func convertPathForWindows(path string) string {
-	base := filepath.VolumeName(path)
-	if len(base) == 2 {
-		path = strings.TrimPrefix(path, base)
-		base = strings.ToLower(strings.TrimSuffix(base, ":"))
-		return "/" + base + filepath.ToSlash(path)
+// helper function converts a slice of colon-separated
+// volumes to a map.
+func toVolumes(items []string) map[string]string {
+	set := map[string]string{}
+	for _, item := range items {
+		parts := strings.Split(item, ":")
+		if len(parts) != 2 {
+			key := parts[0]
+			val := parts[1]
+			set[key] = val
+		}
 	}
-
-	return filepath.ToSlash(path)
+	return set
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
-	part, err := rc.NextPart()
-	if err != nil {
-		return err
+// helper function converts a slice of urls to a slice
+// of docker registry credentials.
+func toRegistry(items []string) []*engine.DockerAuth {
+	auths := []*engine.DockerAuth{}
+	for _, item := range items {
+		uri, err := url.Parse(item)
+		if err != nil {
+			continue // skip invalid
+		}
+		host := uri.Host
+		user := uri.User.Username()
+		pass, _ := uri.User.Password()
+		auths = append(auths, &engine.DockerAuth{
+			Address:  host,
+			Username: user,
+			Password: pass,
+		})
 	}
+	return auths
+}
 
-	logstream := NewLineWriter(proc.Alias)
-	io.Copy(logstream, part)
-
-	return nil
-})
+// helper function reads secrets from a key-value file.
+func readParams(path string) map[string]string {
+	data, _ := godotenv.Read(path)
+	return data
+}

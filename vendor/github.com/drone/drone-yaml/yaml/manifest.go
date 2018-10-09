@@ -23,6 +23,9 @@ type (
 
 	// Resource represents a Drone resource.
 	Resource interface {
+		// GetVersion returns the resource version.
+		GetVersion() string
+
 		// GetKind returns the resource kind.
 		GetKind() string
 	}
@@ -30,14 +33,16 @@ type (
 	// RawResource is a raw encoded resource with the
 	// resource kind and type extracted.
 	RawResource struct {
-		Kind string
-		Type string
-		Data []byte `yaml:"-"`
+		Version string
+		Kind    string
+		Type    string
+		Data    []byte `yaml:"-"`
 	}
 
 	resource struct {
-		Kind string `json:"kind"`
-		Type string `json:"type"`
+		Version string
+		Kind    string `json:"kind"`
+		Type    string `json:"type"`
 	}
 )
 

@@ -6,9 +6,10 @@ type (
 	// Cron is a resource that defines a cron job, used
 	// to execute pipelines at scheduled intervals.
 	Cron struct {
-		Kind string `json:"kind,omitempty"`
-		Type string `json:"type,omitempty"`
-		Name string `json:"name,omitempty"`
+		Version string `json:"version,omitempty"`
+		Kind    string `json:"kind,omitempty"`
+		Type    string `json:"type,omitempty"`
+		Name    string `json:"name,omitempty"`
 
 		Spec CronSpec `json:"spec,omitempty"`
 	}
@@ -25,6 +26,9 @@ type (
 		Target string `json:"target,omitempty"`
 	}
 )
+
+// GetVersion returns the resource version.
+func (c *Cron) GetVersion() string { return c.Version }
 
 // GetKind returns the resource kind.
 func (c *Cron) GetKind() string { return c.Kind }

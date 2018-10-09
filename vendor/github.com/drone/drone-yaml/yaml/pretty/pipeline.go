@@ -7,6 +7,7 @@ import (
 // helper function to pretty print the pipeline resource.
 func printPipeline(w writer, v *yaml.Pipeline) {
 	w.WriteString("---")
+	w.WriteTagValue("version", v.Version)
 	w.WriteTagValue("kind", v.Kind)
 	w.WriteTagValue("type", v.Type)
 	w.WriteTagValue("name", v.Name)

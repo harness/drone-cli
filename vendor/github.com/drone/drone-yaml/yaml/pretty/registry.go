@@ -7,6 +7,7 @@ import (
 // helper function pretty prints the registry resource.
 func printRegistry(w writer, v *yaml.Registry) {
 	w.WriteString("---")
+	w.WriteTagValue("version", v.Version)
 	w.WriteTagValue("kind", v.Kind)
 	w.WriteTagValue("type", v.Type)
 	if v.Type == "encrypted" {

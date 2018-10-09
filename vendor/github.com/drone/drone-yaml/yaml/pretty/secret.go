@@ -12,6 +12,7 @@ import (
 // helper function to pretty prints the signature resource.
 func printSecret(w writer, v *yaml.Secret) {
 	w.WriteString("---")
+	w.WriteTagValue("version", v.Version)
 	w.WriteTagValue("kind", v.Kind)
 	w.WriteTagValue("type", v.Type)
 	if v.Type == "encrypted" {

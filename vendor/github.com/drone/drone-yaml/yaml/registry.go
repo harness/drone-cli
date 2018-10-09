@@ -7,12 +7,16 @@ type (
 	// registry credentials and pointers to external
 	// registry credentials (e.g. from vault).
 	Registry struct {
-		Kind string `json:"kind,omitempty"`
-		Type string `json:"type,omitempty"`
+		Version string `json:"version,omitempt"`
+		Kind    string `json:"kind,omitempty"`
+		Type    string `json:"type,omitempty"`
 
 		Data map[string]string `json:"data,omitempty"`
 	}
 )
+
+// GetVersion returns the resource version.
+func (r *Registry) GetVersion() string { return r.Version }
 
 // GetKind returns the resource kind.
 func (r *Registry) GetKind() string { return r.Kind }

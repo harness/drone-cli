@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+
+	"github.com/drone/drone-yaml/yaml"
 )
 
 // TODO rename WriteTag to WriteKey
@@ -198,6 +200,8 @@ func writeValue(w writer, v interface{}) {
 		writeMapping(w, v)
 	case map[string]string:
 		writeMappingStr(w, v)
+	case yaml.BytesSize:
+		writeValue(w, v.String())
 	}
 }
 

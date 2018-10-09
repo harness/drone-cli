@@ -5,6 +5,7 @@ import "github.com/drone/drone-yaml/yaml"
 // helper function pretty prints the cron resource.
 func printCron(w writer, v *yaml.Cron) {
 	w.WriteString("---")
+	w.WriteTagValue("version", v.Version)
 	w.WriteTagValue("kind", v.Kind)
 	w.WriteTagValue("name", v.Name)
 	printSpec(w, v)

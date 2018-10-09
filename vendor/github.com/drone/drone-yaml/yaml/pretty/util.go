@@ -1,8 +1,12 @@
 package pretty
 
+import "github.com/drone/drone-yaml/yaml"
+
 func isPrimative(v interface{}) bool {
 	switch v.(type) {
 	case bool, string, int, float64:
+		return true
+	case yaml.BytesSize:
 		return true
 	default:
 		return false
@@ -38,6 +42,8 @@ func isZero(v interface{}) bool {
 		return len(v) == 0
 	case map[string]string:
 		return len(v) == 0
+	case yaml.BytesSize:
+		return int64(v) == 0
 	default:
 		return false
 	}

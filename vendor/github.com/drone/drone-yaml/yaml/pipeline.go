@@ -3,9 +3,10 @@ package yaml
 // Pipeline is a resource that defines a continuous
 // delivery pipeline.
 type Pipeline struct {
-	Kind string `json:"kind,omitempty"`
-	Type string `json:"type,omitempty"`
-	Name string `json:"name,omitempty"`
+	Version string `json:"version,omitempty"`
+	Kind    string `json:"kind,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Name    string `json:"name,omitempty"`
 
 	Clone     Clone             `json:"clone,omitempty"`
 	DependsOn []string          `json:"depends_on,omitempty" yaml:"depends_on" `
@@ -17,6 +18,9 @@ type Pipeline struct {
 	Volumes   []*Volume         `json:"volumes,omitempty"`
 	Workspace Workspace         `json:"workspace,omitempty"`
 }
+
+// GetVersion returns the resource version.
+func (p *Pipeline) GetVersion() string { return p.Version }
 
 // GetKind returns the resource kind.
 func (p *Pipeline) GetKind() string { return p.Kind }
@@ -36,8 +40,11 @@ type (
 		Detach      bool                  `json:"detach,omitempty"`
 		DependsOn   []string              `json:"depends_on,omitempty" yaml:"depends_on"`
 		Devices     []*VolumeDevice       `json:"devices,omitempty"`
+		DNS         []string              `json:"dns,omitempty"`
+		DNSSearch   []string              `json:"dns_search,omitempty" yaml:"dns_search"`
 		Entrypoint  []string              `json:"entrypoint,omitempty"`
 		Environment map[string]*Variable  `json:"environment,omitempty"`
+		ExtraHosts  []string              `json:"extra_hosts,omitempty" yaml:"extra_hosts"`
 		Failure     string                `json:"failure,omitempty"`
 		Image       string                `json:"image,omitempty"`
 		Name        string                `json:"name,omitempty"`
@@ -68,8 +75,8 @@ type (
 	// ResourceObject describes compute resource
 	// requirements.
 	ResourceObject struct {
-		CPU    string `json:"cpu"`
-		Memory string `json:"memory"`
+		CPU    string    `json:"cpu"`
+		Memory BytesSize `json:"memory"`
 	}
 
 	// Platform defines the target platform.
@@ -105,8 +112,8 @@ type (
 	// host node's filesystem into the container. This can
 	// be used as a shared scratch space.
 	VolumeEmptyDir struct {
-		Medium    string `json:"medium,omitempty"`
-		SizeLimit string `json:"size_limit,omitempty" yaml:"size_limit"`
+		Medium    string    `json:"medium,omitempty"`
+		SizeLimit BytesSize `json:"size_limit,omitempty" yaml:"size_limit"`
 	}
 
 	// VolumeHostPath mounts a file or directory from the
