@@ -1,8 +1,6 @@
 package compiler
 
 import (
-	"path"
-
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
 
@@ -84,8 +82,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	// create the default workspace path. If a container
 	// does not specify a working directory it defaults
 	// to the workspace path.
-	base, dir := createWorkspace(from)
-	workspace := path.Join(base, dir)
+	base, dir, workspace := createWorkspace(from)
 
 	// create the default workspace volume definition.
 	// the volume will be mounted to each container in

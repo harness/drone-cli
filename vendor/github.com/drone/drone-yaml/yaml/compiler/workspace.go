@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/drone/drone-runtime/engine"
@@ -62,23 +63,20 @@ func toWindowsPath(s string) string {
 //
 //
 
-func createWorkspace(from *yaml.Pipeline) (base, path string) {
+func createWorkspace(from *yaml.Pipeline) (base, path, full string) {
 	base = from.Workspace.Base
 	path = from.Workspace.Path
-	if from.Platform.OS == "windows" {
-		if base == "" {
-			base = "c:\\drone"
-		}
-		if path == "" {
-			path = "\\src"
-		}
-	} else {
-		if base == "" {
-			base = "/drone"
-		}
-		if path == "" {
-			path = "/src"
-		}
+	if base == "" {
+		base = "/drone"
 	}
-	return base, path
+	if path == "" {
+		path = "src"
+	}
+	full = filepath.Join(base, path)
+	if from.Platform.OS == "windows" {
+		base = toWindowsDrive(base)
+		path = toWindowsPath(path)
+		full = toWindowsDrive(full)
+	}
+	return base, path, full
 }
