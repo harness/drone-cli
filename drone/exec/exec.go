@@ -24,6 +24,7 @@ import (
 	"github.com/drone/signal"
 
 	"github.com/joho/godotenv"
+	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli"
 )
@@ -284,7 +285,9 @@ func exec(c *cli.Context) error {
 	hooks := &runtime.Hook{}
 	hooks.GotLine = term.WriteLine(os.Stdout)
 	if tty {
-		hooks.GotLine = term.WriteLinePretty(os.Stdout)
+		hooks.GotLine = term.WriteLinePretty(
+			colorable.NewColorableStdout(),
+		)
 	}
 
 	return runtime.New(
