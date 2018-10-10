@@ -19,6 +19,7 @@ import (
 	"github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/compiler"
 	"github.com/drone/drone-yaml/yaml/compiler/transform"
+	"github.com/drone/drone-yaml/yaml/converter"
 	"github.com/drone/drone-yaml/yaml/linter"
 	"github.com/drone/signal"
 
@@ -152,6 +153,15 @@ func exec(c *cli.Context) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	// this code is temporarily in place to detect and convert
+	// the legacy yaml configuration file to the new format.
+	if converter.IsLegacy(dataS) {
+		dataS, err = converter.ConvertString(dataS)
+		if err != nil {
+			return err
+		}
 	}
 
 	manifest, err := yaml.ParseString(dataS)

@@ -107,11 +107,13 @@
     "yaml/compiler",
     "yaml/compiler/image",
     "yaml/compiler/transform",
+    "yaml/converter",
+    "yaml/converter/internal",
     "yaml/linter",
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "05bf5dcb396c4088ea37a9e810971b36a6a1ef12"
+  revision = "b134c0d5339c67020abe52a537970f528f842b5c"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -281,6 +283,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8c520d39b8c420246478026f1e11decae145d3858ebde58f4bcd0ee2769e74ca"
+  inputs-digest = "f183a4d8f5b52b34e0dc302acbee4dc64e0c12229cbde64b302a95d6d27be6df"
   solver-name = "gps-cdcl"
   solver-version = 1
