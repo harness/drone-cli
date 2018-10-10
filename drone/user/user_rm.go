@@ -23,7 +23,7 @@ func userRemove(c *cli.Context) error {
 		return err
 	}
 
-	if err := client.UserDel(login); err != nil {
+	if err := client.UserDelete(login); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully removed user %s\n", login)

@@ -47,13 +47,12 @@ func repoInfo(c *cli.Context) error {
 }
 
 // template for repo information
-var tmplRepoInfo = `Owner: {{ .Owner }}
+var tmplRepoInfo = `Owner: {{ .Namespace }}
 Repo: {{ .Name }}
-Type: {{ .Kind }}
 Config: {{ .Config }}
 Visibility: {{ .Visibility }}
-Private: {{ .IsPrivate }}
-Trusted: {{ .IsTrusted }}
-Gated: {{ .IsGated }}
-Remote: {{ .Clone }}
+Private: {{ .Private }}
+Trusted: {{ .Trusted }}
+Protected: {{ .Protected }}
+Remote: {{ .HTTPURL }}
 `

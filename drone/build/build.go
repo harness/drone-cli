@@ -9,14 +9,13 @@ var Command = cli.Command{
 	Subcommands: []cli.Command{
 		buildListCmd,
 		buildLastCmd,
-		buildLogsCmd,
 		buildInfoCmd,
 		buildStopCmd,
 		buildStartCmd,
 		buildApproveCmd,
 		buildDeclineCmd,
 		buildQueueCmd,
-		buildKillCmd,
-		buildPsCmd,
+		buildPromoteCmd,
+		buildRollbackCmd,
 	},
 }

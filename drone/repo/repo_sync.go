@@ -28,7 +28,7 @@ func repoSync(c *cli.Context) error {
 		return err
 	}
 
-	repos, err := client.RepoListOpts(true, true)
+	repos, err := client.RepoListSync()
 	if err != nil || len(repos) == 0 {
 		return err
 	}
@@ -38,11 +38,7 @@ func repoSync(c *cli.Context) error {
 		return err
 	}
 
-	org := c.String("org")
 	for _, repo := range repos {
-		if org != "" && org != repo.Owner {
-			continue
-		}
 		tmpl.Execute(os.Stdout, repo)
 	}
 	return nil

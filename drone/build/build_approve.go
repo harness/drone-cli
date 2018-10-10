@@ -10,8 +10,8 @@ import (
 
 var buildApproveCmd = cli.Command{
 	Name:      "approve",
-	Usage:     "approve a build",
-	ArgsUsage: "<repo/name> <build>",
+	Usage:     "approve a build stage",
+	ArgsUsage: "<repo/name> <build> <stage>",
 	Action:    buildApprove,
 }
 
@@ -25,13 +25,17 @@ func buildApprove(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+	stage, err := strconv.Atoi(c.Args().Get(2))
+	if err != nil {
+		return err
+	}
 
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.BuildApprove(owner, name, number)
+	err = client.Approve(owner, name, number, stage)
 	if err != nil {
 		return err
 	}

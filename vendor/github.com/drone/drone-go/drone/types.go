@@ -1,144 +1,193 @@
+// Copyright 2018 Drone.IO Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package drone
 
 type (
 	// User represents a user account.
 	User struct {
-		ID     int64  `json:"id"`
-		Login  string `json:"login"`
-		Email  string `json:"email"`
-		Avatar string `json:"avatar_url"`
-		Active bool   `json:"active"`
-		Admin  bool   `json:"admin"`
+		ID        int64  `json:"id"`
+		Login     string `json:"login"`
+		Email     string `json:"email"`
+		Avatar    string `json:"avatar_url"`
+		Active    bool   `json:"active"`
+		Admin     bool   `json:"admin"`
+		Machine   bool   `json:"machine"`
+		Syncing   bool   `json:"syncing"`
+		Synced    int64  `json:"synced"`
+		Created   int64  `json:"created"`
+		Updated   int64  `json:"updated"`
+		LastLogin int64  `json:"last_login"`
 	}
 
 	// Repo represents a repository.
 	Repo struct {
-		ID          int64  `json:"id,omitempty"`
-		Owner       string `json:"owner"`
-		Name        string `json:"name"`
-		FullName    string `json:"full_name"`
-		Avatar      string `json:"avatar_url,omitempty"`
-		Link        string `json:"link_url,omitempty"`
-		Kind        string `json:"scm,omitempty"`
-		Clone       string `json:"clone_url,omitempty"`
-		Branch      string `json:"default_branch,omitempty"`
-		Timeout     int64  `json:"timeout,omitempty"`
-		Visibility  string `json:"visibility"`
-		IsPrivate   bool   `json:"private,omitempty"`
-		IsTrusted   bool   `json:"trusted"`
-		IsStarred   bool   `json:"starred,omitempty"`
-		IsGated     bool   `json:"gated"`
-		AllowPull   bool   `json:"allow_pr"`
-		AllowPush   bool   `json:"allow_push"`
-		AllowDeploy bool   `json:"allow_deploys"`
-		AllowTag    bool   `json:"allow_tags"`
-		Config      string `json:"config_file"`
+		ID         int64  `json:"id"`
+		UID        string `json:"uid"`
+		UserID     int64  `json:"user_id"`
+		Namespace  string `json:"namespace"`
+		Name       string `json:"name"`
+		Slug       string `json:"slug"`
+		SCM        string `json:"scm"`
+		HTTPURL    string `json:"git_http_url"`
+		SSHURL     string `json:"git_ssh_url"`
+		Link       string `json:"link"`
+		Branch     string `json:"default_branch"`
+		Private    bool   `json:"private"`
+		Visibility string `json:"visibility"`
+		Active     bool   `json:"active"`
+		Config     string `json:"config_path"`
+		Trusted    bool   `json:"trusted"`
+		Protected  bool   `json:"protected"`
+		Timeout    int64  `json:"timeout"`
+		Counter    int64  `json:"counter"`
+		Synced     int64  `json:"synced"`
+		Created    int64  `json:"created"`
+		Updated    int64  `json:"updated"`
+		Version    int64  `json:"version"`
 	}
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config       *string `json:"config_file,omitempty"`
-		IsTrusted    *bool   `json:"trusted,omitempty"`
-		IsGated      *bool   `json:"gated,omitempty"`
-		Timeout      *int64  `json:"timeout,omitempty"`
-		Visibility   *string `json:"visibility"`
-		AllowPull    *bool   `json:"allow_pr,omitempty"`
-		AllowPush    *bool   `json:"allow_push,omitempty"`
-		AllowDeploy  *bool   `json:"allow_deploy,omitempty"`
-		AllowTag     *bool   `json:"allow_tag,omitempty"`
-		BuildCounter *int    `json:"build_counter,omitempty"`
+		Config     *string `json:"config_path,omitempty"`
+		Protected  *bool   `json:"protected,omitempty"`
+		Trusted    *bool   `json:"trusted,omitempty"`
+		Timeout    *int64  `json:"timeout,omitempty"`
+		Visibility *string `json:"visibility,omitempty"`
+		Counter    *int    `json:"counter,omitempty"`
 	}
 
 	// Build defines a build object.
 	Build struct {
-		ID        int64   `json:"id"`
-		Number    int     `json:"number"`
-		Parent    int     `json:"parent"`
-		Event     string  `json:"event"`
-		Status    string  `json:"status"`
-		Error     string  `json:"error"`
-		Enqueued  int64   `json:"enqueued_at"`
-		Created   int64   `json:"created_at"`
-		Started   int64   `json:"started_at"`
-		Finished  int64   `json:"finished_at"`
-		Deploy    string  `json:"deploy_to"`
-		Commit    string  `json:"commit"`
-		Branch    string  `json:"branch"`
-		Ref       string  `json:"ref"`
-		Refspec   string  `json:"refspec"`
-		Remote    string  `json:"remote"`
-		Title     string  `json:"title"`
-		Message   string  `json:"message"`
-		Timestamp int64   `json:"timestamp"`
-		Sender    string  `json:"sender"`
-		Author    string  `json:"author"`
-		Avatar    string  `json:"author_avatar"`
-		Email     string  `json:"author_email"`
-		Link      string  `json:"link_url"`
-		Reviewer  string  `json:"reviewed_by"`
-		Reviewed  int64   `json:"reviewed_at"`
-		Procs     []*Proc `json:"procs,omitempty"`
+		ID           int64             `json:"id"`
+		RepoID       int64             `json:"repo_id"`
+		Trigger      string            `json:"trigger"`
+		Number       int64             `json:"number"`
+		Parent       int64             `json:"parent,omitempty"`
+		Status       string            `json:"status"`
+		Error        string            `json:"error,omitempty"`
+		Event        string            `json:"event"`
+		Action       string            `json:"action"`
+		Link         string            `json:"link"`
+		Timestamp    int64             `json:"timestamp"`
+		Title        string            `json:"title,omitempty"`
+		Message      string            `json:"message"`
+		Before       string            `json:"before"`
+		After        string            `json:"after"`
+		Ref          string            `json:"ref"`
+		Fork         string            `json:"source_repo"`
+		Source       string            `json:"source"`
+		Target       string            `json:"target"`
+		Author       string            `json:"author_login"`
+		AuthorName   string            `json:"author_name"`
+		AuthorEmail  string            `json:"author_email"`
+		AuthorAvatar string            `json:"author_avatar"`
+		Sender       string            `json:"sender"`
+		Params       map[string]string `json:"params,omitempty"`
+		Deploy       string            `json:"deploy_to,omitempty"`
+		Started      int64             `json:"started"`
+		Finished     int64             `json:"finished"`
+		Created      int64             `json:"created"`
+		Updated      int64             `json:"updated"`
+		Version      int64             `json:"version"`
+		Stages       []*Stage          `json:"stages,omitempty"`
 	}
 
-	// Proc represents a process in the build pipeline.
-	Proc struct {
-		ID       int64             `json:"id"`
-		PID      int               `json:"pid"`
-		PPID     int               `json:"ppid"`
-		PGID     int               `json:"pgid"`
-		Name     string            `json:"name"`
-		State    string            `json:"state"`
-		Error    string            `json:"error,omitempty"`
-		ExitCode int               `json:"exit_code"`
-		Started  int64             `json:"start_time,omitempty"`
-		Stopped  int64             `json:"end_time,omitempty"`
-		Machine  string            `json:"machine,omitempty"`
-		Platform string            `json:"platform,omitempty"`
-		Environ  map[string]string `json:"environ,omitempty"`
-		Children []*Proc           `json:"children,omitempty"`
+	// Stage represents a stage of build execution.
+	Stage struct {
+		ID        int64             `json:"id"`
+		BuildID   int64             `json:"build_id"`
+		Number    int               `json:"number"`
+		Name      string            `json:"name"`
+		Kind      string            `json:"kind,omitempty"`
+		Type      string            `json:"type,omitempty"`
+		Status    string            `json:"status"`
+		Error     string            `json:"error,omitempty"`
+		ErrIgnore bool              `json:"errignore"`
+		ExitCode  int               `json:"exit_code"`
+		Machine   string            `json:"machine,omitempty"`
+		OS        string            `json:"os"`
+		Arch      string            `json:"arch"`
+		Variant   string            `json:"variant,omitempty"`
+		Kernel    string            `json:"kernel,omitempty"`
+		Started   int64             `json:"started"`
+		Stopped   int64             `json:"stopped"`
+		Created   int64             `json:"created"`
+		Updated   int64             `json:"updated"`
+		Version   int64             `json:"version"`
+		OnSuccess bool              `json:"on_success"`
+		OnFailure bool              `json:"on_failure"`
+		DependsOn []string          `json:"depends_on,omitempty"`
+		Labels    map[string]string `json:"labels,omitempty"`
+		Steps     []*Step           `json:"steps,omitempty"`
 	}
 
+	// Step represents an individual step in the stage.
+	Step struct {
+		ID        int64  `json:"id"`
+		StageID   int64  `json:"step_id"`
+		Number    int    `json:"number"`
+		Name      string `json:"name"`
+		Status    string `json:"status"`
+		Error     string `json:"error,omitempty"`
+		ErrIgnore bool   `json:"errignore,omitempty"`
+		ExitCode  int    `json:"exit_code"`
+		Started   int64  `json:"started,omitempty"`
+		Stopped   int64  `json:"stopped,omitempty"`
+		Version   int64  `json:"version"`
+	}
+
+	// DEPRECATED
 	// Registry represents a docker registry with credentials.
 	Registry struct {
-		ID       int64  `json:"id"`
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
 		Email    string `json:"email"`
 		Token    string `json:"token"`
+		Policy   string `json:"policy,omitempty"`
 	}
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
-		ID     int64    `json:"id"`
-		Name   string   `json:"name"`
-		Value  string   `json:"value,omitempty"`
-		Images []string `json:"image"`
-		Events []string `json:"event"`
+		Data string `json:"data,omitempty"`
+		Pull bool   `json:"pull,omitempty"`
+		Fork bool   `json:"fork,omitempty"`
 	}
 
-	// Activity represents an item in the user's feed or timeline.
-	Activity struct {
-		Owner    string `json:"owner"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		Number   int    `json:"number,omitempty"`
-		Event    string `json:"event,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Created  int64  `json:"created_at,omitempty"`
-		Started  int64  `json:"started_at,omitempty"`
-		Finished int64  `json:"finished_at,omitempty"`
-		Commit   string `json:"commit,omitempty"`
-		Branch   string `json:"branch,omitempty"`
-		Ref      string `json:"ref,omitempty"`
-		Refspec  string `json:"refspec,omitempty"`
-		Remote   string `json:"remote,omitempty"`
-		Title    string `json:"title,omitempty"`
-		Message  string `json:"message,omitempty"`
-		Author   string `json:"author,omitempty"`
-		Avatar   string `json:"author_avatar,omitempty"`
-		Email    string `json:"author_email,omitempty"`
-	}
+	// // Activity represents an item in the user's feed or timeline.
+	// Activity struct {
+	// 	Owner    string `json:"owner"`
+	// 	Name     string `json:"name"`
+	// 	FullName string `json:"full_name"`
+	// 	Number   int    `json:"number,omitempty"`
+	// 	Event    string `json:"event,omitempty"`
+	// 	Status   string `json:"status,omitempty"`
+	// 	Created  int64  `json:"created_at,omitempty"`
+	// 	Started  int64  `json:"started_at,omitempty"`
+	// 	Finished int64  `json:"finished_at,omitempty"`
+	// 	Commit   string `json:"commit,omitempty"`
+	// 	Branch   string `json:"branch,omitempty"`
+	// 	Ref      string `json:"ref,omitempty"`
+	// 	Refspec  string `json:"refspec,omitempty"`
+	// 	Remote   string `json:"remote,omitempty"`
+	// 	Title    string `json:"title,omitempty"`
+	// 	Message  string `json:"message,omitempty"`
+	// 	Author   string `json:"author,omitempty"`
+	// 	Avatar   string `json:"author_avatar,omitempty"`
+	// 	Email    string `json:"author_email,omitempty"`
+	// }
 
 	// Server represents a server node.
 	Server struct {
@@ -163,6 +212,32 @@ type (
 		Stopped  int64  `json:"stopped"`
 	}
 
+	// Cron represents a cron job.
+	Cron struct {
+		ID      int64  `json:"id"`
+		RepoID  int64  `json:"repo_id"`
+		Name    string `json:"name"`
+		Expr    string `json:"expr"`
+		Next    int64  `json:"next"`
+		Prev    int64  `json:"prev"`
+		Branch  string `json:"branch"`
+		Created int64  `json:"created"`
+		Updated int64  `json:"updated"`
+	}
+
+	// Line represents a line of container logs.
+	Line struct {
+		Number    int    `json:"pos"`
+		Message   string `json:"out"`
+		Timestamp int64  `json:"time"`
+	}
+
+	// Config represents a config file.
+	Config struct {
+		Data string `json:"data"`
+		Kind string `json:"kind"`
+	}
+
 	// Version provides system version details.
 	Version struct {
 		Source  string `json:"source,omitempty"`
@@ -170,3 +245,13 @@ type (
 		Commit  string `json:"commit,omitempty"`
 	}
 )
+
+// Error represents a json-encoded API error.
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (e *Error) Error() string {
+	return e.Message
+}

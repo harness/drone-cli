@@ -9,8 +9,8 @@ import (
 )
 
 var repoRemoveCmd = cli.Command{
-	Name:      "rm",
-	Usage:     "remove a repository",
+	Name:      "disable",
+	Usage:     "disable a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoRemove,
 }
@@ -27,7 +27,7 @@ func repoRemove(c *cli.Context) error {
 		return err
 	}
 
-	if err := client.RepoDel(owner, name); err != nil {
+	if err := client.RepoDisable(owner, name); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully removed repository %s/%s\n", owner, name)

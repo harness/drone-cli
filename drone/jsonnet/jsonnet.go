@@ -1,9 +1,14 @@
 package jsonnet
 
 import (
+	"bytes"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 
+	"github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/pretty"
 	"github.com/fatih/color"
 	"github.com/google/go-jsonnet"
 	"github.com/urfave/cli"
@@ -20,67 +25,89 @@ var Command = cli.Command{
 		}
 	},
 	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "source",
+			Usage: "Source file",
+			Value: ".drone.jsonnet",
+		},
+		cli.StringFlag{
+			Name:  "target",
+			Usage: "target file",
+			Value: ".drone.yml",
+		},
 		cli.BoolFlag{
-			Name:   "string",
-			Hidden: true,
+			Name:  "stream",
+			Usage: "Write output as a YAML stream.",
 		},
-		cli.IntFlag{
-			Name:  "max-stack",
-			Usage: "number of allowed stack frames",
-			Value: 500,
-		},
-		cli.IntFlag{
-			Name:  "max-trace",
-			Usage: "max length of stack trace before cropping",
-			Value: 20,
+		cli.BoolTFlag{
+			Name:  "format",
+			Usage: "Write output as formatted YAML",
 		},
 		cli.BoolFlag{
 			Name:  "stdout",
-			Usage: "write the json document to stdout",
+			Usage: "Write output to stdout",
+		},
+		cli.BoolFlag{
+			Name:  "string",
+			Usage: "Expect a string, manifest as plain text",
 		},
 	},
 }
 
 func generate(c *cli.Context) error {
-	input := c.Args().Get(0)
-	if input == "" {
-		input = ".drone.jsonnet"
-	}
-	output := c.Args().Get(1)
-	if output == "" {
-		output = ".drone.yml"
-	}
+	source := c.String("source")
+	target := c.String("target")
 
-	snippet, err := ioutil.ReadFile(input)
+	data, err := ioutil.ReadFile(source)
 	if err != nil {
 		return err
 	}
 
 	vm := jsonnet.MakeVM()
-	vm.KeepOrder = true
+	vm.MaxStack = 500
 	vm.StringOutput = c.Bool("string")
-	vm.MaxStack = c.Int("max-stack")
-	// vm.ExtVar
-	// vm.ExtCode
-	// vm.TLAVar
-	// vm.TLACode
-	// vm.Importer(&jsonnet.FileImporter{})
-
-	vm.ErrorFormatter.SetMaxStackTraceSize(
-		c.Int("max-trace"),
-	)
+	vm.ErrorFormatter.SetMaxStackTraceSize(20)
 	vm.ErrorFormatter.SetColorFormatter(
 		color.New(color.FgRed).Fprintf,
 	)
 
-	raw, err := vm.EvaluateSnippet(input, string(snippet))
-	if err != nil {
-		return err
+	buf := new(bytes.Buffer)
+	if c.Bool("stream") {
+		docs, err := vm.EvaluateSnippetStream(source, string(data))
+		if err != nil {
+			return err
+		}
+		for _, doc := range docs {
+			buf.WriteString("---")
+			buf.WriteString("\n")
+			buf.WriteString(doc)
+		}
+	} else {
+		result, err := vm.EvaluateSnippet(source, string(data))
+		if err != nil {
+			return err
+		}
+		buf.WriteString(result)
 	}
 
+	// the yaml file is parsed and formatted by default. This
+	// can be disabled for --format=false.
+	if c.BoolT("format") {
+		manifest, err := yaml.Parse(buf)
+		if err != nil {
+			return err
+		}
+		buf.Reset()
+		pretty.Print(buf, manifest)
+	}
+
+	// the user can optionally write the yaml to stdout. This
+	// is useful for debugging purposes without mutating an
+	// existing file.
 	if c.Bool("stdout") {
-		println(raw)
+		io.Copy(os.Stdout, buf)
 		return nil
 	}
-	return ioutil.WriteFile(output, []byte(raw), 0644)
+
+	return ioutil.WriteFile(target, buf.Bytes(), 0644)
 }

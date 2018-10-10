@@ -10,8 +10,8 @@ import (
 
 var buildDeclineCmd = cli.Command{
 	Name:      "decline",
-	Usage:     "decline a build",
-	ArgsUsage: "<repo/name> <build>",
+	Usage:     "decline a build stage",
+	ArgsUsage: "<repo/name> <build> <stage>",
 	Action:    buildDecline,
 }
 
@@ -25,13 +25,17 @@ func buildDecline(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+	stage, err := strconv.Atoi(c.Args().Get(2))
+	if err != nil {
+		return err
+	}
 
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.BuildDecline(owner, name, number)
+	err = client.Decline(owner, name, number, stage)
 	if err != nil {
 		return err
 	}

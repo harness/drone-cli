@@ -49,4 +49,7 @@ func userInfo(c *cli.Context) error {
 
 // template for user information
 var tmplUserInfo = `User: {{ .Login }}
-Email: {{ .Email }}`
+Email: {{ .Email }}
+Admin: {{ .Admin }}
+Machine: {{ .Machine }}
+`

@@ -44,7 +44,7 @@ func repoList(c *cli.Context) error {
 
 	org := c.String("org")
 	for _, repo := range repos {
-		if org != "" && org != repo.Owner {
+		if org != "" && org != repo.Namespace {
 			continue
 		}
 		tmpl.Execute(os.Stdout, repo)
@@ -53,4 +53,4 @@ func repoList(c *cli.Context) error {
 }
 
 // template for repository list items
-var tmplRepoList = `{{ .FullName }}`
+var tmplRepoList = `{{ .Slug }}`
