@@ -43,7 +43,7 @@ var Command = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "pipeline",
-			Usage: "Name of the pipelie to execute",
+			Usage: "Name of the pipeline to execute",
 		},
 		cli.StringSliceFlag{
 			Name:  "include",
