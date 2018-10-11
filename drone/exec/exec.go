@@ -27,6 +27,8 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli"
+
+	yamlv2 "gopkg.in/yaml.v2"
 )
 
 var tty = isatty.IsTerminal(os.Stdout.Fd())
@@ -144,6 +146,17 @@ func exec(c *cli.Context) error {
 	}
 
 	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	// workaround to allow yaml anchors
+	var anyJSON map[string]interface{}
+	err = yamlv2.Unmarshal([]byte(data), &anyJSON)
+	if err != nil {
+		return err
+	}
+	data, err = yamlv2.Marshal(anyJSON)
 	if err != nil {
 		return err
 	}
