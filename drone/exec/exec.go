@@ -19,10 +19,12 @@ import (
 	"github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/compiler"
 	"github.com/drone/drone-yaml/yaml/compiler/transform"
+	"github.com/drone/drone-yaml/yaml/converter"
 	"github.com/drone/drone-yaml/yaml/linter"
 	"github.com/drone/signal"
 
 	"github.com/joho/godotenv"
+	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli"
 )
@@ -154,6 +156,15 @@ func exec(c *cli.Context) error {
 		return err
 	}
 
+	// this code is temporarily in place to detect and convert
+	// the legacy yaml configuration file to the new format.
+	if converter.IsLegacy(dataS) {
+		dataS, err = converter.ConvertString(dataS)
+		if err != nil {
+			return err
+		}
+	}
+
 	manifest, err := yaml.ParseString(dataS)
 	if err != nil {
 		return err
@@ -274,7 +285,9 @@ func exec(c *cli.Context) error {
 	hooks := &runtime.Hook{}
 	hooks.GotLine = term.WriteLine(os.Stdout)
 	if tty {
-		hooks.GotLine = term.WriteLinePretty(os.Stdout)
+		hooks.GotLine = term.WriteLinePretty(
+			colorable.NewColorableStdout(),
+		)
 	}
 
 	return runtime.New(
