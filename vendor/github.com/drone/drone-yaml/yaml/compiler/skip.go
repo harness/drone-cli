@@ -10,7 +10,6 @@ type SkipData struct {
 	Instance string
 	Ref      string
 	Repo     string
-	Status   string
 	Target   string
 }
 
@@ -28,8 +27,6 @@ func SkipFunc(data SkipData) func(*yaml.Container) bool {
 		case !container.When.Ref.Match(data.Ref):
 			return true
 		case !container.When.Repo.Match(data.Repo):
-			return true
-		case !container.When.Status.Match(data.Status):
 			return true
 		case !container.When.Target.Match(data.Target):
 			return true
