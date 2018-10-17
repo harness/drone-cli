@@ -68,6 +68,7 @@ var secretFindCmd = cli.Command{
 
 func secretFind(c *cli.Context) error {
 	path := c.Args().First()
+	key := c.Args().Get(1)
 
 	slug := c.String("repo")
 	owner, name, err := internal.ParseRepo(slug)
@@ -91,7 +92,8 @@ func secretFind(c *cli.Context) error {
 	}
 
 	req := &secret.Request{
-		Name:  path,
+		Path:  path,
+		Name:  key,
 		Repo:  repo,
 		Build: build,
 	}
@@ -105,7 +107,6 @@ func secretFind(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	println(req.Name)
 	println(res.Data)
 	return nil
 }

@@ -26,6 +26,7 @@ const V1 = "application/vnd.drone.secret.v1+json"
 type (
 	// Request defines a secret request.
 	Request struct {
+		Path  string      `json:"path"`
 		Name  string      `json:"name"`
 		Repo  drone.Repo  `json:"repo,omitempty"`
 		Build drone.Build `json:"build,omitempty"`
