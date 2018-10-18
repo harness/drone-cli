@@ -3,6 +3,7 @@ package compiler
 import (
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/compiler/image"
 
 	"github.com/dchest/uniuri"
 )
@@ -132,6 +133,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	if !from.Clone.Disable {
 		src := createClone(from)
 		dst := createStep(spec, src)
+		dst.Docker.PullPolicy = engine.PullIfNotExists
 		setupCloneDepth(from, dst)
 		setupCloneCredentials(spec, dst, c.gitCredentials())
 		setupWorkingDir(src, dst, workspace)
@@ -164,11 +166,22 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 		spec.Steps = append(spec.Steps, step)
 	}
 
+	// rename will store a list of container names
+	// that should be mapped to their temporary alias.
+	rename := map[string]string{}
+
 	// for each pipeline step defined in the yaml
 	// configuration file, convert to a runtime step
 	// and append to the specification.
 	for _, container := range from.Steps {
-		step := createStep(spec, container)
+		var step *engine.Step
+		switch {
+		case container.Build != nil:
+			step = createBuildStep(spec, container)
+			rename[container.Build.Image] = step.Metadata.UID
+		default:
+			step = createStep(spec, container)
+		}
 		setupWorkingDir(container, step, workspace)
 		setupWorkingDirMount(step, base)
 		setupWorkspaceEnv(step, base, dir, workspace)
@@ -183,6 +196,36 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 			step.Docker.Privileged = true
 		}
 		spec.Steps = append(spec.Steps, step)
+	}
+
+	// if the pipeline includes any build and publish
+	// steps we should create an entry for the host
+	// machine docker socket.
+	if spec.Docker != nil && len(rename) > 0 {
+		v := &engine.Volume{
+			Metadata: engine.Metadata{
+				UID:       c.random(),
+				Name:      "_docker_socket",
+				Namespace: namespace,
+				Labels:    map[string]string{},
+			},
+			HostPath: &engine.VolumeHostPath{
+				Path: "/var/run/docker.sock",
+			},
+		}
+		spec.Docker.Volumes = append(spec.Docker.Volumes, v)
+	}
+
+	// images created during the pipeline are assigned a
+	// random alias. All references to the origin image
+	// name must be changed to the alias.
+	for _, step := range spec.Steps {
+		for k, v := range rename {
+			if image.MatchTag(step.Docker.Image, k) {
+				img := image.Trim(step.Docker.Image) + ":" + v
+				step.Docker.Image = image.Expand(img)
+			}
+		}
 	}
 
 	// executes user-defined transformations before the

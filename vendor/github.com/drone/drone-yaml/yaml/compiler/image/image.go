@@ -43,6 +43,12 @@ func Match(from string, to ...string) bool {
 	return false
 }
 
+// MatchTag returns true if the image name matches
+// an image in the list, including the tag.
+func MatchTag(a, b string) bool {
+	return Expand(a) == Expand(b)
+}
+
 // MatchHostname returns true if the image hostname
 // matches the specified hostname.
 func MatchHostname(image, hostname string) bool {

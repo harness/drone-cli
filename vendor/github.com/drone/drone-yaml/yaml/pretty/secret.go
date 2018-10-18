@@ -15,13 +15,34 @@ func printSecret(w writer, v *yaml.Secret) {
 	w.WriteTagValue("version", v.Version)
 	w.WriteTagValue("kind", v.Kind)
 	w.WriteTagValue("type", v.Type)
-	if v.Type == "encrypted" {
+	if v.Type == "encrypted" || v.Type == "opaque" {
 		printData(w, v.Data)
 	} else {
-		w.WriteTagValue("data", v.Data)
+		printExternalData(w, v.External)
 	}
 	w.WriteByte('\n')
 	w.WriteByte('\n')
+}
+
+// helper function prints the external data.
+func printExternalData(w writer, d map[string]yaml.ExternalData) {
+	var keys []string
+	for k := range d {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	w.WriteTag("external_data")
+	w.IndentIncrease()
+	for _, k := range keys {
+		v := d[k]
+		w.WriteTag(k)
+		w.IndentIncrease()
+		w.WriteTagValue("path", v.Path)
+		w.WriteTagValue("name", v.Name)
+		w.IndentDecrease()
+	}
+	w.IndentDecrease()
 }
 
 func printData(w writer, d map[string]string) {

@@ -54,6 +54,13 @@ func createStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 
 	// appends the volumes to the container def.
 	for _, vol := range src.Volumes {
+		// the user should never be able to directly
+		// mount the docker socket. This should be
+		// restricted by the linter, but we place this
+		// check here just to be safe.
+		if vol.Name == "_docker_socket" {
+			continue
+		}
 		mount := &engine.VolumeMount{
 			Name: vol.Name,
 			Path: vol.MountPath,
@@ -110,6 +117,63 @@ func createStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 			setupScript(spec, dst, src)
 		}
 	}
+
+	return dst
+}
+
+func createBuildStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
+	dst := &engine.Step{
+		Metadata: engine.Metadata{
+			UID:       random(),
+			Name:      src.Name,
+			Namespace: spec.Metadata.Namespace,
+			Labels: map[string]string{
+				"io.drone.step.name": src.Name,
+			},
+		},
+		Detach:    src.Detach,
+		DependsOn: src.DependsOn,
+		Devices:   nil,
+		Docker: &engine.DockerStep{
+			Args:       []string{"--build"},
+			DNS:        src.DNS,
+			Image:      "drone/docker",
+			PullPolicy: engine.PullIfNotExists,
+		},
+		Envs:         map[string]string{},
+		IgnoreErr:    toIgnoreErr(src),
+		IgnoreStderr: false,
+		IgnoreStdout: false,
+		Resources:    toResources(src),
+		RunPolicy:    toRunPolicy(src),
+	}
+
+	// if v := src.Build.Args; len(v) > 0 {
+	// 	dst.Envs["DOCKER_BUILD_ARGS"] = strings.Join(v, ",")
+	// }
+	if v := src.Build.CacheFrom; len(v) > 0 {
+		dst.Envs["DOCKER_BUILD_CACHE_FROM"] = strings.Join(v, ",")
+	}
+	// if len(src.Build.Labels) > 0 {
+	// 	dst.Envs["DOCKER_BUILD_LABELS"] = strings.Join(v, ",")
+	// }
+	if v := src.Build.Dockerfile; v != "" {
+		dst.Envs["DOCKER_BUILD_DOCKERFILE"] = v
+
+	}
+	if v := src.Build.Context; v != "" {
+		dst.Envs["DOCKER_BUILD_CONTEXT"] = v
+	}
+	if v := src.Build.Image; v != "" {
+		alias := image.Trim(v) + ":" + dst.Metadata.UID
+		dst.Envs["DOCKER_BUILD_IMAGE"] = image.Expand(v)
+		dst.Envs["DOCKER_BUILD_IMAGE_ALIAS"] = image.Expand(alias)
+	}
+
+	dst.Volumes = append(dst.Volumes, &engine.VolumeMount{
+		Name: "_docker_socket",
+		Path: "/var/run/docker.sock",
+	})
 
 	return dst
 }

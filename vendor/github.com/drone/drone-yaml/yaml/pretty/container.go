@@ -113,7 +113,7 @@ func printEnviron(w writer, v map[string]*yaml.Variable) {
 		} else {
 			w.WriteTag(k)
 			w.IndentIncrease()
-			w.WriteTagValue("$secret", v.Secret)
+			w.WriteTagValue("from_secret", v.Secret)
 			w.IndentDecrease()
 		}
 	}
@@ -182,7 +182,7 @@ func printSettings(w writer, v map[string]*yaml.Parameter) {
 		} else {
 			w.WriteTag(k)
 			w.IndentIncrease()
-			w.WriteTagValue("$secret", v.Secret)
+			w.WriteTagValue("from_secret", v.Secret)
 			w.IndentDecrease()
 		}
 	}

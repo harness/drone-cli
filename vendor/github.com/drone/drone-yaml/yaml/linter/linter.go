@@ -2,6 +2,7 @@ package linter
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/drone/drone-yaml/yaml"
 )
@@ -49,8 +50,11 @@ func checkContainer(container *yaml.Container, trusted bool) error {
 	if err != nil {
 		return err
 	}
-	if container.Image == "" {
+	if container.Build == nil && container.Image == "" {
 		return errors.New("linter: invalid or missing image")
+	}
+	if container.Build != nil && container.Build.Image == "" {
+		return errors.New("linter: invalid or missing build image")
 	}
 	if container.Name == "" {
 		return errors.New("linter: invalid or missing name")
@@ -69,6 +73,12 @@ func checkContainer(container *yaml.Container, trusted bool) error {
 	}
 	if trusted == false && len(container.ExtraHosts) > 0 {
 		return errors.New("linter: untrusted repositories cannot configure extra_hosts")
+	}
+	for _, mount := range container.Volumes {
+		switch mount.Name {
+		case "workspace", "_workspace", "_docker_socket":
+			return fmt.Errorf("linter: invalid volume name: %s", mount.Name)
+		}
 	}
 	return nil
 }
@@ -103,6 +113,10 @@ func checkVolumes(pipeline *yaml.Pipeline, trusted bool) error {
 			if err != nil {
 				return err
 			}
+		}
+		switch volume.Name {
+		case "workspace", "_workspace", "_docker_socket":
+			return fmt.Errorf("linter: invalid volume name: %s", volume.Name)
 		}
 	}
 	return nil

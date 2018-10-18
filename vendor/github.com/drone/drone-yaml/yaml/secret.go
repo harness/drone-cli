@@ -10,7 +10,15 @@ type (
 		Kind    string `json:"kind,omitempty"`
 		Type    string `json:"type,omitempty"`
 
-		Data map[string]string `json:"data,omitempty"`
+		Data     map[string]string       `json:"data,omitempty"`
+		External map[string]ExternalData `json:"external_data,omitempty" yaml:"external_data"`
+	}
+
+	// ExternalData defines the path and name of external
+	// data located in an external or remote storage system.
+	ExternalData struct {
+		Path string `json:"path,omitempty"`
+		Name string `json:"name,omitempty"`
 	}
 )
 
@@ -22,7 +30,7 @@ func (s *Secret) GetKind() string { return s.Kind }
 
 // Validate returns an error if the secret is invalid.
 func (s *Secret) Validate() error {
-	if len(s.Data) == 0 {
+	if len(s.Data) == 0 && len(s.External) == 0 {
 		return errors.New("yaml: invalid secret resource")
 	}
 	return nil

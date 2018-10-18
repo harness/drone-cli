@@ -2,8 +2,7 @@ package yaml
 
 import (
 	"encoding/json"
-
-	"gopkg.in/yaml.v2"
+	"errors"
 )
 
 // Resource enums.
@@ -88,5 +87,5 @@ func (m *Manifest) MarshalJSON() ([]byte, error) {
 
 // MarshalYAML implement the yaml.Marshaler.
 func (m *Manifest) MarshalYAML() (interface{}, error) {
-	return yaml.Marshal(m.Resources)
+	return nil, errors.New("yaml: marshal not implemented")
 }

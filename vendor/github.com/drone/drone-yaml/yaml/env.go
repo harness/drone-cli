@@ -6,14 +6,14 @@ type (
 	// to a secret.
 	Variable struct {
 		Value  string `json:"value,omitempty"`
-		Secret string `json:"$secret,omitempty" yaml:"$secret"`
+		Secret string `json:"from_secret,omitempty" yaml:"from_secret"`
 	}
 
 	// variable is a tempoary type used to unmarshal
 	// variables with references to secrets.
 	variable struct {
 		Value  string
-		Secret string `yaml:"$secret"`
+		Secret string `yaml:"from_secret"`
 	}
 )
 

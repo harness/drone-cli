@@ -6,13 +6,13 @@ type (
 	// to a secret.
 	Parameter struct {
 		Value  interface{} `json:"value,omitempty"`
-		Secret string      `json:"$secret,omitempty" yaml:"$secret"`
+		Secret string      `json:"from_secret,omitempty" yaml:"from_secret"`
 	}
 
 	// parameter is a tempoary type used to unmarshal
 	// parameters with references to secrets.
 	parameter struct {
-		Secret string `yaml:"$secret"`
+		Secret string `yaml:"from_secret"`
 	}
 )
 
