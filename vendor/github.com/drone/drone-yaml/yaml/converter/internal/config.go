@@ -174,27 +174,23 @@ func toPullPolicy(pull bool) string {
 func toSecrets(from *Config) *droneyaml.Secret {
 	secret := &droneyaml.Secret{}
 	secret.Kind = "secret"
-	secret.Type = "external"
-	secret.Data = map[string]string{}
+	secret.Type = "general"
+	secret.External = map[string]droneyaml.ExternalData{}
 	for key, val := range from.Secrets {
+		external := droneyaml.ExternalData{}
 		if val.Driver == "vault" {
-			var s string
 			if val.DriverOpts != nil {
-				path := val.DriverOpts["path"]
-				key := val.DriverOpts["key"]
-				s = path
-				if key != "" {
-					s = s + "#" + key
-				}
+				external.Path = val.DriverOpts["path"]
+				external.Name = val.DriverOpts["key"]
 			}
-			secret.Data[key] = s
 		} else if val.Path != "" {
-			secret.Data[key] = val.Path
+			external.Path = val.Path
 		} else {
-			secret.Data[key] = val.Vault
+			external.Path = val.Vault
 		}
+		secret.External[key] = external
 	}
-	if len(secret.Data) == 0 {
+	if len(secret.External) == 0 {
 		return nil
 	}
 	return secret

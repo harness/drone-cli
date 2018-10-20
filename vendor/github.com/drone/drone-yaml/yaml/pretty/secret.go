@@ -14,14 +14,27 @@ func printSecret(w writer, v *yaml.Secret) {
 	w.WriteString("---")
 	w.WriteTagValue("version", v.Version)
 	w.WriteTagValue("kind", v.Kind)
-	w.WriteTagValue("type", v.Type)
-	if v.Type == "encrypted" || v.Type == "opaque" {
+	w.WriteTagValue("type", toSecretType(v.Type))
+
+	if len(v.Data) > 0 {
 		printData(w, v.Data)
-	} else {
+	}
+	if len(v.External) > 0 {
 		printExternalData(w, v.External)
 	}
 	w.WriteByte('\n')
 	w.WriteByte('\n')
+}
+
+// helper function returns the secret type text.
+func toSecretType(s string) string {
+	s = strings.ToLower(s)
+	switch s {
+	case "docker", "ecr", "general":
+		return s
+	default:
+		return "general"
+	}
 }
 
 // helper function prints the external data.
