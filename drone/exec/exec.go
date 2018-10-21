@@ -79,6 +79,10 @@ var Command = cli.Command{
 			Name:  "network",
 			Usage: "external networks",
 		},
+		cli.StringSliceFlag{
+			Name:  "registry",
+			Usage: "registry",
+		},
 		cli.StringFlag{
 			Name:  "secret-file",
 			Usage: "secret file",
@@ -321,11 +325,11 @@ func toRegistry(items []string) []*engine.DockerAuth {
 		if err != nil {
 			continue // skip invalid
 		}
-		host := uri.Host
 		user := uri.User.Username()
 		pass, _ := uri.User.Password()
+		uri.User = nil
 		auths = append(auths, &engine.DockerAuth{
-			Address:  host,
+			Address:  uri.String(),
 			Username: user,
 			Password: pass,
 		})
