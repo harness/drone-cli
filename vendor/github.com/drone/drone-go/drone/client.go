@@ -333,6 +333,44 @@ func (c *client) Encrypt(owner, name string, secret *Secret) (string, error) {
 	return out.Data, err
 }
 
+// Secret returns a secret by name.
+func (c *client) Secret(owner, name, secret string) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// SecretList returns a list of all repository secrets.
+func (c *client) SecretList(owner string, name string) ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// SecretCreate creates a secret.
+func (c *client) SecretCreate(owner, name string, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// SecretUpdate updates a secret.
+func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// SecretDelete deletes a secret.
+func (c *client) SecretDelete(owner, name, secret string) error {
+	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
+	return c.delete(uri)
+}
+
 // Cron returns a cronjob by name.
 func (c *client) Cron(owner, name, cron string) (*Cron, error) {
 	out := new(Cron)
@@ -347,6 +385,20 @@ func (c *client) CronList(owner string, name string) ([]*Cron, error) {
 	uri := fmt.Sprintf(pathCrons, c.addr, owner, name)
 	err := c.get(uri, &out)
 	return out, err
+}
+
+// CronCreate creates a cronjob.
+func (c *client) CronCreate(owner, name string, in *Cron) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathCrons, c.addr, owner, name)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// CronDelete deletes a cronjob.
+func (c *client) CronDelete(owner, name, cron string) error {
+	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
+	return c.delete(uri)
 }
 
 // CronEnable ensables a cronjob.

@@ -20,7 +20,11 @@ var Command = cli.Command{
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "allow-pull-request",
-			Usage: "permit access to pull requests",
+			Usage: "permit read access to pull requests",
+		},
+		cli.BoolFlag{
+			Name:  "allow-push-on-pull-request",
+			Usage: "permit write access to pull requests (e.g. allow docker push)",
 		},
 	},
 }
@@ -47,8 +51,9 @@ func encryptSecret(c *cli.Context) error {
 	}
 
 	secret := &drone.Secret{
-		Data: plaintext,
-		Pull: c.Bool("allow-pull-request"),
+		Data:            plaintext,
+		PullRequest:     c.Bool("allow-pull-request"),
+		PullRequestPush: c.Bool("allow-push-on-pull-request"),
 	}
 	encrypted, err := client.Encrypt(owner, name, secret)
 	if err != nil {

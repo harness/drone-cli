@@ -114,11 +114,32 @@ type Client interface {
 	// LogsPurge purges the build logs for the specified step.
 	LogsPurge(owner, name string, build, stage, step int) error
 
+	// Secret returns a secret by name.
+	Secret(owner, name, secret string) (*Secret, error)
+
+	// SecretList returns a list of all repository secrets.
+	SecretList(owner, name string) ([]*Secret, error)
+
+	// SecretCreate creates a registry.
+	SecretCreate(owner, name string, secret *Secret) (*Secret, error)
+
+	// SecretUpdate updates a registry.
+	SecretUpdate(owner, name string, secret *Secret) (*Secret, error)
+
+	// SecretDelete deletes a secret.
+	SecretDelete(owner, name, secret string) error
+
 	// Cron returns a cronjob by name.
 	Cron(owner, name, cron string) (*Cron, error)
 
 	// CronList returns a list of all repository cronjobs.
 	CronList(owner string, name string) ([]*Cron, error)
+
+	// CronCreate creates a cronjob.
+	CronCreate(owner, name string, in *Cron) (*Cron, error)
+
+	// CronDelete deletes a cronjob.
+	CronDelete(owner, name, cron string) error
 
 	// CronEnable enables a cronjob.
 	CronEnable(owner, name, cron string) error

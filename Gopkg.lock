@@ -84,7 +84,7 @@
     "plugin/logger",
     "plugin/secret"
   ]
-  revision = "d00b5c24549e5676acefedc4d5ef115471bf48eb"
+  revision = "a02047a0b54dae0f23b511367c12c528606b599e"
 
 [[projects]]
   branch = "master"

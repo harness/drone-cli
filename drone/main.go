@@ -15,6 +15,7 @@ import (
 	"github.com/drone/drone-cli/drone/log"
 	"github.com/drone/drone-cli/drone/plugins"
 	"github.com/drone/drone-cli/drone/repo"
+	"github.com/drone/drone-cli/drone/secret"
 	"github.com/drone/drone-cli/drone/server"
 	"github.com/drone/drone-cli/drone/sign"
 	"github.com/drone/drone-cli/drone/user"
@@ -77,6 +78,7 @@ func main() {
 		info.Command,
 		repo.Command,
 		user.Command,
+		secret.Command,
 		server.Command,
 		autoscale.Command,
 		format.Command,
