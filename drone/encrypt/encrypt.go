@@ -43,7 +43,8 @@ func encryptSecret(c *cli.Context) error {
 
 	plaintext := c.Args().Get(1)
 	if strings.HasPrefix(plaintext, "@") {
-		data, err := ioutil.ReadFile(plaintext)
+		path := strings.TrimPrefix(plaintext, "@")
+		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			return err
 		}
