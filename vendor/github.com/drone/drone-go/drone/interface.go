@@ -86,9 +86,6 @@ type Client interface {
 	// the specified repository.
 	BuildList(namespace, name string) ([]*Build, error)
 
-	// BuildQueue returns a list of enqueued builds.
-	BuildQueue() ([]*Build, error)
-
 	// BuildRestart re-starts a build.
 	BuildRestart(namespace, name string, build int, params map[string]string) (*Build, error)
 
@@ -152,6 +149,15 @@ type Client interface {
 
 	// Encrypt returns an encrypted secret
 	Encrypt(owner, name string, secret *Secret) (string, error)
+
+	// Queue returns a list of queue items.
+	Queue() ([]*Stage, error)
+
+	// QueuePause pauses queue operations.
+	QueuePause() error
+
+	// QueueResume resumes queue operations.
+	QueueResume() error
 
 	//
 	// Move to autoscaler-go

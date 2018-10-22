@@ -54,7 +54,7 @@ const (
 	pathCron            = "%s/api/repos/%s/%s/cron/%s"
 	pathUsers           = "%s/api/users"
 	pathUser            = "%s/api/users/%s"
-	pathBuildQueue      = "%s/api/system/builds"
+	pathQueue           = "%s/api/queue"
 	pathServers         = "%s/api/servers"
 	pathServer          = "%s/api/servers/%s"
 	pathScalerPause     = "%s/api/pause"
@@ -221,14 +221,6 @@ func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
 func (c *client) BuildList(owner, name string) ([]*Build, error) {
 	var out []*Build
 	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// BuildQueue returns a list of enqueued builds.
-func (c *client) BuildQueue() ([]*Build, error) {
-	var out []*Build
-	uri := fmt.Sprintf(pathBuildQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err
 }
@@ -407,6 +399,28 @@ func (c *client) CronUpdate(owner, name, cron string, in *CronPatch) (*Cron, err
 func (c *client) CronDelete(owner, name, cron string) error {
 	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
 	return c.delete(uri)
+}
+
+// Queue returns a list of enqueued builds.
+func (c *client) Queue() ([]*Stage, error) {
+	var out []*Stage
+	uri := fmt.Sprintf(pathQueue, c.addr)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// QueueResume resumes queue operations.
+func (c *client) QueueResume() error {
+	uri := fmt.Sprintf(pathQueue, c.addr)
+	err := c.post(uri, nil, nil)
+	return err
+}
+
+// QueuePause pauses queue operations.
+func (c *client) QueuePause() error {
+	uri := fmt.Sprintf(pathQueue, c.addr)
+	err := c.delete(uri)
+	return err
 }
 
 //

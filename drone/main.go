@@ -14,6 +14,7 @@ import (
 	"github.com/drone/drone-cli/drone/jsonnet"
 	"github.com/drone/drone-cli/drone/log"
 	"github.com/drone/drone-cli/drone/plugins"
+	"github.com/drone/drone-cli/drone/queue"
 	"github.com/drone/drone-cli/drone/repo"
 	"github.com/drone/drone-cli/drone/secret"
 	"github.com/drone/drone-cli/drone/server"
@@ -80,6 +81,7 @@ func main() {
 		user.Command,
 		secret.Command,
 		server.Command,
+		queue.Command,
 		autoscale.Command,
 		format.Command,
 		sign.Command,
