@@ -3,6 +3,7 @@ package cron
 import (
 	"html/template"
 	"os"
+	"time"
 
 	"github.com/urfave/cli"
 
@@ -39,7 +40,7 @@ func cronList(c *cli.Context) error {
 		return err
 	}
 	format := c.String("format") + "\n"
-	tmpl, err := template.New("_").Parse(format)
+	tmpl, err := template.New("_").Funcs(funcs).Parse(format)
 	if err != nil {
 		return err
 	}
@@ -52,4 +53,18 @@ func cronList(c *cli.Context) error {
 // template for build list information
 var tmplCronList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Expr: {{ .Expr }}
+Next: {{ fromUnix .Next }}
+{{- if .Disabled }}
+Disabled: true
+{{- end }}
 `
+
+var funcs = map[string]interface{}{
+	"fromUnix": func(v interface{}) string {
+		i, ok := v.(int64)
+		if !ok {
+			return ""
+		}
+		return time.Unix(i, 0).String()
+	},
+}

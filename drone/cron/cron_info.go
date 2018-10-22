@@ -40,7 +40,7 @@ func cronInfo(c *cli.Context) error {
 		return err
 	}
 	format := c.String("format")
-	tmpl, err := template.New("_").Parse(format)
+	tmpl, err := template.New("_").Funcs(funcs).Parse(format)
 	if err != nil {
 		return err
 	}

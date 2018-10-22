@@ -9,6 +9,7 @@ var Command = cli.Command{
 	Subcommands: []cli.Command{
 		cronListCmd,
 		cronInfoCmd,
+		cronCreateCmd,
 		cronDisableCmd,
 		cronEnableCmd,
 	},

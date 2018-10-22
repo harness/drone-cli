@@ -395,24 +395,18 @@ func (c *client) CronCreate(owner, name string, in *Cron) (*Cron, error) {
 	return out, err
 }
 
+// CronDisable disables a cronjob.
+func (c *client) CronUpdate(owner, name, cron string, in *CronPatch) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
 // CronDelete deletes a cronjob.
 func (c *client) CronDelete(owner, name, cron string) error {
 	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
 	return c.delete(uri)
-}
-
-// CronEnable ensables a cronjob.
-func (c *client) CronEnable(owner, name, cron string) error {
-	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
-	err := c.post(uri, nil, nil)
-	return err
-}
-
-// CronDisable disables a cronjob.
-func (c *client) CronDisable(owner, name, cron string) error {
-	uri := fmt.Sprintf(pathCron, c.addr, owner, name, cron)
-	err := c.delete(uri)
-	return err
 }
 
 //

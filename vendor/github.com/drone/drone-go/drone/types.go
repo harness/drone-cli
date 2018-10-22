@@ -196,15 +196,26 @@ type (
 
 	// Cron represents a cron job.
 	Cron struct {
-		ID      int64  `json:"id"`
-		RepoID  int64  `json:"repo_id"`
-		Name    string `json:"name"`
-		Expr    string `json:"expr"`
-		Next    int64  `json:"next"`
-		Prev    int64  `json:"prev"`
-		Branch  string `json:"branch"`
-		Created int64  `json:"created"`
-		Updated int64  `json:"updated"`
+		ID       int64  `json:"id"`
+		RepoID   int64  `json:"repo_id"`
+		Name     string `json:"name"`
+		Expr     string `json:"expr"`
+		Next     int64  `json:"next"`
+		Prev     int64  `json:"prev"`
+		Event    string `json:"event"`
+		Branch   string `json:"branch"`
+		Target   string `json:"target"`
+		Disabled bool   `json:"disabled"`
+		Created  int64  `json:"created"`
+		Updated  int64  `json:"updated"`
+	}
+
+	// CronPatch defines a cron patch request.
+	CronPatch struct {
+		Event    *string `json:"event"`
+		Branch   *string `json:"branch"`
+		Target   *string `json:"target"`
+		Disabled *bool   `json:"disabled"`
 	}
 
 	// Line represents a line of container logs.
