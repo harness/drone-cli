@@ -6,12 +6,14 @@ import (
 
 	"github.com/drone/drone-cli/drone/autoscale"
 	"github.com/drone/drone-cli/drone/build"
+	"github.com/drone/drone-cli/drone/convert"
 	"github.com/drone/drone-cli/drone/cron"
 	"github.com/drone/drone-cli/drone/encrypt"
 	"github.com/drone/drone-cli/drone/exec"
 	"github.com/drone/drone-cli/drone/format"
 	"github.com/drone/drone-cli/drone/info"
 	"github.com/drone/drone-cli/drone/jsonnet"
+	"github.com/drone/drone-cli/drone/lint"
 	"github.com/drone/drone-cli/drone/log"
 	"github.com/drone/drone-cli/drone/plugins"
 	"github.com/drone/drone-cli/drone/queue"
@@ -84,6 +86,8 @@ func main() {
 		queue.Command,
 		autoscale.Command,
 		format.Command,
+		convert.Command,
+		lint.Command,
 		sign.Command,
 		jsonnet.Command,
 		plugins.Command,
