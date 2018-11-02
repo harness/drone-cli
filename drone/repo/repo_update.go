@@ -44,6 +44,22 @@ var repoUpdateCmd = cli.Command{
 			Name:  "unsafe",
 			Usage: "validate updating the build-counter is unsafe",
 		},
+		cli.BoolFlag{
+			Name:  "allow-push",
+			Usage: "validate updating the build-counter is unsafe",
+		},
+		cli.BoolFlag{
+			Name:  "allow-pr",
+			Usage: "validate updating the build-counter is unsafe",
+		},
+		cli.BoolFlag{
+			Name:  "allow-tag",
+			Usage: "validate updating the build-counter is unsafe",
+		},
+		cli.BoolFlag{
+			Name:  "allow-deploy",
+			Usage: "validate updating the build-counter is unsafe",
+		},
 	},
 }
 
@@ -67,6 +83,10 @@ func repoUpdate(c *cli.Context) error {
 		protected    = c.Bool("protected")
 		buildCounter = c.Int("build-counter")
 		unsafe       = c.Bool("unsafe")
+		allowPush    = c.Bool("allow-push")
+		allowPr      = c.Bool("allow-pr")
+		allowTags    = c.Bool("allow-tag")
+		allowDeploys = c.Bool("allow-deploy")
 	)
 
 	patch := new(drone.RepoPatch)
@@ -94,6 +114,18 @@ func repoUpdate(c *cli.Context) error {
 	}
 	if c.IsSet("build-counter") && unsafe {
 		patch.Counter = &buildCounter
+	}
+	if c.IsSet("allow-push") {
+		patch.AllowPush = &allowPush
+	}
+	if c.IsSet("allow-pr") {
+		patch.AllowPr = &allowPr
+	}
+	if c.IsSet("allow-tag") {
+		patch.AllowTag = &allowTags
+	}
+	if c.IsSet("allow-deploy") {
+		patch.AllowDeploy = &allowDeploys
 	}
 
 	if _, err := client.RepoUpdate(owner, name, patch); err != nil {

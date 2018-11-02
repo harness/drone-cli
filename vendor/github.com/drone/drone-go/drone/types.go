@@ -33,39 +33,47 @@ type (
 
 	// Repo represents a repository.
 	Repo struct {
-		ID         int64  `json:"id"`
-		UID        string `json:"uid"`
-		UserID     int64  `json:"user_id"`
-		Namespace  string `json:"namespace"`
-		Name       string `json:"name"`
-		Slug       string `json:"slug"`
-		SCM        string `json:"scm"`
-		HTTPURL    string `json:"git_http_url"`
-		SSHURL     string `json:"git_ssh_url"`
-		Link       string `json:"link"`
-		Branch     string `json:"default_branch"`
-		Private    bool   `json:"private"`
-		Visibility string `json:"visibility"`
-		Active     bool   `json:"active"`
-		Config     string `json:"config_path"`
-		Trusted    bool   `json:"trusted"`
-		Protected  bool   `json:"protected"`
-		Timeout    int64  `json:"timeout"`
-		Counter    int64  `json:"counter"`
-		Synced     int64  `json:"synced"`
-		Created    int64  `json:"created"`
-		Updated    int64  `json:"updated"`
-		Version    int64  `json:"version"`
+		ID          int64  `json:"id"`
+		UID         string `json:"uid"`
+		UserID      int64  `json:"user_id"`
+		Namespace   string `json:"namespace"`
+		Name        string `json:"name"`
+		Slug        string `json:"slug"`
+		SCM         string `json:"scm"`
+		HTTPURL     string `json:"git_http_url"`
+		SSHURL      string `json:"git_ssh_url"`
+		Link        string `json:"link"`
+		Branch      string `json:"default_branch"`
+		Private     bool   `json:"private"`
+		Visibility  string `json:"visibility"`
+		Active      bool   `json:"active"`
+		Config      string `json:"config_path"`
+		Trusted     bool   `json:"trusted"`
+		Protected   bool   `json:"protected"`
+		Timeout     int64  `json:"timeout"`
+		Counter     int64  `json:"counter"`
+		AllowPush   bool   `json:"allow_push,omitempty"`
+		AllowPr     bool   `json:"allow_pr,omitempty"`
+		AllowTag    bool   `json:"allow_tag,omitempty"`
+		AllowDeploy bool   `json:"allow_deploy,omitempty"`
+		Synced      int64  `json:"synced"`
+		Created     int64  `json:"created"`
+		Updated     int64  `json:"updated"`
+		Version     int64  `json:"version"`
 	}
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config     *string `json:"config_path,omitempty"`
-		Protected  *bool   `json:"protected,omitempty"`
-		Trusted    *bool   `json:"trusted,omitempty"`
-		Timeout    *int64  `json:"timeout,omitempty"`
-		Visibility *string `json:"visibility,omitempty"`
-		Counter    *int    `json:"counter,omitempty"`
+		Config      *string `json:"config_path,omitempty"`
+		Protected   *bool   `json:"protected,omitempty"`
+		Trusted     *bool   `json:"trusted,omitempty"`
+		Timeout     *int64  `json:"timeout,omitempty"`
+		Visibility  *string `json:"visibility,omitempty"`
+		Counter     *int    `json:"counter,omitempty"`
+		AllowPush   *bool   `json:"allow_push,omitempty"`
+		AllowPr     *bool   `json:"allow_pr,omitempty"`
+		AllowTag    *bool   `json:"allow_tag,omitempty"`
+		AllowDeploy *bool   `json:"allow_deploy,omitempty"`
 	}
 
 	// Build defines a build object.
