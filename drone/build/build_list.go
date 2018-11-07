@@ -38,7 +38,7 @@ var buildListCmd = cli.Command{
 		},
 		cli.IntFlag{
 			Name:  "page",
-			Usage: "size of the page",
+			Usage: "page number",
 			Value: 1,
 		},
 	},
