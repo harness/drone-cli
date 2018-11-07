@@ -36,6 +36,11 @@ var buildListCmd = cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
+		cli.IntFlag{
+			Name:  "page",
+			Usage: "size of the page",
+			Value: 1,
+		},
 	},
 }
 
@@ -51,7 +56,9 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	builds, err := client.BuildList(owner, name)
+	page := c.Int("page")
+
+	builds, err := client.BuildList(owner, name, page)
 	if err != nil {
 		return err
 	}
