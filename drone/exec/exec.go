@@ -87,6 +87,10 @@ var Command = cli.Command{
 			Name:  "secret-file",
 			Usage: "secret file",
 		},
+		cli.StringFlag{
+			Name:  "env-file",
+			Usage: "env file",
+		},
 		cli.StringSliceFlag{
 			Name:  "privileged",
 			Usage: "privileged plugins",
@@ -249,9 +253,14 @@ func exec(c *cli.Context) error {
 			c.StringSlice("network"),
 		),
 		transform.WithProxy(),
+		transform.WithEnviron(
+			readParams(
+				c.String("secret-file"),
+			),
+		),
 		transform.WithSecrets(
 			readParams(
-				c.String("env-file"),
+				c.String("secret-file"),
 			),
 		),
 		transform.WithVolumes(
