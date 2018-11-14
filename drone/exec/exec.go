@@ -85,7 +85,7 @@ var Command = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "secret-file",
-			Usage: "secret file",
+			Usage: "secret file, define values that can be used with from_secret",
 		},
 		cli.StringFlag{
 			Name:  "env-file",
@@ -253,11 +253,6 @@ func exec(c *cli.Context) error {
 			c.StringSlice("network"),
 		),
 		transform.WithProxy(),
-		transform.WithEnviron(
-			readParams(
-				c.String("secret-file"),
-			),
-		),
 		transform.WithSecrets(
 			readParams(
 				c.String("secret-file"),
