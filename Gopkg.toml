@@ -38,8 +38,8 @@
   name = "github.com/drone/drone-runtime"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/drone/drone-yaml"
+  revision = "3bda9f5012c9aee2237b6a8a2625da7ea126dcc6"
 
 [[constraint]]
   name = "github.com/drone/signal"

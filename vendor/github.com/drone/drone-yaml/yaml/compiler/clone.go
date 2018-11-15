@@ -5,7 +5,6 @@ import (
 
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
-	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
 // default name of the clone step.
@@ -49,11 +48,7 @@ func setupCloneCredentials(spec *engine.Spec, dst *engine.Step, data []byte) {
 		Path: "/root/.git-credentials",
 	})
 	spec.Files = append(spec.Files, &engine.File{
-		Metadata: engine.Metadata{
-			UID:       rand.String(),
-			Namespace: spec.Metadata.Namespace,
-			Name:      ".git-credentials",
-		},
+		Name: ".git-credentials",
 		Data: data,
 	})
 }

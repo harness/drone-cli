@@ -1,9 +1,6 @@
 package transform
 
-import (
-	"github.com/drone/drone-runtime/engine"
-	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
-)
+import "github.com/drone/drone-runtime/engine"
 
 // WithSecrets is a transform function that adds a set
 // of global secrets to the container.
@@ -12,11 +9,7 @@ func WithSecrets(secrets map[string]string) func(*engine.Spec) {
 		for key, value := range secrets {
 			spec.Secrets = append(spec.Secrets,
 				&engine.Secret{
-					Metadata: engine.Metadata{
-						UID:       rand.String(),
-						Name:      key,
-						Namespace: spec.Metadata.Namespace,
-					},
+					Name: key,
 					Data: value,
 				},
 			)
@@ -53,8 +46,6 @@ func WithSecretFunc(f SecretFunc) func(*engine.Spec) {
 		for name := range set {
 			secret := f(name)
 			if secret != nil {
-				secret.Metadata.UID = rand.String()
-				secret.Metadata.Namespace = spec.Metadata.Namespace
 				spec.Secrets = append(spec.Secrets, secret)
 			}
 		}

@@ -100,13 +100,11 @@
   revision = "18ed46cdaba01970970290a83715c871fb169db4"
 
 [[projects]]
-  branch = "master"
   name = "github.com/drone/drone-yaml"
   packages = [
     "yaml",
     "yaml/compiler",
     "yaml/compiler/image",
-    "yaml/compiler/internal/rand",
     "yaml/compiler/transform",
     "yaml/converter",
     "yaml/converter/internal",
@@ -114,7 +112,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "00544d2965ea883dffaf6aa9e56c0130941483f6"
+  revision = "3bda9f5012c9aee2237b6a8a2625da7ea126dcc6"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -284,6 +282,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e876cc62fe39d562e521936b5afc6c520c0a1b826a44c17ecda377b10880c332"
+  inputs-digest = "0f9dac53920f6d551d503a8f6d7c17958bce16772977fe6d523d995c5b599fa2"
   solver-name = "gps-cdcl"
   solver-version = 1

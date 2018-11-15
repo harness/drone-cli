@@ -7,7 +7,7 @@ import "github.com/docker/go-units"
 // (eg. "44kiB", "17MiB").
 type BytesSize int64
 
-// UnmarshalYAML implements yaml unmarshalling.
+// UnmarshalYAML implements yaml unmarhsaling.
 func (b *BytesSize) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {

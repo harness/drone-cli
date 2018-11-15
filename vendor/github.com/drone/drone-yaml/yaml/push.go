@@ -13,7 +13,7 @@ type (
 	}
 )
 
-// UnmarshalYAML implements yaml unmarshalling.
+// UnmarshalYAML implements yaml unmarhsaling.
 func (p *Push) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	d := new(push)
 	err := unmarshal(&d.Image)

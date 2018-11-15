@@ -6,13 +6,12 @@ import (
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/compiler/image"
-	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
 func createStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 	dst := &engine.Step{
 		Metadata: engine.Metadata{
-			UID:       rand.String(),
+			UID:       random(),
 			Name:      src.Name,
 			Namespace: spec.Metadata.Namespace,
 			Labels: map[string]string{
@@ -125,7 +124,7 @@ func createStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 func createBuildStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 	dst := &engine.Step{
 		Metadata: engine.Metadata{
-			UID:       rand.String(),
+			UID:       random(),
 			Name:      src.Name,
 			Namespace: spec.Metadata.Namespace,
 			Labels: map[string]string{
