@@ -7,6 +7,7 @@ import (
 
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
 func setupScript(spec *engine.Spec, dst *engine.Step, src *yaml.Container) {
@@ -25,16 +26,21 @@ func setupScript(spec *engine.Spec, dst *engine.Step, src *yaml.Container) {
 		buf.String(),
 	)
 	spec.Files = append(spec.Files, &engine.File{
-		Name: src.Name,
+		Metadata: engine.Metadata{
+			UID:       rand.String(),
+			Namespace: spec.Metadata.Namespace,
+			Name:      src.Name,
+		},
 		Data: []byte(script),
 	})
 	dst.Files = append(dst.Files, &engine.FileMount{
 		Name: src.Name,
-		Path: "/bin/droneinit",
+		Path: "/usr/drone/bin/init",
 		Mode: 0777,
 	})
+
 	dst.Docker.Command = []string{"/bin/sh"}
-	dst.Docker.Args = []string{"/bin/droneinit"}
+	dst.Docker.Args = []string{"/usr/drone/bin/init"}
 }
 
 // buildScript is a helper script this is added to the build

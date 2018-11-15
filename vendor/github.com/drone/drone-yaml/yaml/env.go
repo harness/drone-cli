@@ -17,7 +17,7 @@ type (
 	}
 )
 
-// UnmarshalYAML implements yaml unmarhsaling.
+// UnmarshalYAML implements yaml unmarshalling.
 func (v *Variable) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	d := new(variable)
 	err := unmarshal(&d.Value)

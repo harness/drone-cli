@@ -124,14 +124,14 @@ func checkVolumes(pipeline *yaml.Pipeline, trusted bool) error {
 
 func checkHostPathVolume(volume *yaml.VolumeHostPath, trusted bool) error {
 	if trusted == false {
-		return errors.New("linter: untrusted repsitories cannot mount host volumes")
+		return errors.New("linter: untrusted repositories cannot mount host volumes")
 	}
 	return nil
 }
 
 func checkEmptyDirVolume(volume *yaml.VolumeEmptyDir, trusted bool) error {
 	if trusted == false && volume.Medium == "memory" {
-		return errors.New("linter: untrusted repsitories cannot mount in-memory volumes")
+		return errors.New("linter: untrusted repositories cannot mount in-memory volumes")
 	}
 	return nil
 }

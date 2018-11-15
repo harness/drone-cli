@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/drone/drone-runtime/engine"
+	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
 const (
@@ -21,7 +22,11 @@ func WithNetrc(machine, username, password string) func(*engine.Spec) {
 		}
 		netrc := generateNetrc(machine, username, password)
 		spec.Files = append(spec.Files, &engine.File{
-			Name: netrcName,
+			Metadata: engine.Metadata{
+				UID:       rand.String(),
+				Name:      netrcName,
+				Namespace: spec.Metadata.Namespace,
+			},
 			Data: []byte(netrc),
 		})
 		for _, step := range spec.Steps {

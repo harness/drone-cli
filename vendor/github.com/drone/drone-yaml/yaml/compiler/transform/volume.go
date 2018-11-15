@@ -1,8 +1,8 @@
 package transform
 
 import (
-	"github.com/dchest/uniuri"
 	"github.com/drone/drone-runtime/engine"
+	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
 // WithVolumes is a transform function that adds a set
@@ -12,8 +12,8 @@ func WithVolumes(volumes map[string]string) func(*engine.Spec) {
 		for key, value := range volumes {
 			volume := &engine.Volume{
 				Metadata: engine.Metadata{
-					UID:       uniuri.New(),
-					Name:      uniuri.New(),
+					UID:       rand.String(),
+					Name:      rand.String(),
 					Namespace: spec.Metadata.Namespace,
 					Labels:    map[string]string{},
 				},

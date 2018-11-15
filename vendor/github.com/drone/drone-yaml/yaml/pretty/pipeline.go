@@ -21,6 +21,9 @@ func printPipeline(w writer, v *yaml.Pipeline) {
 	if !isCloneEmpty(v.Clone) {
 		printClone(w, v.Clone)
 	}
+	if !isConcurrencyEmpty(v.Concurrency) {
+		printConcurrency(w, v.Concurrency)
+	}
 	if !isWorkspaceEmpty(v.Workspace) {
 		printWorkspace(w, v.Workspace)
 	}
@@ -82,6 +85,15 @@ func printClone(w writer, v yaml.Clone) {
 	w.IndentIncrease()
 	w.WriteTagValue("depth", v.Depth)
 	w.WriteTagValue("disable", v.Disable)
+	w.WriteByte('\n')
+	w.IndentDecrease()
+}
+
+// helper function pretty prints the clone block.
+func printConcurrency(w writer, v yaml.Concurrency) {
+	w.WriteTag("concurrency")
+	w.IndentIncrease()
+	w.WriteTagValue("limit", v.Limit)
 	w.WriteByte('\n')
 	w.IndentDecrease()
 }
@@ -223,6 +235,12 @@ func isPlatformEmpty(v yaml.Platform) bool {
 func isCloneEmpty(v yaml.Clone) bool {
 	return v.Depth == 0 &&
 		v.Disable == false
+}
+
+// helper function returns true if the concurrency
+// object is empty.
+func isConcurrencyEmpty(v yaml.Concurrency) bool {
+	return v.Limit == 0
 }
 
 // helper function returns true if the conditions

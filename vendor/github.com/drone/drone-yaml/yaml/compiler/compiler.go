@@ -4,15 +4,10 @@ import (
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/compiler/image"
-
-	"github.com/dchest/uniuri"
+	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
 // TODO(bradrydzewski) handle depends_on (clone, services, etc)
-
-// random provides the default function used to
-// generate a random string.
-var random = uniuri.New
 
 // A Compiler compiles the pipeline configuration to an
 // intermediate representation that can be executed by
@@ -34,11 +29,6 @@ type Compiler struct {
 	// deprecated in a future release.
 	PrivilegedFunc func(*yaml.Container) bool
 
-	// RandFunc returns a random string. The random
-	// function is used to create unique identifiers for
-	// the namespace, container, and volume resources.
-	RandFunc func() string
-
 	// SkipFunc returns true if the step should be skipped.
 	// The skip function can be used to evaluate the when
 	// clause of each step, and return true if it should
@@ -56,7 +46,7 @@ type Compiler struct {
 // pipeline configuration that can be executed by the
 // Drone runtime engine.
 func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
-	namespace := c.random()
+	namespace := rand.String()
 
 	spec := &engine.Spec{
 		Metadata: engine.Metadata{
@@ -91,7 +81,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	spec.Docker.Volumes = append(spec.Docker.Volumes,
 		&engine.Volume{
 			Metadata: engine.Metadata{
-				UID:       c.random(),
+				UID:       rand.String(),
 				Name:      workspaceName,
 				Namespace: namespace,
 				Labels:    map[string]string{},
@@ -106,7 +96,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	for _, from := range from.Volumes {
 		to := &engine.Volume{
 			Metadata: engine.Metadata{
-				UID:       c.random(),
+				UID:       rand.String(),
 				Name:      from.Name,
 				Namespace: namespace,
 				Labels:    map[string]string{},
@@ -204,7 +194,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	if spec.Docker != nil && len(rename) > 0 {
 		v := &engine.Volume{
 			Metadata: engine.Metadata{
-				UID:       c.random(),
+				UID:       rand.String(),
 				Name:      "_docker_socket",
 				Namespace: namespace,
 				Labels:    map[string]string{},
@@ -273,13 +263,4 @@ func (c *Compiler) skip(container *yaml.Container) bool {
 		return c.SkipFunc(container)
 	}
 	return false
-}
-
-// return a random string. If the user-defined random
-// function is nil, a defalt random function is returned.
-func (c *Compiler) random() string {
-	if c.RandFunc != nil {
-		return c.RandFunc()
-	}
-	return uniuri.New()
 }
