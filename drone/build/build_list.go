@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
 	"github.com/urfave/cli"
 )
 
@@ -56,9 +57,7 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	page := c.Int("page")
-
-	builds, err := client.BuildList(owner, name, page)
+	builds, err := client.BuildList(owner, name, &drone.ListOptions{Page: c.Int("page")})
 	if err != nil {
 		return err
 	}
