@@ -57,7 +57,7 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	builds, err := client.BuildList(owner, name, &drone.ListOptions{Page: c.Int("page")})
+	builds, err := client.BuildList(owner, name, drone.ListOptions{Page: c.Int("page")})
 	if err != nil {
 		return err
 	}
