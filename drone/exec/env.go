@@ -46,7 +46,7 @@ func getEnv(c *cli.Context) map[string]string {
 func prefixedEnviron(environ []string) map[string]string {
 	envs := map[string]string{}
 	for _, env := range environ {
-		if !strings.HasSuffix(env, "DRONE_") {
+		if !strings.HasPrefix(env, "DRONE_") {
 			continue
 		}
 		parts := strings.SplitN(env, "=", 2)
