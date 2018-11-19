@@ -91,7 +91,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:54d4d615594a29c821ce7655b3aa9ebf0143b9449957392501a6dd24eb21b547"
+  digest = "1:b32dbc42ae85ab6d943faeb881afabcec3d20e651369120e2d5c09d2a51db82f"
   name = "github.com/drone/drone-go"
   packages = [
     "drone",
@@ -102,7 +102,7 @@
     "plugin/secret",
   ]
   pruneopts = "UT"
-  revision = "2d78f279e8ef75a009a54d794928446c2656e077"
+  revision = "e79fb40acd816665a46d428ace911cc09bed0e68"
 
 [[projects]]
   branch = "master"

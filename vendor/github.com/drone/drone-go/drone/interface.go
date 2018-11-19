@@ -84,7 +84,7 @@ type Client interface {
 
 	// BuildList returns a list of recent builds for the
 	// the specified repository.
-	BuildList(namespace, name string) ([]*Build, error)
+	BuildList(namespace, name string, opts ListOptions) ([]*Build, error)
 
 	// BuildRestart re-starts a build.
 	BuildRestart(namespace, name string, build int, params map[string]string) (*Build, error)
