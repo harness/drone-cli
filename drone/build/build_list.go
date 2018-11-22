@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
 	"github.com/urfave/cli"
 )
 
@@ -36,6 +37,11 @@ var buildListCmd = cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
+		cli.IntFlag{
+			Name:  "page",
+			Usage: "page number",
+			Value: 1,
+		},
 	},
 }
 
@@ -51,7 +57,7 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	builds, err := client.BuildList(owner, name)
+	builds, err := client.BuildList(owner, name, drone.ListOptions{Page: c.Int("page")})
 	if err != nil {
 		return err
 	}

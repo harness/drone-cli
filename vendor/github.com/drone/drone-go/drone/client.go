@@ -34,7 +34,7 @@ const (
 	pathRepoMove        = "%s/api/repos/%s/%s/move?to=%s"
 	pathChown           = "%s/api/repos/%s/%s/chown"
 	pathRepair          = "%s/api/repos/%s/%s/repair"
-	pathBuilds          = "%s/api/repos/%s/%s/builds"
+	pathBuilds          = "%s/api/repos/%s/%s/builds?%s"
 	pathBuild           = "%s/api/repos/%s/%s/builds/%v"
 	pathApprove         = "%s/api/repos/%s/%s/builds/%d/approve/%d"
 	pathDecline         = "%s/api/repos/%s/%s/builds/%d/decline/%d"
@@ -65,6 +65,18 @@ const (
 type client struct {
 	client *http.Client
 	addr   string
+}
+
+type ListOptions struct {
+	Page int
+}
+
+func encodeListOptions(opts ListOptions) string {
+	params := url.Values{}
+	if opts.Page != 0 {
+		params.Set("page", strconv.Itoa(opts.Page))
+	}
+	return params.Encode()
 }
 
 // New returns a client at the specified url.
@@ -218,9 +230,9 @@ func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
 
 // BuildList returns a list of recent builds for the
 // the specified repository.
-func (c *client) BuildList(owner, name string) ([]*Build, error) {
+func (c *client) BuildList(owner, name string, opts ListOptions) ([]*Build, error) {
 	var out []*Build
-	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
+	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name, encodeListOptions(opts))
 	err := c.get(uri, &out)
 	return out, err
 }
