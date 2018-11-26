@@ -237,6 +237,57 @@ type (
 		Version string `json:"version,omitempty"`
 		Commit  string `json:"commit,omitempty"`
 	}
+
+	// Node provides node details.
+	Node struct {
+		ID        int64             `json:"id"`
+		UID       string            `json:"uid"`
+		Provider  string            `json:"provider"`
+		State     string            `json:"state"`
+		Name      string            `json:"name"`
+		Image     string            `json:"image"`
+		Region    string            `json:"region"`
+		Size      string            `json:"size"`
+		OS        string            `json:"os"`
+		Arch      string            `json:"arch"`
+		Kernel    string            `json:"kernel"`
+		Variant   string            `json:"variant"`
+		Address   string            `json:"address"`
+		Capacity  int               `json:"capacity"`
+		Filters   []string          `json:"filters"`
+		Labels    map[string]string `json:"labels"`
+		Error     string            `json:"error"`
+		CAKey     []byte            `json:"ca_key"`
+		CACert    []byte            `json:"ca_cert"`
+		TLSKey    []byte            `json:"tls_key"`
+		TLSCert   []byte            `json:"tls_cert"`
+		TLSName   string            `json:"tls_name"`
+		Paused    bool              `json:"paused"`
+		Protected bool              `json:"protected"`
+		Created   int64             `json:"created"`
+		Updated   int64             `json:"updated"`
+	}
+
+	// NodePatch defines a node patch request.
+	NodePatch struct {
+		UID       *string            `json:"uid"`
+		Provider  *string            `json:"provider"`
+		State     *string            `json:"state"`
+		Image     *string            `json:"image"`
+		Region    *string            `json:"region"`
+		Size      *string            `json:"size"`
+		Address   *string            `json:"address"`
+		Capacity  *int               `json:"capacity"`
+		Filters   *[]string          `json:"filters"`
+		Labels    *map[string]string `json:"labels"`
+		Error     *string            `json:"error"`
+		CAKey     *[]byte            `json:"ca_key"`
+		CACert    *[]byte            `json:"ca_cert"`
+		TLSKey    *[]byte            `json:"tls_key"`
+		TLSCert   *[]byte            `json:"tls_cert"`
+		Paused    *bool              `json:"paused"`
+		Protected *bool              `json:"protected"`
+	}
 )
 
 // Error represents a json-encoded API error.

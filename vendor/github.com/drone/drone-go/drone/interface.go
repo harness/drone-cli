@@ -159,6 +159,21 @@ type Client interface {
 	// QueueResume resumes queue operations.
 	QueueResume() error
 
+	// Node returns a node by name.
+	Node(name string) (*Node, error)
+
+	// NodeList returns a list of all nodes.
+	NodeList() ([]*Node, error)
+
+	// NodeCreate creates a node.
+	NodeCreate(in *Node) (*Node, error)
+
+	// NodeDelete deletes a node.
+	NodeDelete(name string) error
+
+	// NodeUpdate updates a node.
+	NodeUpdate(name string, in *NodePatch) (*Node, error)
+
 	//
 	// Move to autoscaler-go
 	//

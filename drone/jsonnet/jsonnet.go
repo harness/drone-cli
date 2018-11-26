@@ -71,6 +71,9 @@ func generate(c *cli.Context) error {
 		color.New(color.FgRed).Fprintf,
 	)
 
+	// register native functions
+	RegisterNativeFuncs(vm)
+
 	buf := new(bytes.Buffer)
 	if c.Bool("stream") {
 		docs, err := vm.EvaluateSnippetStream(source, string(data))

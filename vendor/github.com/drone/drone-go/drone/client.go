@@ -59,6 +59,8 @@ const (
 	pathServer          = "%s/api/servers/%s"
 	pathScalerPause     = "%s/api/pause"
 	pathScalerResume    = "%s/api/resume"
+	pathNodes           = "%s/api/nodes"
+	pathNode            = "%s/api/nodes/%s"
 	pathVersion         = "%s/version"
 )
 
@@ -433,6 +435,44 @@ func (c *client) QueuePause() error {
 	uri := fmt.Sprintf(pathQueue, c.addr)
 	err := c.delete(uri)
 	return err
+}
+
+// Node returns a node by name.
+func (c *client) Node(name string) (*Node, error) {
+	out := new(Node)
+	uri := fmt.Sprintf(pathNode, c.addr, name)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// NodeList returns a list of all nodes.
+func (c *client) NodeList() ([]*Node, error) {
+	var out []*Node
+	uri := fmt.Sprintf(pathNodes, c.addr)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// NodeCreate creates a node.
+func (c *client) NodeCreate(in *Node) (*Node, error) {
+	out := new(Node)
+	uri := fmt.Sprintf(pathNodes, c.addr)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// NodeDelete deletes a node.
+func (c *client) NodeDelete(name string) error {
+	uri := fmt.Sprintf(pathNode, c.addr, name)
+	return c.delete(uri)
+}
+
+// NodeUpdate updates a node.
+func (c *client) NodeUpdate(name string, in *NodePatch) (*Node, error) {
+	out := new(Node)
+	uri := fmt.Sprintf(pathNode, c.addr, name)
+	err := c.patch(uri, in, out)
+	return out, err
 }
 
 //
