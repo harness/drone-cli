@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"github.com/drone/drone-cli/drone/plugins/config"
+	"github.com/drone/drone-cli/drone/plugins/registry"
 	"github.com/drone/drone-cli/drone/plugins/secret"
 
 	"github.com/urfave/cli"
@@ -14,5 +15,6 @@ var Command = cli.Command{
 	Subcommands: []cli.Command{
 		config.Command,
 		secret.Command,
+		registry.Command,
 	},
 }
