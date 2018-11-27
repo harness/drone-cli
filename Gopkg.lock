@@ -280,27 +280,9 @@
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
   version = "v2.2.1"
 
-[[projects]]
-  branch = "master"
-  name = "k8s.io/apimachinery"
-  packages = ["pkg/util/yaml"]
-  revision = "4a9a8137c0a17bc4594f544987b3f0d48b2e3d3a"
-
-[[projects]]
-  name = "k8s.io/klog"
-  packages = ["."]
-  revision = "a5bc97fbc634d635061f3146511332c7e313a55a"
-  version = "v0.1.0"
-
-[[projects]]
-  name = "sigs.k8s.io/yaml"
-  packages = ["."]
-  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
-  version = "v1.1.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6231db05608d1d302f6adca5b454345603ce021a63e0302a19b44c2984d612b1"
+  inputs-digest = "4397a05d47122616cd779f5e646acfbc27da310e172c449f1725c7fd533b9268"
   solver-name = "gps-cdcl"
   solver-version = 1
