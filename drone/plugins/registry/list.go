@@ -53,17 +53,17 @@ var registryListCmd = cli.Command{
 		cli.StringFlag{
 			Name:   "endpoint",
 			Usage:  "plugin endpoint",
-			EnvVar: "DRONE_SECRET_ENDPOINT",
+			EnvVar: "DRONE_REGISTRY_ENDPOINT",
 		},
 		cli.StringFlag{
 			Name:   "secret",
 			Usage:  "plugin secret",
-			EnvVar: "DRONE_SECRET_SECRET",
+			EnvVar: "DRONE_REGISTRY_SECRET",
 		},
 		cli.StringFlag{
 			Name:   "ssl-skip-verify",
 			Usage:  "plugin ssl verification disabled",
-			EnvVar: "DRONE_SECRET_VERIFY",
+			EnvVar: "DRONE_REGISTRY_VERIFY",
 		},
 		cli.StringFlag{
 			Name:   "format",
