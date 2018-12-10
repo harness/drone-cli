@@ -3,14 +3,18 @@ package runtime
 import (
 	"context"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/drone/drone-runtime/engine"
+	"github.com/natessilva/dag"
 	"golang.org/x/sync/errgroup"
 )
 
 // Runtime executes a pipeline configuration.
 type Runtime struct {
+	mu sync.Mutex
+
 	engine engine.Engine
 	config *engine.Spec
 	hook   *Hook
@@ -58,18 +62,25 @@ func (r *Runtime) Resume(ctx context.Context, start int) error {
 		return err
 	}
 
-	for i, step := range r.config.Steps {
-		steps := []*engine.Step{step}
-		if i < start {
-			continue
-		}
-		select {
-		case <-ctx.Done():
-			return ErrCancel
-		case err := <-r.execAll(steps):
-			if err != nil {
-				r.error = err
+	if isSerial(r.config) {
+		for i, step := range r.config.Steps {
+			steps := []*engine.Step{step}
+			if i < start {
+				continue
 			}
+			select {
+			case <-ctx.Done():
+				return ErrCancel
+			case err := <-r.execAll(steps):
+				if err != nil {
+					r.error = err
+				}
+			}
+		}
+	} else {
+		err := r.execGraph(ctx)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -80,6 +91,33 @@ func (r *Runtime) Resume(ctx context.Context, start int) error {
 		}
 	}
 	return r.error
+}
+
+func (r *Runtime) execGraph(ctx context.Context) error {
+	var d dag.Runner
+	for _, s := range r.config.Steps {
+		step := s
+		d.AddVertex(step.Metadata.Name, func() error {
+			select {
+			case <-ctx.Done():
+				return ErrCancel
+			default:
+			}
+			err := r.exec(step)
+			if err != nil {
+				r.mu.Lock()
+				r.error = err
+				r.mu.Unlock()
+			}
+			return nil
+		})
+	}
+	for _, s := range r.config.Steps {
+		for _, dep := range s.DependsOn {
+			d.AddEdge(dep, s.Metadata.Name)
+		}
+	}
+	return d.Run()
 }
 
 func (r *Runtime) execAll(group []*engine.Step) <-chan error {

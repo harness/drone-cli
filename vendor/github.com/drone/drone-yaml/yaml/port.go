@@ -16,7 +16,7 @@ type (
 	}
 )
 
-// UnmarshalYAML implements yaml unmarhsaling.
+// UnmarshalYAML implements yaml unmarshalling.
 func (p *Port) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	out := new(port)
 	err := unmarshal(&out.Port)

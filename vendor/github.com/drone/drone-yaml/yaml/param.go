@@ -16,11 +16,11 @@ type (
 	}
 )
 
-// UnmarshalYAML implements yaml unmarhsaling.
+// UnmarshalYAML implements yaml unmarshalling.
 func (p *Parameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	d := new(parameter)
 	err := unmarshal(d)
-	if err == nil {
+	if err == nil && d.Secret != ""{
 		p.Secret = d.Secret
 		return nil
 	}

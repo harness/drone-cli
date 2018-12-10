@@ -14,9 +14,11 @@ import (
 // config represents the Docker client configuration,
 // typically located at ~/.docker/config.json
 type config struct {
-	Auths map[string]struct {
-		Auth string `json:"auth"`
-	} `json:"auths"`
+	Auths map[string]auths `json:"auths"`
+}
+
+type auths struct {
+	Auth string `json:"auth"`
 }
 
 // Parse parses the registry credential from the reader.
@@ -94,4 +96,20 @@ func Encode(username, password string) string {
 	}
 	buf, _ := json.Marshal(&v)
 	return base64.URLEncoding.EncodeToString(buf)
+}
+
+// Marshal marshals the DockerAuth credentials to a
+// .docker/config.json file.
+func Marshal(list []*engine.DockerAuth) ([]byte, error) {
+	out := &config{}
+	out.Auths = map[string]auths{}
+	for _, item := range list {
+		out.Auths[item.Address] = auths{
+			Auth: Encode(
+				item.Username,
+				item.Password,
+			),
+		}
+	}
+	return json.Marshal(out)
 }

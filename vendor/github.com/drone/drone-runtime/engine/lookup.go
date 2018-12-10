@@ -23,7 +23,7 @@ func LookupVolume(spec *Spec, name string) (*Volume, bool) {
 // named secret.
 func LookupSecret(spec *Spec, secret *SecretVar) (*Secret, bool) {
 	for _, sec := range spec.Secrets {
-		if sec.Name == secret.Name {
+		if sec.Metadata.Name == secret.Name {
 			return sec, true
 		}
 	}
@@ -34,7 +34,7 @@ func LookupSecret(spec *Spec, secret *SecretVar) (*Secret, bool) {
 // named file.
 func LookupFile(spec *Spec, name string) (*File, bool) {
 	for _, file := range spec.Files {
-		if file.Name == name {
+		if file.Metadata.Name == name {
 			return file, true
 		}
 	}

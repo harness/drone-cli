@@ -39,7 +39,6 @@ type (
 		Detach       bool              `json:"detach,omitempty"`
 		DependsOn    []string          `json:"depends_on,omitempty"`
 		Devices      []*VolumeDevice   `json:"devices,omitempty"`
-		Docker       *DockerStep       `json:"docker,omitempty"`
 		Envs         map[string]string `json:"environment,omitempty"`
 		Files        []*FileMount      `json:"files,omitempty"`
 		IgnoreErr    bool              `json:"ignore_err,omitempty"`
@@ -50,6 +49,11 @@ type (
 		Secrets      []*SecretVar      `json:"secrets,omitempty"`
 		Volumes      []*VolumeMount    `json:"volumes,omitempty"`
 		WorkingDir   string            `json:"working_dir,omitempty"`
+
+		// Docker-specific settings. These settings are
+		// only used by the Docker and Kubernetes runtime
+		// drivers.
+		Docker *DockerStep `json:"docker,omitempty"`
 	}
 
 	// DockerAuth defines dockerhub authentication credentials.
@@ -83,8 +87,8 @@ type (
 	// mounted somewhere in the step container or virtual
 	// machine prior to command execution.
 	File struct {
-		Name string `json:"name,omitempty"`
-		Data []byte `json:"data,omitempty"`
+		Metadata Metadata `json:"metadata,omitempty"`
+		Data     []byte   `json:"data,omitempty"`
 	}
 
 	// FileMount defines how a file resource should be
@@ -93,6 +97,8 @@ type (
 		Name string `json:"name,omitempty"`
 		Path string `json:"path,omitempty"`
 		Mode int64  `json:"mode,omitempty"`
+
+		// Base string `json:"base,omitempty"`
 	}
 
 	// FusionConfig configures a VMWare Fusion-based pipeline.
@@ -141,8 +147,8 @@ type (
 
 	// Secret represents a secret variable.
 	Secret struct {
-		Name string `json:"name,omitempty"`
-		Data string `json:"data,omitempty"`
+		Metadata Metadata `json:"metadata,omitempty"`
+		Data     string   `json:"data,omitempty"`
 	}
 
 	// SecretVar represents an environment variable

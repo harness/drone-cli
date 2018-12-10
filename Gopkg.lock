@@ -98,14 +98,16 @@
     "runtime",
     "runtime/term"
   ]
-  revision = "18ed46cdaba01970970290a83715c871fb169db4"
+  revision = "a0aa03692fb3d6552311e5ebc79c1bfbab536ab4"
 
 [[projects]]
+  branch = "master"
   name = "github.com/drone/drone-yaml"
   packages = [
     "yaml",
     "yaml/compiler",
     "yaml/compiler/image",
+    "yaml/compiler/internal/rand",
     "yaml/compiler/transform",
     "yaml/converter",
     "yaml/converter/internal",
@@ -113,7 +115,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "3bda9f5012c9aee2237b6a8a2625da7ea126dcc6"
+  revision = "9296fb754228249b0f67009abcb7aee2b3b811c8"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -191,6 +193,12 @@
   packages = ["."]
   revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
   version = "v0.0.4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/natessilva/dag"
+  packages = ["."]
+  revision = "7194b8dcc5c4ac1f9a86465b7da3dc2f5765c1bf"
 
 [[projects]]
   name = "github.com/opencontainers/go-digest"
@@ -283,6 +291,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4397a05d47122616cd779f5e646acfbc27da310e172c449f1725c7fd533b9268"
+  inputs-digest = "dd36c9a07b2371502d4f87936691baf9293f8c7cdffc29fdd27cf012cf0ca954"
   solver-name = "gps-cdcl"
   solver-version = 1
