@@ -46,6 +46,14 @@ type Compiler struct {
 func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	namespace := rand.String()
 
+	isSerial := true
+	for _, step := range from.Steps {
+		if len(step.DependsOn) != 0 {
+			isSerial = false
+			break
+		}
+	}
+
 	spec := &engine.Spec{
 		Metadata: engine.Metadata{
 			UID:       namespace,
@@ -154,7 +162,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 		// if the clone step is enabled, the service should
 		// not start until the clone step is complete. Add
 		// the clone step as a dependency in the graph.
-		if !from.Clone.Disable {
+		if isSerial == false && from.Clone.Disable == false {
 			step.DependsOn = append(step.DependsOn, cloneStepName)
 		}
 		spec.Steps = append(spec.Steps, step)
@@ -193,7 +201,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 		// not start until the clone step is complete. If
 		// no dependencies are defined, at a minimum, the
 		// step depends on the initial clone step completing.
-		if !from.Clone.Disable && len(step.DependsOn) == 0 {
+		if isSerial == false && from.Clone.Disable == false && len(step.DependsOn) == 0 {
 			step.DependsOn = append(step.DependsOn, cloneStepName)
 		}
 		spec.Steps = append(spec.Steps, step)

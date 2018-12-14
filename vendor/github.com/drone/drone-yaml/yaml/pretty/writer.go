@@ -202,6 +202,8 @@ func writeValue(w writer, v interface{}) {
 		writeMappingStr(w, v)
 	case yaml.BytesSize:
 		writeValue(w, v.String())
+	case yaml.MilliSize:
+		writeValue(w, v.String())
 	}
 }
 

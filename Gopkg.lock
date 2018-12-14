@@ -115,7 +115,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "9296fb754228249b0f67009abcb7aee2b3b811c8"
+  revision = "2d2db75c210e6a546d018f8c8aa57859162d1066"
 
 [[projects]]
   name = "github.com/drone/envsubst"

@@ -8,6 +8,8 @@ func isPrimative(v interface{}) bool {
 		return true
 	case yaml.BytesSize:
 		return true
+	case yaml.MilliSize:
+		return true
 	default:
 		return false
 	}
