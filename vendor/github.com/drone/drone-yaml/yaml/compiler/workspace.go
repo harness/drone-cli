@@ -1,7 +1,7 @@
 package compiler
 
 import (
-	"path/filepath"
+	unixpath "path"
 	"strings"
 
 	"github.com/drone/drone-runtime/engine"
@@ -72,7 +72,8 @@ func createWorkspace(from *yaml.Pipeline) (base, path, full string) {
 	if path == "" {
 		path = "src"
 	}
-	full = filepath.Join(base, path)
+	full = unixpath.Join(base, path)
+
 	if from.Platform.OS == "windows" {
 		base = toWindowsDrive(base)
 		path = toWindowsPath(path)

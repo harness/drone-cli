@@ -3,6 +3,7 @@ package yaml
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	droneyaml "github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/pretty"
@@ -154,7 +155,8 @@ func toEnvironment(from *Container) map[string]*droneyaml.Variable {
 		}
 	}
 	for _, val := range from.Secrets.Secrets {
-		envs[val.Target] = &droneyaml.Variable{
+		name := strings.ToUpper(val.Target)
+		envs[name] = &droneyaml.Variable{
 			Secret: val.Source,
 		}
 	}
