@@ -46,19 +46,34 @@ func (w *lineWriter) Write(p []byte) (n int, err error) {
 		out = w.rep.Replace(out)
 	}
 
-	line := &Line{
-		Number:    w.num,
-		Message:   out,
-		Timestamp: int64(time.Since(w.now).Seconds()),
+	parts := []string{out}
+
+	// kubernetes buffers the output and may combine
+	// multiple lines into a single block of output.
+	// Split into multiple lines.
+	//
+	// note that docker output always inclines a line
+	// feed marker. This needs to be accounted for when
+	// splitting the output into multiple lines.
+	if strings.Contains(strings.TrimSuffix(out, "\n"), "\n") {
+		parts = strings.SplitAfter(out, "\n")
 	}
 
-	if w.state.hook.GotLine != nil {
-		w.state.hook.GotLine(w.state, line)
-	}
-	w.size = w.size + len(p)
-	w.num++
+	for _, part := range parts {
+		line := &Line{
+			Number:    w.num,
+			Message:   part,
+			Timestamp: int64(time.Since(w.now).Seconds()),
+		}
 
-	w.lines = append(w.lines, line)
+		if w.state.hook.GotLine != nil {
+			w.state.hook.GotLine(w.state, line)
+		}
+		w.size = w.size + len(part)
+		w.num++
+
+		w.lines = append(w.lines, line)
+	}
 
 	// if the write exceeds the maximum output we should
 	// write a single line to the end of the logs that

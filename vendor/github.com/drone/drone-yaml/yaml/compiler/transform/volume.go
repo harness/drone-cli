@@ -14,7 +14,7 @@ func WithVolumes(volumes map[string]string) func(*engine.Spec) {
 				Metadata: engine.Metadata{
 					UID:       rand.String(),
 					Name:      rand.String(),
-					Namespace: spec.Metadata.Namespace,
+					Namespace: spec.Metadata.Name,
 					Labels:    map[string]string{},
 				},
 				HostPath: &engine.VolumeHostPath{
