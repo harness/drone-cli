@@ -110,12 +110,14 @@
     "yaml/compiler/internal/rand",
     "yaml/compiler/transform",
     "yaml/converter",
-    "yaml/converter/internal",
+    "yaml/converter/bitbucket",
+    "yaml/converter/legacy",
+    "yaml/converter/legacy/internal",
     "yaml/linter",
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "90f0314ca0349f42f951a49ca20ac2b8074b8b48"
+  revision = "53f97a4f989bfcce0d26c1f582f44528cdcf4b50"
 
 [[projects]]
   name = "github.com/drone/envsubst"

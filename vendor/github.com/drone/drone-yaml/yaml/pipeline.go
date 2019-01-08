@@ -29,8 +29,9 @@ func (p *Pipeline) GetKind() string { return p.Kind }
 type (
 	// Clone configures the git clone.
 	Clone struct {
-		Disable bool `json:"disable,omitempty"`
-		Depth   int  `json:"depth,omitempty"`
+		Disable    bool `json:"disable,omitempty"`
+		Depth      int  `json:"depth,omitempty"`
+		SkipVerify bool `json:"skip_verify,omitempty" yaml:"skip_verify"`
 	}
 
 	// Concurrency limits pipeline concurrency.

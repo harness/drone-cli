@@ -29,9 +29,9 @@ type Config struct {
 	}
 }
 
-// ConvertBytes converts the yaml configuration file from
+// Convert converts the yaml configuration file from
 // the legacy format to the 1.0+ format.
-func ConvertBytes(d []byte) ([]byte, error) {
+func Convert(d []byte) ([]byte, error) {
 	from := new(Config)
 	err := yaml.Unmarshal(d, from)
 	if err != nil {
@@ -80,14 +80,6 @@ func ConvertBytes(d []byte) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	pretty.Print(buf, manifest)
 	return buf.Bytes(), nil
-}
-
-// ConvertString converts the yaml configuration file from
-// the legacy format to the 1.0+ format.
-func ConvertString(s string) (string, error) {
-	dat := []byte(s)
-	out, err := ConvertBytes(dat)
-	return string(out), err
 }
 
 func toContainer(from *Container) *droneyaml.Container {

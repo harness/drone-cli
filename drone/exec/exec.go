@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/drone/envsubst"
@@ -166,11 +165,12 @@ func exec(c *cli.Context) error {
 
 	// this code is temporarily in place to detect and convert
 	// the legacy yaml configuration file to the new format.
-	if converter.IsLegacy(dataS) {
-		dataS, err = converter.ConvertString(dataS)
-		if err != nil {
-			return err
-		}
+	dataS, err = converter.ConvertString(dataS, converter.Metadata{
+		Filename: file,
+		Ref:      c.String("ref"),
+	})
+	if err != nil {
+		return err
 	}
 
 	manifest, err := yaml.ParseString(dataS)
@@ -221,7 +221,7 @@ func exec(c *cli.Context) error {
 			Target:   environ["DRONE_DEPLOY_TO"],
 		},
 	)
-	comp.TransformFunc = transform.Combine(
+	transforms := []func(*engine.Spec){
 		transform.Include(
 			c.StringSlice("include"),
 		),
@@ -258,12 +258,24 @@ func exec(c *cli.Context) error {
 				c.String("secret-file"),
 			),
 		),
-		transform.WithVolumes(
-			toVolumes(
-				c.StringSlice("volume"),
-			),
+		transform.WithVolumeSlice(
+			c.StringSlice("volume"),
 		),
-	)
+	}
+	// the user has the option to disable the git clone
+	// if the pipeline is being executed on the local
+	// codebase.
+	if c.Bool("clone") == false {
+		// HACK(bradrydzewski) If the workspace defines a
+		// sub-path we append a host volume mount. Else we
+		// replace the empty dir workspace mount with a host
+		// volume mount.
+		switch pipeline.Workspace.Path {
+		case "", "/", "\\":
+		default:
+		}
+	}
+	comp.TransformFunc = transform.Combine(transforms...)
 	ir := comp.Compile(pipeline)
 
 	// the user has the option to disable the git clone
@@ -303,21 +315,6 @@ func exec(c *cli.Context) error {
 		runtime.WithConfig(ir),
 		runtime.WithHooks(hooks),
 	).Run(ctx)
-}
-
-// helper function converts a slice of colon-separated
-// volumes to a map.
-func toVolumes(items []string) map[string]string {
-	set := map[string]string{}
-	for _, item := range items {
-		parts := strings.Split(item, ":")
-		if len(parts) != 2 {
-			key := parts[0]
-			val := parts[1]
-			set[key] = val
-		}
-	}
-	return set
 }
 
 // helper function converts a slice of urls to a slice

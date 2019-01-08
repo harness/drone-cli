@@ -85,6 +85,7 @@ func printClone(w writer, v yaml.Clone) {
 	w.IndentIncrease()
 	w.WriteTagValue("depth", v.Depth)
 	w.WriteTagValue("disable", v.Disable)
+	w.WriteTagValue("skip_verify", v.SkipVerify)
 	w.WriteByte('\n')
 	w.IndentDecrease()
 }
@@ -234,7 +235,8 @@ func isPlatformEmpty(v yaml.Platform) bool {
 // object is empty.
 func isCloneEmpty(v yaml.Clone) bool {
 	return v.Depth == 0 &&
-		v.Disable == false
+		v.Disable == false &&
+		v.SkipVerify == false
 }
 
 // helper function returns true if the concurrency

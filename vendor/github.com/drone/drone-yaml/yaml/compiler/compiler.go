@@ -37,7 +37,15 @@ type Compiler struct {
 	// output prior to completion. This can be useful when
 	// you need to programatically modify the output,
 	// set defaults, etc.
-	TransformFunc func(spec *engine.Spec)
+	TransformFunc func(*engine.Spec)
+
+	// WorkspaceFunc can be used to customize the default
+	// workspace paths.
+	WorkspaceFunc func(*yaml.Pipeline) (base, path, full string)
+
+	// WorkspaceMountFunc can be used to override the default
+	// workspace volume mount.
+	WorkspaceMountFunc func(*engine.Spec, string)
 }
 
 // Compile returns an intermediate representation of the
@@ -79,7 +87,7 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	// create the default workspace path. If a container
 	// does not specify a working directory it defaults
 	// to the workspace path.
-	base, dir, workspace := createWorkspace(from)
+	base, dir, workspace := c.workspace(from)
 
 	// create the default workspace volume definition.
 	// the volume will be mounted to each container in
@@ -283,3 +291,20 @@ func (c *Compiler) skip(container *yaml.Container) bool {
 	}
 	return false
 }
+
+// return the workspace paths. If the user-defined
+// function is nil, default logic is used.
+func (c *Compiler) workspace(pipeline *yaml.Pipeline) (base, path, full string) {
+	if c.WorkspaceFunc != nil {
+		return c.WorkspaceFunc(pipeline)
+	}
+	return createWorkspace(pipeline)
+}
+
+// func (c *Compiler) workspaceMount(step *engine.Step, base, path, full string) {
+// 	if c.WorkspaceMountFunc != nil {
+// 		c.WorkspaceMountFunc(step, path)
+// 		return
+// 	}
+// 	setupWorkingDirMount(spec, base)
+// }

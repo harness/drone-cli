@@ -58,7 +58,9 @@ func checkPipeline(pipeline *yaml.Pipeline, trusted bool) error {
 	if err != nil {
 		return err
 	}
-	names := map[string]struct{}{}
+	names := map[string]struct{}{
+		"clone": struct{}{},
+	}
 	for _, container := range pipeline.Steps {
 		_, ok := names[container.Name]
 		if ok {

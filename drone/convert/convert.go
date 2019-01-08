@@ -35,7 +35,7 @@ func convert(c *cli.Context) error {
 		return err
 	}
 
-	res, err := converter.ConvertBytes(raw)
+	res, err := converter.Convert(raw, converter.Metadata{Filename: path})
 	if err != nil {
 		return err
 	}

@@ -28,9 +28,15 @@ func cloneImage(src *yaml.Pipeline) string {
 
 // helper function configures the clone depth parameter,
 // specific to the clone plugin.
+//
+// TODO(bradrydzewski) rename to setupCloneParams
 func setupCloneDepth(src *yaml.Pipeline, dst *engine.Step) {
 	if depth := src.Clone.Depth; depth > 0 {
 		dst.Envs["PLUGIN_DEPTH"] = strconv.Itoa(depth)
+	}
+	if skipVerify := src.Clone.SkipVerify; skipVerify {
+		dst.Envs["GIT_SSL_NO_VERIFY"] = "true"
+		dst.Envs["PLUGIN_SKIP_VERIFY"] = "true"
 	}
 }
 
