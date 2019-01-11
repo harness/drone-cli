@@ -28,9 +28,6 @@ func Convert(b []byte, ref string) ([]byte, error) {
 	pipeline.Name = "default"
 	pipeline.Kind = "pipeline"
 
-	pipeline.Workspace.Base = "/drone"
-	pipeline.Workspace.Path = "/src"
-
 	//
 	// clone
 	//

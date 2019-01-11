@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/drone/envsubst"
@@ -262,29 +263,13 @@ func exec(c *cli.Context) error {
 			c.StringSlice("volume"),
 		),
 	}
-	// the user has the option to disable the git clone
-	// if the pipeline is being executed on the local
-	// codebase.
 	if c.Bool("clone") == false {
-		// HACK(bradrydzewski) If the workspace defines a
-		// sub-path we append a host volume mount. Else we
-		// replace the empty dir workspace mount with a host
-		// volume mount.
-		switch pipeline.Workspace.Path {
-		case "", "/", "\\":
-		default:
-		}
+		pwd, _ := os.Getwd()
+		comp.WorkspaceMountFunc = compiler.MountHostWorkspace
+		comp.WorkspaceFunc = compiler.CreateHostWorkspace(pwd)
 	}
 	comp.TransformFunc = transform.Combine(transforms...)
 	ir := comp.Compile(pipeline)
-
-	// the user has the option to disable the git clone
-	// if the pipeline is being executed on the local
-	// codebase.
-	if c.Bool("clone") == false {
-		pwd, _ := os.Getwd()
-		mountWorkspace(ir, pwd)
-	}
 
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
@@ -303,6 +288,30 @@ func exec(c *cli.Context) error {
 	// creates a hook to print the step output to stdout,
 	// with per-step color coding if a tty.
 	hooks := &runtime.Hook{}
+	hooks.BeforeEach = func(s *runtime.State) error {
+		s.Step.Envs["CI_BUILD_STATUS"] = "success"
+		s.Step.Envs["CI_BUILD_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		s.Step.Envs["DRONE_BUILD_STATUS"] = "success"
+		s.Step.Envs["DRONE_BUILD_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["DRONE_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		s.Step.Envs["CI_JOB_STATUS"] = "success"
+		s.Step.Envs["CI_JOB_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		s.Step.Envs["DRONE_JOB_STATUS"] = "success"
+		s.Step.Envs["DRONE_JOB_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["DRONE_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		if s.Runtime.Error != nil {
+			s.Step.Envs["CI_BUILD_STATUS"] = "failure"
+			s.Step.Envs["CI_JOB_STATUS"] = "failure"
+			s.Step.Envs["DRONE_BUILD_STATUS"] = "failure"
+			s.Step.Envs["DRONE_JOB_STATUS"] = "failure"
+		}
+		return nil
+	}
+
 	hooks.GotLine = term.WriteLine(os.Stdout)
 	if tty {
 		hooks.GotLine = term.WriteLinePretty(

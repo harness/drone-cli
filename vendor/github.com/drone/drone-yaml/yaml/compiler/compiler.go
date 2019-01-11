@@ -39,13 +39,16 @@ type Compiler struct {
 	// set defaults, etc.
 	TransformFunc func(*engine.Spec)
 
-	// WorkspaceFunc can be used to customize the default
-	// workspace paths.
-	WorkspaceFunc func(*yaml.Pipeline) (base, path, full string)
+	// WorkspaceFunc can be used to set the workspace volume
+	// that is created for the entire pipeline. The primary
+	// use case for this function is running local builds,
+	// where the workspace is mounted to the host machine
+	// working directory.
+	WorkspaceFunc func(*engine.Spec)
 
 	// WorkspaceMountFunc can be used to override the default
 	// workspace volume mount.
-	WorkspaceMountFunc func(*engine.Spec, string)
+	WorkspaceMountFunc func(step *engine.Step, base, path, full string)
 }
 
 // Compile returns an intermediate representation of the
@@ -87,22 +90,12 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 	// create the default workspace path. If a container
 	// does not specify a working directory it defaults
 	// to the workspace path.
-	base, dir, workspace := c.workspace(from)
+	base, dir, workspace := createWorkspace(from)
 
 	// create the default workspace volume definition.
 	// the volume will be mounted to each container in
 	// the pipeline.
-	spec.Docker.Volumes = append(spec.Docker.Volumes,
-		&engine.Volume{
-			Metadata: engine.Metadata{
-				UID:       rand.String(),
-				Name:      workspaceName,
-				Namespace: namespace,
-				Labels:    map[string]string{},
-			},
-			EmptyDir: &engine.VolumeEmptyDir{},
-		},
-	)
+	c.setupWorkspace(spec)
 
 	// for each volume defined in the yaml configuration
 	// file, convert to a runtime volume and append to the
@@ -141,8 +134,8 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 		setupCloneDepth(from, dst)
 		setupCloneCredentials(spec, dst, c.gitCredentials())
 		setupWorkingDir(src, dst, workspace)
-		setupWorkingDirMount(dst, base)
 		setupWorkspaceEnv(dst, base, dir, workspace)
+		c.setupWorkspaceMount(dst, base, dir, workspace)
 		spec.Steps = append(spec.Steps, dst)
 	}
 
@@ -155,8 +148,8 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 		// set to run in detached mode.
 		step.Detach = true
 		setupWorkingDir(service, step, workspace)
-		setupWorkingDirMount(step, base)
 		setupWorkspaceEnv(step, base, dir, workspace)
+		c.setupWorkspaceMount(step, base, dir, workspace)
 		// if the skip callback function returns true,
 		// modify the runtime step to never execute.
 		if c.skip(service) {
@@ -193,8 +186,8 @@ func (c *Compiler) Compile(from *yaml.Pipeline) *engine.Spec {
 			step = createStep(spec, container)
 		}
 		setupWorkingDir(container, step, workspace)
-		setupWorkingDirMount(step, base)
 		setupWorkspaceEnv(step, base, dir, workspace)
+		c.setupWorkspaceMount(step, base, dir, workspace)
 		// if the skip callback function returns true,
 		// modify the runtime step to never execute.
 		if c.skip(container) {
@@ -292,19 +285,19 @@ func (c *Compiler) skip(container *yaml.Container) bool {
 	return false
 }
 
-// return the workspace paths. If the user-defined
-// function is nil, default logic is used.
-func (c *Compiler) workspace(pipeline *yaml.Pipeline) (base, path, full string) {
+func (c *Compiler) setupWorkspace(spec *engine.Spec) {
 	if c.WorkspaceFunc != nil {
-		return c.WorkspaceFunc(pipeline)
+		c.WorkspaceFunc(spec)
+		return
 	}
-	return createWorkspace(pipeline)
+	CreateWorkspace(spec)
+	return
 }
 
-// func (c *Compiler) workspaceMount(step *engine.Step, base, path, full string) {
-// 	if c.WorkspaceMountFunc != nil {
-// 		c.WorkspaceMountFunc(step, path)
-// 		return
-// 	}
-// 	setupWorkingDirMount(spec, base)
-// }
+func (c *Compiler) setupWorkspaceMount(step *engine.Step, base, path, full string) {
+	if c.WorkspaceMountFunc != nil {
+		c.WorkspaceMountFunc(step, base, path, full)
+		return
+	}
+	MountWorkspace(step, base, path, full)
+}

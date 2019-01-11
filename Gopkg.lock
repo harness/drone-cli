@@ -44,12 +44,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/dchest/uniuri"
-  packages = ["."]
-  revision = "8902c56451e9b58ff940bbe5fec35d5f9c04584a"
-
-[[projects]]
   name = "github.com/docker/distribution"
   packages = [
     "digestset",
@@ -117,7 +111,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "53f97a4f989bfcce0d26c1f582f44528cdcf4b50"
+  revision = "dd25dd275e8c82f38f3110cfa564f83d34329685"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -293,6 +287,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dd36c9a07b2371502d4f87936691baf9293f8c7cdffc29fdd27cf012cf0ca954"
+  inputs-digest = "1fa068f17979b5ab98e27b61d8509f666335ceaa20176693cf5bd114bb5a2e1a"
   solver-name = "gps-cdcl"
   solver-version = 1

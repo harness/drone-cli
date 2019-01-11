@@ -6,10 +6,14 @@ import (
 
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/compiler/internal/rand"
 )
 
-// default name for the workspace volume.
-const workspaceName = "workspace"
+const (
+	workspacePath     = "/drone/src"
+	workspaceName     = "workspace"
+	workspaceHostName = "host"
+)
 
 func setupWorkingDir(src *yaml.Container, dst *engine.Step, path string) {
 	// if the working directory is already set
@@ -25,15 +29,6 @@ func setupWorkingDir(src *yaml.Container, dst *engine.Step, path string) {
 	}
 	// else set the working directory.
 	dst.WorkingDir = path
-}
-
-// helper function mounts the working directory base
-// path to the container.
-func setupWorkingDirMount(step *engine.Step, path string) {
-	step.Volumes = append(step.Volumes, &engine.VolumeMount{
-		Name: workspaceName,
-		Path: path,
-	})
 }
 
 // helper function appends the workspace base and
@@ -67,10 +62,7 @@ func createWorkspace(from *yaml.Pipeline) (base, path, full string) {
 	base = from.Workspace.Base
 	path = from.Workspace.Path
 	if base == "" {
-		base = "/drone"
-	}
-	if path == "" {
-		path = "src"
+		base = workspacePath
 	}
 	full = unixpath.Join(base, path)
 
@@ -80,4 +72,73 @@ func createWorkspace(from *yaml.Pipeline) (base, path, full string) {
 		full = toWindowsDrive(full)
 	}
 	return base, path, full
+}
+
+//
+//
+//
+
+// CreateWorkspace creates the workspace volume as
+// an empty directory mount.
+func CreateWorkspace(spec *engine.Spec) {
+	spec.Docker.Volumes = append(spec.Docker.Volumes,
+		&engine.Volume{
+			Metadata: engine.Metadata{
+				UID:       rand.String(),
+				Name:      workspaceName,
+				Namespace: spec.Metadata.Namespace,
+				Labels:    map[string]string{},
+			},
+			EmptyDir: &engine.VolumeEmptyDir{},
+		},
+	)
+}
+
+// CreateHostWorkspace returns a WorkspaceFunc that
+// mounts a host machine volume as the pipeline
+// workspace.
+func CreateHostWorkspace(workdir string) func(*engine.Spec) {
+	return func(spec *engine.Spec) {
+		CreateWorkspace(spec)
+		spec.Docker.Volumes = append(
+			spec.Docker.Volumes,
+			&engine.Volume{
+				Metadata: engine.Metadata{
+					UID:  rand.String(),
+					Name: workspaceHostName,
+				},
+				HostPath: &engine.VolumeHostPath{
+					Path: workdir,
+				},
+			},
+		)
+	}
+}
+
+//
+//
+//
+
+// MountWorkspace is a WorkspaceFunc that mounts the
+// default workspace volume to the pipeline step.
+func MountWorkspace(step *engine.Step, base, path, full string) {
+	step.Volumes = append(step.Volumes, &engine.VolumeMount{
+		Name: workspaceName,
+		Path: base,
+	})
+}
+
+// MountHostWorkspace is a WorkspaceFunc that mounts
+// the default workspace and host volume to the pipeline.
+func MountHostWorkspace(step *engine.Step, base, path, full string) {
+	step.Volumes = append(step.Volumes, &engine.VolumeMount{
+		Name: workspaceHostName,
+		Path: full,
+	})
+	if path != "" {
+		step.Volumes = append(step.Volumes, &engine.VolumeMount{
+			Name: workspaceName,
+			Path: base,
+		})
+	}
 }
