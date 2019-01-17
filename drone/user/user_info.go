@@ -51,5 +51,6 @@ func userInfo(c *cli.Context) error {
 var tmplUserInfo = `User: {{ .Login }}
 Email: {{ .Email }}
 Admin: {{ .Admin }}
+Active: {{ .Active }}
 Machine: {{ .Machine }}
 `

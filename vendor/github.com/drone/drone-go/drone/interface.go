@@ -44,7 +44,7 @@ type Client interface {
 	UserCreate(user *User) (*User, error)
 
 	// UserUpdate updates a user account.
-	UserUpdate(user *User) (*User, error)
+	UserUpdate(login string, user *UserPatch) (*User, error)
 
 	// UserDelete deletes a user account.
 	UserDelete(login string) error

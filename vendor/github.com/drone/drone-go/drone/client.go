@@ -134,9 +134,9 @@ func (c *client) UserCreate(in *User) (*User, error) {
 }
 
 // UserUpdate updates a user account.
-func (c *client) UserUpdate(in *User) (*User, error) {
+func (c *client) UserUpdate(login string, in *UserPatch) (*User, error) {
 	out := new(User)
-	uri := fmt.Sprintf(pathUser, c.addr, in.Login)
+	uri := fmt.Sprintf(pathUser, c.addr, login)
 	err := c.patch(uri, in, out)
 	return out, err
 }
