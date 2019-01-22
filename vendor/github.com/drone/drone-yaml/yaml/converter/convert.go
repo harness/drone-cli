@@ -2,6 +2,7 @@ package converter
 
 import (
 	"github.com/drone/drone-yaml/yaml/converter/bitbucket"
+	"github.com/drone/drone-yaml/yaml/converter/gitlab"
 	"github.com/drone/drone-yaml/yaml/converter/legacy"
 )
 
@@ -27,7 +28,7 @@ func Convert(d []byte, m Metadata) ([]byte, error) {
 	case "circle.yml", ".circleci/config.yml":
 		// TODO(bradrydzewski)
 	case ".gitlab-ci.yml":
-		// TODO(bradrydzewski)
+		return gitlab.Convert(d)
 	case ".travis.yml":
 		// TODO(bradrydzewski)
 	}

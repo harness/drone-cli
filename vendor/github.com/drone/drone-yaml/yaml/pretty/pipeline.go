@@ -145,7 +145,7 @@ func printCondition(w writer, k string, v yaml.Condition) {
 	}
 	if len(v.Exclude) != 0 {
 		w.IndentIncrease()
-		w.WriteTagValue("exclude", v.Include)
+		w.WriteTagValue("exclude", v.Exclude)
 		w.IndentDecrease()
 	}
 }

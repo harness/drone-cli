@@ -105,13 +105,15 @@
     "yaml/compiler/transform",
     "yaml/converter",
     "yaml/converter/bitbucket",
+    "yaml/converter/gitlab",
+    "yaml/converter/internal",
     "yaml/converter/legacy",
     "yaml/converter/legacy/internal",
     "yaml/linter",
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "dd25dd275e8c82f38f3110cfa564f83d34329685"
+  revision = "1aa8f3a67d92ba8207e5fe9f00c15610f1714d87"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -162,6 +164,12 @@
   ]
   revision = "6144c57d2a054b72ff46219f655bf863b940e174"
   version = "v0.11.2"
+
+[[projects]]
+  name = "github.com/gosimple/slug"
+  packages = ["."]
+  revision = "42ac18c34c2c6f4843fa48167317dcaa9416d1e2"
+  version = "v1.4.2"
 
 [[projects]]
   branch = "master"
@@ -222,6 +230,12 @@
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rainycape/unidecode"
+  packages = ["."]
+  revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
 
 [[projects]]
   name = "github.com/urfave/cli"
