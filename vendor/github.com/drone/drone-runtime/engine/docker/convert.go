@@ -60,6 +60,11 @@ func toHostConfig(spec *engine.Spec, step *engine.Step) *container.HostConfig {
 		Privileged: step.Docker.Privileged,
 		// TODO(bradrydzewski) set ShmSize
 	}
+	// windows does not support privileged so we hard-code
+	// this value to false.
+	if spec.Platform.OS == "windows" {
+		config.Privileged = false
+	}
 	if len(step.Docker.DNS) > 0 {
 		config.DNS = step.Docker.DNS
 	}
