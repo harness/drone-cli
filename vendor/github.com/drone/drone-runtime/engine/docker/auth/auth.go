@@ -68,11 +68,14 @@ func decode(s string) (username, password string) {
 	if err != nil {
 		return
 	}
-	parts := strings.Split(string(d), ":")
-	if len(parts) != 2 {
-		return
+	parts := strings.SplitN(string(d), ":", 2)
+	if len(parts) > 0 {
+		username = parts[0]
 	}
-	return parts[0], parts[1]
+	if len(parts) > 1 {
+		password = parts[1]
+	}
+	return
 }
 
 func hostname(s string) string {
@@ -105,7 +108,7 @@ func Marshal(list []*engine.DockerAuth) ([]byte, error) {
 	out.Auths = map[string]auths{}
 	for _, item := range list {
 		out.Auths[item.Address] = auths{
-			Auth: Encode(
+			Auth: encode(
 				item.Username,
 				item.Password,
 			),

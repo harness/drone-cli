@@ -13,6 +13,7 @@ import (
 
 	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/network"
 	"docker.io/go-docker/api/types/volume"
 )
 
@@ -149,6 +150,15 @@ func (e *dockerEngine) Create(ctx context.Context, spec *engine.Spec, step *engi
 		err := e.client.CopyToContainer(ctx, step.Metadata.UID, "/", bytes.NewReader(tar), copyOpts)
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, net := range step.Docker.Networks {
+		err = e.client.NetworkConnect(ctx, net, step.Metadata.UID, &network.EndpointSettings{
+			Aliases: []string{net},
+		})
+		if err != nil {
+			return nil
 		}
 	}
 

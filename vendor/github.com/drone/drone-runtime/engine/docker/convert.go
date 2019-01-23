@@ -83,14 +83,8 @@ func toHostConfig(spec *engine.Spec, step *engine.Step) *container.HostConfig {
 		}
 	}
 
-	// IMPORTANT before we implement devices for docker we
-	// need to implement devices for kubernetes. This might
-	// also require changes to the drone yaml format.
-	if len(step.Devices) != 0 {
-		// TODO(bradrydzewski) set Devices
-	}
-
 	if len(step.Volumes) != 0 {
+		config.Devices = toDeviceSlice(spec, step)
 		config.Binds = toVolumeSlice(spec, step)
 		config.Mounts = toVolumeMounts(spec, step)
 	}
@@ -109,6 +103,30 @@ func toNetConfig(spec *engine.Spec, proc *engine.Step) *network.NetworkingConfig
 	}
 }
 
+// helper function that converts a slice of device paths to a slice of
+// container.DeviceMapping.
+func toDeviceSlice(spec *engine.Spec, step *engine.Step) []container.DeviceMapping {
+	var to []container.DeviceMapping
+	for _, mount := range step.Devices {
+		device, ok := engine.LookupVolume(spec, mount.Name)
+		if !ok {
+			continue
+		}
+		if isDevice(device) == false {
+			continue
+		}
+		to = append(to, container.DeviceMapping{
+			PathOnHost:        device.HostPath.Path,
+			PathInContainer:   mount.DevicePath,
+			CgroupPermissions: "rwm",
+		})
+	}
+	if len(to) == 0 {
+		return nil
+	}
+	return to
+}
+
 // helper function returns a slice of volume mounts.
 func toVolumeSlice(spec *engine.Spec, step *engine.Step) []string {
 	// this entire function should be deprecated in
@@ -118,6 +136,9 @@ func toVolumeSlice(spec *engine.Spec, step *engine.Step) []string {
 	for _, mount := range step.Volumes {
 		volume, ok := engine.LookupVolume(spec, mount.Name)
 		if !ok {
+			continue
+		}
+		if isDevice(volume) {
 			continue
 		}
 		if isDataVolume(volume) == false {
@@ -211,6 +232,11 @@ func isTempfs(volume *engine.Volume) bool {
 // returns true if the volume is a data-volume.
 func isDataVolume(volume *engine.Volume) bool {
 	return volume.EmptyDir != nil && volume.EmptyDir.Medium != "memory"
+}
+
+// returns true if the volume is a device
+func isDevice(volume *engine.Volume) bool {
+	return volume.HostPath != nil && strings.HasPrefix(volume.HostPath.Path, "/dev/")
 }
 
 // returns true if the volume is a named pipe.

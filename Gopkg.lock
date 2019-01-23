@@ -92,7 +92,7 @@
     "runtime",
     "runtime/term"
   ]
-  revision = "909b61f69eca3c0062caec8b5d337f64cb21763d"
+  revision = "e538fd780e4c98fbc31a1fabc04b2578f5cda17e"
 
 [[projects]]
   branch = "master"
@@ -113,7 +113,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "1aa8f3a67d92ba8207e5fe9f00c15610f1714d87"
+  revision = "98eb77b4c58a783b3f2efce8fed4e5d9d1f09469"
 
 [[projects]]
   name = "github.com/drone/envsubst"
