@@ -189,10 +189,16 @@ func printVolumes(w writer, v []*yaml.Volume) {
 		s.WriteTagValue("name", v.Name)
 		if v := v.EmptyDir; v != nil {
 			s.WriteTag("temp")
-			s.IndentIncrease()
-			s.WriteTagValue("medium", v.Medium)
-			s.WriteTagValue("size_limit", v.SizeLimit)
-			s.IndentDecrease()
+			if isEmptyDirEmpty(v) {
+				w.WriteByte(' ')
+				w.WriteByte('{')
+				w.WriteByte('}')
+			} else {
+				s.IndentIncrease()
+				s.WriteTagValue("medium", v.Medium)
+				s.WriteTagValue("size_limit", v.SizeLimit)
+				s.IndentDecrease()
+			}
 		}
 
 		if v := v.HostPath; v != nil {
@@ -262,4 +268,10 @@ func isConditionsEmpty(v yaml.Conditions) bool {
 // object is empty.
 func isConditionEmpty(v yaml.Condition) bool {
 	return len(v.Exclude) == 0 && len(v.Include) == 0
+}
+
+// helper function returns true if the emptydir
+// object is empty.
+func isEmptyDirEmpty(v *yaml.VolumeEmptyDir) bool {
+	return v.SizeLimit == 0 && len(v.Medium) == 0
 }
