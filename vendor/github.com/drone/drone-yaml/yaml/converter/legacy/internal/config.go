@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	droneyaml "github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/converter/legacy/matrix"
 	"github.com/drone/drone-yaml/yaml/pretty"
 
 	"gopkg.in/yaml.v2"
@@ -21,6 +22,7 @@ type Config struct {
 	Pipeline Containers
 	Services Containers
 	Branches Constraint
+	Matrix   interface{}
 	Secrets  map[string]struct {
 		Driver     string
 		DriverOpts map[string]string `yaml:"driver_opts"`
@@ -34,11 +36,14 @@ type Config struct {
 func Convert(d []byte) ([]byte, error) {
 	from := new(Config)
 	err := yaml.Unmarshal(d, from)
+
 	if err != nil {
 		return nil, err
 	}
 
-	pipeline := &droneyaml.Pipeline{}
+	manifest := &droneyaml.Manifest{}
+
+	pipeline := droneyaml.Pipeline{}
 	pipeline.Name = "default"
 	pipeline.Kind = "pipeline"
 
@@ -65,20 +70,57 @@ func Convert(d []byte) ([]byte, error) {
 			toContainer(container),
 		)
 	}
+
 	pipeline.Volumes = toVolumes(from)
 	pipeline.Trigger.Branch.Include = from.Branches.Include
 	pipeline.Trigger.Branch.Exclude = from.Branches.Exclude
 
-	manifest := &droneyaml.Manifest{}
-	manifest.Resources = append(manifest.Resources, pipeline)
+	if from.Matrix != nil {
+		axes, err := matrix.Parse(d)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for index, environ := range axes {
+			current := pipeline
+			current.Name = fmt.Sprintf("matrix-%d", index+1)
+
+			marshaled, err := yaml.Marshal(&current)
+
+			if err != nil {
+				return nil, err
+			}
+
+			transformed := string(marshaled)
+
+			for key, value := range environ {
+				if strings.Contains(value, "\n") {
+					value = fmt.Sprintf("%q", value)
+				}
+
+				transformed = strings.Replace(transformed, fmt.Sprintf("${%s}", key), value, -1)
+			}
+
+			if err := yaml.Unmarshal([]byte(transformed), &current); err != nil {
+				return nil, err
+			}
+
+			manifest.Resources = append(manifest.Resources, &current)
+		}
+	} else {
+		manifest.Resources = append(manifest.Resources, &pipeline)
+	}
 
 	secrets := toSecrets(from)
+
 	if secrets != nil {
 		manifest.Resources = append(manifest.Resources, secrets)
 	}
 
 	buf := new(bytes.Buffer)
 	pretty.Print(buf, manifest)
+
 	return buf.Bytes(), nil
 }
 

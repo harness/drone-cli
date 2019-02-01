@@ -2,11 +2,12 @@ package gitlab
 
 import (
 	"bytes"
+	"strings"
 
 	droneyaml "github.com/drone/drone-yaml/yaml"
+	"github.com/drone/drone-yaml/yaml/compiler/image"
 	"github.com/drone/drone-yaml/yaml/pretty"
 
-	"github.com/gosimple/slug"
 	"gopkg.in/yaml.v2"
 )
 
@@ -78,7 +79,7 @@ func Convert(b []byte) ([]byte, error) {
 				Entrypoint: step.Entrypoint,
 			}
 			if step.Name == "" {
-				step.Name = slug.Make(step.Image)
+				step.Name = serviceSlug(step.Image)
 			}
 			pipeline.Services = append(pipeline.Services, step)
 		}
@@ -92,4 +93,10 @@ func Convert(b []byte) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	pretty.Print(buf, manifest)
 	return buf.Bytes(), nil
+}
+
+func serviceSlug(s string) string {
+	s = image.Trim(s)
+	s = strings.Replace(s, "/", "__", -1)
+	return s
 }
