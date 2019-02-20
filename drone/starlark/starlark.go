@@ -37,10 +37,6 @@ var Command = cli.Command{
 			Usage: "target file",
 			Value: ".drone.yml",
 		},
-		cli.BoolFlag{
-			Name:  "stream",
-			Usage: "Write output as a YAML stream.",
-		},
 		cli.BoolTFlag{
 			Name:  "format",
 			Usage: "Write output as formatted YAML",
@@ -48,10 +44,6 @@ var Command = cli.Command{
 		cli.BoolFlag{
 			Name:  "stdout",
 			Usage: "Write output to stdout",
-		},
-		cli.BoolFlag{
-			Name:  "string",
-			Usage: "Expect a string, manifest as plain text",
 		},
 	},
 }
@@ -68,6 +60,7 @@ func generate(c *cli.Context) error {
 	thread := &starlark.Thread{
 		Name:  "drone",
 		Print: func(_ *starlark.Thread, msg string) { fmt.Println(msg) },
+		Load:  makeLoad(),
 	}
 	globals, err := starlark.ExecFile(thread, source, data, nil)
 	if err != nil {
@@ -200,4 +193,36 @@ func goQuoteIsSafe(s string) bool {
 		}
 	}
 	return true
+}
+
+// https://github.com/google/starlark-go/blob/4eb76950c5f02ec5bcfd3ca898231a6543942fd9/repl/repl.go#L175
+func makeLoad() func(thread *starlark.Thread, module string) (starlark.StringDict, error) {
+	type entry struct {
+		globals starlark.StringDict
+		err     error
+	}
+
+	var cache = make(map[string]*entry)
+
+	return func(thread *starlark.Thread, module string) (starlark.StringDict, error) {
+		e, ok := cache[module]
+		if e == nil {
+			if ok {
+				// request for package whose loading is in progress
+				return nil, fmt.Errorf("cycle in load graph")
+			}
+
+			// Add a placeholder to indicate "load in progress".
+			cache[module] = nil
+
+			// Load it.
+			thread := &starlark.Thread{Name: "exec " + module, Load: thread.Load}
+			globals, err := starlark.ExecFile(thread, module, nil, nil)
+			e = &entry{globals, err}
+
+			// Update the cache.
+			cache[module] = e
+		}
+		return e.globals, e.err
+	}
 }
