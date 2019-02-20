@@ -234,6 +234,18 @@
 
 [[projects]]
   branch = "master"
+  name = "go.starlark.net"
+  packages = [
+    "internal/compile",
+    "internal/spell",
+    "resolve",
+    "starlark",
+    "syntax"
+  ]
+  revision = "4eb76950c5f02ec5bcfd3ca898231a6543942fd9"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -290,6 +302,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1fa068f17979b5ab98e27b61d8509f666335ceaa20176693cf5bd114bb5a2e1a"
+  inputs-digest = "86e95417580e11b912789f139bf94b3610385facfd6d8c90e4d5ff612c907940"
   solver-name = "gps-cdcl"
   solver-version = 1

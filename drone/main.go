@@ -22,6 +22,7 @@ import (
 	"github.com/drone/drone-cli/drone/secret"
 	"github.com/drone/drone-cli/drone/server"
 	"github.com/drone/drone-cli/drone/sign"
+	"github.com/drone/drone-cli/drone/starlark"
 	"github.com/drone/drone-cli/drone/user"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -92,6 +93,7 @@ func main() {
 		lint.Command,
 		sign.Command,
 		jsonnet.Command,
+		starlark.Command,
 		plugins.Command,
 	}
 
