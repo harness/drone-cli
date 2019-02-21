@@ -29,13 +29,15 @@ type (
 		Created   int64  `json:"created"`
 		Updated   int64  `json:"updated"`
 		LastLogin int64  `json:"last_login"`
+		Token     string `json:"token"`
 	}
 
 	// UserPatch defines a user patch request.
 	UserPatch struct {
-		Active  *bool `json:"active,omitempty"`
-		Admin   *bool `json:"admin,omitempty"`
-		Machine *bool `json:"machine,omitempty"`
+		Active  *bool   `json:"active,omitempty"`
+		Admin   *bool   `json:"admin,omitempty"`
+		Machine *bool   `json:"machine,omitempty"`
+		Token   *string `json:"token,omitempty"`
 	}
 
 	// Repo represents a repository.

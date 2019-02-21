@@ -68,7 +68,6 @@
   version = "v0.3.3"
 
 [[projects]]
-  branch = "master"
   name = "github.com/drone/drone-go"
   packages = [
     "drone",
@@ -79,7 +78,8 @@
     "plugin/registry",
     "plugin/secret"
   ]
-  revision = "1354e27647f2efee29b63dcd9cc561fafb4c51c1"
+  revision = "b1b8a8f8f28e6beecb78e7c6fa95a26ccc040b26"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
