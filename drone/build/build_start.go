@@ -3,7 +3,9 @@ package build
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
+	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
@@ -18,6 +20,11 @@ var buildStartCmd = cli.Command{
 		cli.StringSliceFlag{
 			Name:  "param, p",
 			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
+		},
+		cli.StringFlag{
+			Name:  "format",
+			Usage: "format output",
+			Value: "",
 		},
 	},
 }
@@ -58,6 +65,14 @@ func buildStart(c *cli.Context) (err error) {
 	build, err := client.BuildRestart(owner, name, number, params)
 	if err != nil {
 		return err
+	}
+
+	if c.IsSet("format") {
+		tmpl, err := template.New("_").Parse(c.String("format"))
+		if err != nil {
+			return err
+		}
+		return tmpl.Execute(os.Stdout, build)
 	}
 
 	fmt.Printf("Starting build %s/%s#%d\n", owner, name, build.Number)
