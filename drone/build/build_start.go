@@ -2,7 +2,6 @@ package build
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strconv"
 	"text/template"
@@ -24,7 +23,7 @@ var buildStartCmd = cli.Command{
 		cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
-			Value: "",
+			Value: tmplBuildInfo,
 		},
 	},
 }
@@ -67,14 +66,9 @@ func buildStart(c *cli.Context) (err error) {
 		return err
 	}
 
-	if c.IsSet("format") {
-		tmpl, err := template.New("_").Parse(c.String("format"))
-		if err != nil {
-			return err
-		}
-		return tmpl.Execute(os.Stdout, build)
+	tmpl, err := template.New("_").Parse(c.String("format"))
+	if err != nil {
+		return err
 	}
-
-	fmt.Printf("Starting build %s/%s#%d\n", owner, name, build.Number)
-	return nil
+	return tmpl.Execute(os.Stdout, build)
 }

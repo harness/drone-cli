@@ -22,7 +22,7 @@ var buildPromoteCmd = cli.Command{
 		cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
-			Value: "",
+			Value: tmplBuildInfo,
 		},
 	},
 }
