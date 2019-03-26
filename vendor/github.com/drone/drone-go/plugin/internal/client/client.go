@@ -31,6 +31,13 @@ import (
 	"github.com/99designs/httpsignatures-go"
 )
 
+// DefaultClient is the default http.Client.
+var DefaultClient = &http.Client{
+	CheckRedirect: func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
+
 // required http headers
 // note that (request-target) is disabled because reverse proxies,
 // including aws lambda with api gateway, fail verification.
@@ -57,6 +64,9 @@ func New(endpoint, secret string, skipverify bool) *Client {
 	}
 	if skipverify {
 		client.Client = &http.Client{
+			CheckRedirect: func(*http.Request, []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
 				TLSClientConfig: &tls.Config{
@@ -163,7 +173,7 @@ func (s *Client) Do(in, out interface{}) error {
 
 func (s *Client) client() *http.Client {
 	if s.Client == nil {
-		return http.DefaultClient
+		return DefaultClient
 	}
 	return s.Client
 }

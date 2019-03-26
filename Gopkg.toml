@@ -39,7 +39,7 @@
 
 [[constraint]]
   name = "github.com/drone/drone-yaml"
-  branch = "master"
+  version = "1.0.6"
 
 [[constraint]]
   name = "github.com/drone/signal"

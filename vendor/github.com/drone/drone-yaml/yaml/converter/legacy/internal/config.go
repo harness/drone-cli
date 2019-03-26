@@ -1,8 +1,13 @@
+// Copyright 2019 Drone.IO Inc. All rights reserved.
+// Use of this source code is governed by the Drone Non-Commercial License
+// that can be found in the LICENSE file.
+
 package yaml
 
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 
 	droneyaml "github.com/drone/drone-yaml/yaml"
@@ -113,9 +118,8 @@ func Convert(d []byte) ([]byte, error) {
 	}
 
 	secrets := toSecrets(from)
-
-	if secrets != nil {
-		manifest.Resources = append(manifest.Resources, secrets)
+	for _, secret := range secrets {
+		manifest.Resources = append(manifest.Resources, secret)
 	}
 
 	buf := new(bytes.Buffer)
@@ -210,29 +214,36 @@ func toPullPolicy(pull bool) string {
 
 // helper function converts the legacy secret syntax to the
 // new secret variable syntax.
-func toSecrets(from *Config) *droneyaml.Secret {
-	secret := &droneyaml.Secret{}
-	secret.Kind = "secret"
-	secret.Type = "general"
-	secret.External = map[string]droneyaml.ExternalData{}
-	for key, val := range from.Secrets {
-		external := droneyaml.ExternalData{}
+func toSecrets(from *Config) []*droneyaml.Secret {
+	var keys []string
+	for key := range from.Secrets {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	var secrets []*droneyaml.Secret
+	for _, key := range keys {
+		val := from.Secrets[key]
+		secret := new(droneyaml.Secret)
+		secret.Name = key
+		secret.Kind = "secret"
+
 		if val.Driver == "vault" {
 			if val.DriverOpts != nil {
-				external.Path = val.DriverOpts["path"]
-				external.Name = val.DriverOpts["key"]
+				secret.Get.Path = val.DriverOpts["path"]
+				secret.Get.Name = val.DriverOpts["key"]
 			}
 		} else if val.Path != "" {
-			external.Path = val.Path
+			secret.Get.Path = val.Path
 		} else {
-			external.Path = val.Vault
+			secret.Get.Path = val.Vault
 		}
-		secret.External[key] = external
+		secrets = append(secrets, secret)
 	}
-	if len(secret.External) == 0 {
+	if len(secrets) == 0 {
 		return nil
 	}
-	return secret
+	return secrets
 }
 
 // helper function converts the legacy vargs syntax to the

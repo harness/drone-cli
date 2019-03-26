@@ -1,3 +1,9 @@
+// Copyright 2019 Drone.IO Inc. All rights reserved.
+// Use of this source code is governed by the Drone Non-Commercial License
+// that can be found in the LICENSE file.
+
+// +build !oss
+
 package converter
 
 import (
@@ -5,19 +11,6 @@ import (
 	"github.com/drone/drone-yaml/yaml/converter/gitlab"
 	"github.com/drone/drone-yaml/yaml/converter/legacy"
 )
-
-// Metadata provides additional metadata used to
-// convert the configuration file format.
-type Metadata struct {
-	// Filename of the configuration file, helps
-	// determine the yaml configuration format.
-	Filename string
-
-	// Ref of the commit use to choose the correct
-	// pipeline if the configuration format defines
-	// multiple pipelines (like Bitbucket)
-	Ref string
-}
 
 // Convert converts the yaml configuration file from
 // the legacy format to the 1.0+ format.

@@ -1,3 +1,17 @@
+// Copyright the Drone Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package yaml
 
 // Pipeline is a resource that defines a continuous
@@ -13,6 +27,7 @@ type Pipeline struct {
 	DependsOn   []string          `json:"depends_on,omitempty" yaml:"depends_on" `
 	Node        map[string]string `json:"node,omitempty" yaml:"node"`
 	Platform    Platform          `json:"platform,omitempty"`
+	PullSecrets []string          `json:"image_pull_secrets,omitempty" yaml:"image_pull_secrets"`
 	Services    []*Container      `json:"services,omitempty"`
 	Steps       []*Container      `json:"steps,omitempty"`
 	Trigger     Conditions        `json:"trigger,omitempty"`
@@ -82,7 +97,7 @@ type (
 	// ResourceObject describes compute resource
 	// requirements.
 	ResourceObject struct {
-		CPU    MilliSize `json:"cpu"`
+		CPU    float64   `json:"cpu" yaml:"cpu"`
 		Memory BytesSize `json:"memory"`
 	}
 
