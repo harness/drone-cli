@@ -12,30 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pretty
+package converter
 
-import (
-	"io"
+// Metadata provides additional metadata used to
+// convert the configuration file format.
+type Metadata struct {
+	// Filename of the configuration file, helps
+	// determine the yaml configuration format.
+	Filename string
 
-	"github.com/drone/drone-yaml/yaml"
-)
-
-// Print pretty prints the manifest.
-func Print(w io.Writer, v *yaml.Manifest) {
-	state := new(baseWriter)
-	for _, r := range v.Resources {
-		switch t := r.(type) {
-		case *yaml.Cron:
-			printCron(state, t)
-		case *yaml.Secret:
-			printSecret(state, t)
-		case *yaml.Signature:
-			printSignature(state, t)
-		case *yaml.Pipeline:
-			printPipeline(state, t)
-		}
-	}
-	state.WriteString("...")
-	state.WriteByte('\n')
-	w.Write(state.Bytes())
+	// Ref of the commit use to choose the correct
+	// pipeline if the configuration format defines
+	// multiple pipelines (like Bitbucket)
+	Ref string
 }

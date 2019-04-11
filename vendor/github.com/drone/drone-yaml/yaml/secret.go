@@ -1,6 +1,23 @@
+// Copyright 2019 Drone IO, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package yaml
 
 import "errors"
+
+// TODO(bradrydzewski) deprecate Secret
+// TODO(bradrydzewski) deprecate ExternalData
 
 type (
 	// Secret is a resource that provides encrypted data
@@ -9,9 +26,19 @@ type (
 		Version string `json:"version,omitempty"`
 		Kind    string `json:"kind,omitempty"`
 		Type    string `json:"type,omitempty"`
+		Name    string `json:"name,omitempty"`
 
-		Data     map[string]string       `json:"data,omitempty"`
-		External map[string]ExternalData `json:"external_data,omitempty" yaml:"external_data"`
+		Data string    `json:"data,omitempty"`
+		Get  SecretGet `json:"get,omitempty"`
+	}
+
+	// SecretGet defines a request to get a secret from
+	// an external sevice at the specified path, or with the
+	// specified name.
+	SecretGet struct {
+		Path string `json:"path,omitempty"`
+		Name string `json:"name,omitempty"`
+		Key  string `json:"key,omitempty"`
 	}
 
 	// ExternalData defines the path and name of external
@@ -30,7 +57,7 @@ func (s *Secret) GetKind() string { return s.Kind }
 
 // Validate returns an error if the secret is invalid.
 func (s *Secret) Validate() error {
-	if len(s.Data) == 0 && len(s.External) == 0 {
+	if len(s.Data) == 0 && len(s.Get.Path) == 0 && len(s.Get.Name) == 0 {
 		return errors.New("yaml: invalid secret resource")
 	}
 	return nil

@@ -1,3 +1,17 @@
+// Copyright 2019 Drone IO, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package runtime
 
 import (
@@ -103,6 +117,12 @@ func (r *Runtime) execGraph(ctx context.Context) error {
 				return ErrCancel
 			default:
 			}
+			r.mu.Lock()
+			skip := r.error == ErrInterrupt
+			r.mu.Unlock()
+			if skip {
+				return nil
+			}
 			err := r.exec(step)
 			if err != nil {
 				r.mu.Lock()
@@ -123,6 +143,14 @@ func (r *Runtime) execGraph(ctx context.Context) error {
 func (r *Runtime) execAll(group []*engine.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
+
+	// if a previous step returned error code 78
+	// the pipeline process skips all subsequent
+	// pipeline steps.
+	if r.error == ErrInterrupt {
+		close(done)
+		return done
+	}
 
 	for _, step := range group {
 		step := step
@@ -223,6 +251,8 @@ func (r *Runtime) exec(step *engine.Step) error {
 			Name: step.Metadata.Name,
 			Code: wait.ExitCode,
 		}
+	} else if wait.ExitCode == 78 {
+		err = ErrInterrupt
 	} else if wait.ExitCode != 0 {
 		err = &ExitError{
 			Name: step.Metadata.Name,

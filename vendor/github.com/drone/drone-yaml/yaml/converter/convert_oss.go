@@ -12,30 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pretty
+// +build oss
 
-import (
-	"io"
+package converter
 
-	"github.com/drone/drone-yaml/yaml"
-)
+// Convert converts the yaml configuration file from
+// the legacy format to the 1.0+ format.
+func Convert(d []byte, m Metadata) ([]byte, error) {
+	return d, nil
+}
 
-// Print pretty prints the manifest.
-func Print(w io.Writer, v *yaml.Manifest) {
-	state := new(baseWriter)
-	for _, r := range v.Resources {
-		switch t := r.(type) {
-		case *yaml.Cron:
-			printCron(state, t)
-		case *yaml.Secret:
-			printSecret(state, t)
-		case *yaml.Signature:
-			printSignature(state, t)
-		case *yaml.Pipeline:
-			printPipeline(state, t)
-		}
-	}
-	state.WriteString("...")
-	state.WriteByte('\n')
-	w.Write(state.Bytes())
+// ConvertString converts the yaml configuration file from
+// the legacy format to the 1.0+ format.
+func ConvertString(s string, m Metadata) (string, error) {
+	return s, nil
 }

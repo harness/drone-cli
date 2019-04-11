@@ -1,3 +1,17 @@
+// Copyright 2019 Drone IO, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package docker
 
 import (
@@ -6,6 +20,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"time"
 
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-runtime/engine/docker/auth"
@@ -24,6 +39,33 @@ type dockerEngine struct {
 // NewEnv returns a new Engine from the environment.
 func NewEnv() (engine.Engine, error) {
 	cli, err := docker.NewEnvClient()
+	if err != nil {
+		return nil, err
+	}
+	return New(cli), nil
+}
+
+// NewEnvBackoff returns a new Engine from the environment. If
+// the connection fails or cannot be reached, the system attempts
+// to reconnect N times before returning an error.
+func NewEnvBackoff(retries int, wait time.Duration) (engine.Engine, error) {
+	var cli *docker.Client
+	var err error
+	for i := 0; i < retries; i++ {
+		if i > 0 {
+			time.Sleep(wait)
+		}
+		cli, err = docker.NewEnvClient()
+		if err == nil {
+			continue
+		}
+		_, err = cli.Ping(context.Background())
+		if err != nil {
+			cli.Close()
+			continue
+		}
+		break
+	}
 	if err != nil {
 		return nil, err
 	}
