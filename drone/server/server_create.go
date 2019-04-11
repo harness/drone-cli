@@ -11,7 +11,7 @@ import (
 
 var serverCreateCmd = cli.Command{
 	Name:   "create",
-	Usage:  "crate a new server",
+	Usage:  "create a new server",
 	Action: serverCreate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
