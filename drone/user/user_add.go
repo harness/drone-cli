@@ -23,7 +23,7 @@ var userAddCmd = cli.Command{
 			Name:  "machine",
 			Usage: "machine account",
 		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:  "token",
 			Usage: "api token",
 		},
