@@ -20,9 +20,7 @@ import "github.com/drone/drone-runtime/engine"
 // of global registry credentials to the container.
 func WithAuths(auths []*engine.DockerAuth) func(*engine.Spec) {
 	return func(spec *engine.Spec) {
-		for _, auth := range auths {
-			spec.Docker.Auths = append(spec.Docker.Auths, auth)
-		}
+		spec.Docker.Auths = append(spec.Docker.Auths, auths...)
 	}
 }
 

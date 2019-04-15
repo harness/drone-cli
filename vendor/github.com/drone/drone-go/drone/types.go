@@ -170,6 +170,7 @@ type (
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
+		Namespace       string `json:"namespace,omitempty"`
 		Name            string `json:"name,omitempty"`
 		Data            string `json:"data,omitempty"`
 		PullRequest     bool   `json:"pull_request,omitempty"`

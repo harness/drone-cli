@@ -27,41 +27,44 @@ import (
 )
 
 const (
-	pathSelf            = "%s/api/user"
-	pathFeed            = "%s/api/user/feed"
-	pathRepos           = "%s/api/user/repos"
-	pathRepo            = "%s/api/repos/%s/%s"
-	pathRepoMove        = "%s/api/repos/%s/%s/move?to=%s"
-	pathChown           = "%s/api/repos/%s/%s/chown"
-	pathRepair          = "%s/api/repos/%s/%s/repair"
-	pathBuilds          = "%s/api/repos/%s/%s/builds?%s"
-	pathBuild           = "%s/api/repos/%s/%s/builds/%v"
-	pathApprove         = "%s/api/repos/%s/%s/builds/%d/approve/%d"
-	pathDecline         = "%s/api/repos/%s/%s/builds/%d/decline/%d"
-	pathPromote         = "%s/api/repos/%s/%s/builds/%d/promote?%s"
-	pathRollback        = "%s/api/repos/%s/%s/builds/%d/rollback?%s"
-	pathJob             = "%s/api/repos/%s/%s/builds/%d/%d"
-	pathLog             = "%s/api/repos/%s/%s/builds/%d/logs/%d/%d"
-	pathRepoSecrets     = "%s/api/repos/%s/%s/secrets"
-	pathRepoSecret      = "%s/api/repos/%s/%s/secrets/%s"
-	pathRepoRegistries  = "%s/api/repos/%s/%s/registry"
-	pathRepoRegistry    = "%s/api/repos/%s/%s/registry/%s"
-	pathEncryptSecret   = "%s/api/repos/%s/%s/encrypt/secret"
-	pathEncryptRegistry = "%s/api/repos/%s/%s/encrypt/registry"
-	pathSign            = "%s/api/repos/%s/%s/sign"
-	pathVerify          = "%s/api/repos/%s/%s/verify"
-	pathCrons           = "%s/api/repos/%s/%s/cron"
-	pathCron            = "%s/api/repos/%s/%s/cron/%s"
-	pathUsers           = "%s/api/users"
-	pathUser            = "%s/api/users/%s"
-	pathQueue           = "%s/api/queue"
-	pathServers         = "%s/api/servers"
-	pathServer          = "%s/api/servers/%s"
-	pathScalerPause     = "%s/api/pause"
-	pathScalerResume    = "%s/api/resume"
-	pathNodes           = "%s/api/nodes"
-	pathNode            = "%s/api/nodes/%s"
-	pathVersion         = "%s/version"
+	pathSelf             = "%s/api/user"
+	pathFeed             = "%s/api/user/feed"
+	pathRepos            = "%s/api/user/repos"
+	pathRepo             = "%s/api/repos/%s/%s"
+	pathRepoMove         = "%s/api/repos/%s/%s/move?to=%s"
+	pathChown            = "%s/api/repos/%s/%s/chown"
+	pathRepair           = "%s/api/repos/%s/%s/repair"
+	pathBuilds           = "%s/api/repos/%s/%s/builds?%s"
+	pathBuild            = "%s/api/repos/%s/%s/builds/%v"
+	pathApprove          = "%s/api/repos/%s/%s/builds/%d/approve/%d"
+	pathDecline          = "%s/api/repos/%s/%s/builds/%d/decline/%d"
+	pathPromote          = "%s/api/repos/%s/%s/builds/%d/promote?%s"
+	pathRollback         = "%s/api/repos/%s/%s/builds/%d/rollback?%s"
+	pathJob              = "%s/api/repos/%s/%s/builds/%d/%d"
+	pathLog              = "%s/api/repos/%s/%s/builds/%d/logs/%d/%d"
+	pathRepoSecrets      = "%s/api/repos/%s/%s/secrets"
+	pathRepoSecret       = "%s/api/repos/%s/%s/secrets/%s"
+	pathRepoRegistries   = "%s/api/repos/%s/%s/registry"
+	pathRepoRegistry     = "%s/api/repos/%s/%s/registry/%s"
+	pathEncryptSecret    = "%s/api/repos/%s/%s/encrypt/secret"
+	pathEncryptRegistry  = "%s/api/repos/%s/%s/encrypt/registry"
+	pathSign             = "%s/api/repos/%s/%s/sign"
+	pathVerify           = "%s/api/repos/%s/%s/verify"
+	pathCrons            = "%s/api/repos/%s/%s/cron"
+	pathCron             = "%s/api/repos/%s/%s/cron/%s"
+	pathSecrets          = "%s/api/secrets"
+	pathSecretsNamespace = "%s/api/secrets/%s"
+	pathSecretsName      = "%s/api/secrets/%s/%s"
+	pathUsers            = "%s/api/users"
+	pathUser             = "%s/api/users/%s"
+	pathQueue            = "%s/api/queue"
+	pathServers          = "%s/api/servers"
+	pathServer           = "%s/api/servers/%s"
+	pathScalerPause      = "%s/api/pause"
+	pathScalerResume     = "%s/api/resume"
+	pathNodes            = "%s/api/nodes"
+	pathNode             = "%s/api/nodes/%s"
+	pathVersion          = "%s/version"
 )
 
 type client struct {
@@ -189,6 +192,13 @@ func (c *client) RepoDisable(owner, name string) error {
 	return err
 }
 
+// RepoDelete permanently deletes a repository.
+func (c *client) RepoDelete(owner, name string) error {
+	uri := fmt.Sprintf(pathRepo+"?remove=true", c.addr, owner, name)
+	err := c.delete(uri)
+	return err
+}
+
 // RepoUpdate updates a repository.
 func (c *client) RepoUpdate(owner, name string, in *RepoPatch) (*Repo, error) {
 	out := new(Repo)
@@ -254,6 +264,14 @@ func (c *client) BuildRestart(owner, name string, build int, params map[string]s
 // BuildCancel cancels the running job.
 func (c *client) BuildCancel(owner, name string, build int) error {
 	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, build)
+	err := c.delete(uri)
+	return err
+}
+
+// BuildPurge purges the build history.
+func (c *client) BuildPurge(owner, name string, before int) error {
+	param := fmt.Sprintf("before=%d", before)
+	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name, param)
 	err := c.delete(uri)
 	return err
 }
@@ -374,6 +392,52 @@ func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
 // SecretDelete deletes a secret.
 func (c *client) SecretDelete(owner, name, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
+	return c.delete(uri)
+}
+
+// OrgSecret returns a secret by name.
+func (c *client) OrgSecret(namespace, name string) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathSecretsName, c.addr, namespace, name)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// OrgSecretList returns a list of all repository secrets.
+func (c *client) OrgSecretList(namespace string) ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathSecretsNamespace, c.addr, namespace)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// OrgSecretListAll returns a list of all repository secrets.
+func (c *client) OrgSecretListAll() ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathSecrets, c.addr)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// OrgSecretCreate creates a registry.
+func (c *client) OrgSecretCreate(namespace string, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathSecretsNamespace, c.addr, namespace)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// OrgSecretUpdate updates a registry.
+func (c *client) OrgSecretUpdate(namespace string, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathSecretsNamespace, c.addr, namespace)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// OrgSecretDelete deletes a secret.
+func (c *client) OrgSecretDelete(namespace, name string) error {
+	uri := fmt.Sprintf(pathSecretsName, c.addr, namespace, name)
 	return c.delete(uri)
 }
 

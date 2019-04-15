@@ -18,9 +18,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"time"
 
 	"github.com/drone/drone-runtime/engine"
 	"github.com/drone/drone-runtime/engine/docker/auth"
@@ -45,31 +45,15 @@ func NewEnv() (engine.Engine, error) {
 	return New(cli), nil
 }
 
-// NewEnvBackoff returns a new Engine from the environment. If
-// the connection fails or cannot be reached, the system attempts
-// to reconnect N times before returning an error.
-func NewEnvBackoff(retries int, wait time.Duration) (engine.Engine, error) {
-	var cli *docker.Client
-	var err error
-	for i := 0; i < retries; i++ {
-		if i > 0 {
-			time.Sleep(wait)
-		}
-		cli, err = docker.NewEnvClient()
-		if err == nil {
-			continue
-		}
-		_, err = cli.Ping(context.Background())
-		if err != nil {
-			cli.Close()
-			continue
-		}
-		break
+// Ping attempts to ping the Docker daemon. An error is returned
+// if the ping attempt fails.
+func Ping(ctx context.Context, engine engine.Engine) error {
+	eng, ok := engine.(*dockerEngine)
+	if !ok {
+		return fmt.Errorf("Not a valid Engine type")
 	}
-	if err != nil {
-		return nil, err
-	}
-	return New(cli), nil
+	_, err := eng.client.Ping(ctx)
+	return err
 }
 
 // New returns a new Engine using the Docker API Client.

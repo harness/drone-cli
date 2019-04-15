@@ -47,6 +47,7 @@ func createStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 			Ports:      toPorts(src),
 			Privileged: src.Privileged,
 			PullPolicy: toPullPolicy(src),
+			User:       src.User,
 		},
 		Envs:         map[string]string{},
 		Files:        nil, // set below

@@ -85,6 +85,7 @@ type (
 		Ports      []*Port    `json:"ports,omitempty"`
 		Privileged bool       `json:"privileged,omitempty"`
 		PullPolicy PullPolicy `json:"pull_policy,omitempty"`
+		User       string     `json:"user"`
 	}
 
 	// File defines a file that should be uploaded or

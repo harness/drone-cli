@@ -77,6 +77,7 @@ type (
 		Resources   *Resources            `json:"resources,omitempty"`
 		Settings    map[string]*Parameter `json:"settings,omitempty"`
 		Shell       string                `json:"shell,omitempty"`
+		User        string                `json:"user,omitempty"`
 		Volumes     []*VolumeMount        `json:"volumes,omitempty"`
 		When        Conditions            `json:"when,omitempty"`
 		WorkingDir  string                `json:"working_dir,omitempty" yaml:"working_dir"`

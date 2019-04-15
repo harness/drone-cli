@@ -20,6 +20,7 @@ import "github.com/drone/drone-yaml/yaml"
 // pipeline step should be skipped.
 type SkipData struct {
 	Branch   string
+	Cron     string
 	Event    string
 	Instance string
 	Ref      string
@@ -33,6 +34,8 @@ func SkipFunc(data SkipData) func(*yaml.Container) bool {
 	return func(container *yaml.Container) bool {
 		switch {
 		case !container.When.Branch.Match(data.Branch):
+			return true
+		case !container.When.Cron.Match(data.Cron):
 			return true
 		case !container.When.Event.Match(data.Event):
 			return true

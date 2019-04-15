@@ -30,6 +30,7 @@ func toConfig(spec *engine.Spec, step *engine.Step) *container.Config {
 		Image:        step.Docker.Image,
 		Labels:       step.Metadata.Labels,
 		WorkingDir:   step.WorkingDir,
+		User:         step.Docker.User,
 		AttachStdin:  false,
 		AttachStdout: true,
 		AttachStderr: true,

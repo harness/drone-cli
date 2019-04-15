@@ -34,6 +34,7 @@ func printContainer(w writer, v *yaml.Container) {
 	}
 
 	w.WriteTagValue("detach", v.Detach)
+	w.WriteTagValue("user", v.User)
 	w.WriteTagValue("shell", v.Shell)
 	w.WriteTagValue("entrypoint", v.Entrypoint)
 	w.WriteTagValue("command", v.Command)

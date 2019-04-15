@@ -68,7 +68,6 @@
   version = "v0.3.3"
 
 [[projects]]
-  branch = "master"
   name = "github.com/drone/drone-go"
   packages = [
     "drone",
@@ -79,7 +78,8 @@
     "plugin/registry",
     "plugin/secret"
   ]
-  revision = "3512a7b31f0f6f218f04bb2c4122fe6f7728af07"
+  revision = "8dcd49ee509e4753547bb738b4c38e4da3b4f72e"
+  version = "v1.0.4"
 
 [[projects]]
   name = "github.com/drone/drone-runtime"
@@ -91,8 +91,8 @@
     "runtime",
     "runtime/term"
   ]
-  revision = "eb52dcd01c595130f0b483c0671e642b79e88ea9"
-  version = "v1.0.4"
+  revision = "7884b81bee212ab864786b581a55e67843303e18"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/drone/drone-yaml"
@@ -113,8 +113,8 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "f53100ba378e7a9f37baab2e6142b2cccff5ff69"
-  version = "v1.0.6"
+  revision = "7441be0ed5a9bd800e56989caad519d0545c2759"
+  version = "v1.0.8"
 
 [[projects]]
   name = "github.com/drone/envsubst"
