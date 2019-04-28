@@ -63,6 +63,10 @@ var Command = cli.Command{
 			Usage: "enable the clone step",
 		},
 		cli.BoolFlag{
+			Name:  "copy",
+			Usage: "copy the host files to volume instead of mounting the current directory to containers",
+		},
+		cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "build is trusted",
 		},
@@ -208,6 +212,13 @@ func exec(c *cli.Context) error {
 		pipeline.Clone.Disable = true
 	}
 
+	if c.Bool("copy") {
+		if c.Bool("clone") {
+			return errors.New("both 'copy' and 'clone' flags can't be set")
+		}
+		pipeline.Clone.CopyHost = true
+	}
+
 	comp := new(compiler.Compiler)
 	comp.PrivilegedFunc = compiler.DindFunc(
 		c.StringSlice("privileged"),
@@ -266,7 +277,11 @@ func exec(c *cli.Context) error {
 	if c.Bool("clone") == false {
 		pwd, _ := os.Getwd()
 		comp.WorkspaceMountFunc = compiler.MountHostWorkspace
-		comp.WorkspaceFunc = compiler.CreateHostWorkspace(pwd)
+		if c.Bool("copy") == false {
+			comp.WorkspaceFunc = compiler.CreateHostWorkspace(pwd)
+		} else {
+			comp.WorkspaceFunc = compiler.CreateCopyHostWorkspace()
+		}
 	}
 	comp.TransformFunc = transform.Combine(transforms...)
 	ir := comp.Compile(pipeline)
