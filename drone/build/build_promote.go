@@ -1,7 +1,9 @@
 package build
 
 import (
+	"os"
 	"strconv"
+	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/urfave/cli"
@@ -16,6 +18,12 @@ var buildPromoteCmd = cli.Command{
 		cli.StringSliceFlag{
 			Name:  "param, p",
 			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
+		},
+		cli.StringFlag{
+			Name:   "format",
+			Usage:  "format output",
+			Value:  tmplBuildInfo,
+			Hidden: true,
 		},
 	},
 }
@@ -38,10 +46,14 @@ func buildPromote(c *cli.Context) (err error) {
 		return err
 	}
 
-	_, err = client.Promote(owner, name, number, target, params)
+	build, err := client.Promote(owner, name, number, target, params)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	tmpl, err := template.New("_").Parse(c.String("format"))
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, build)
 }
