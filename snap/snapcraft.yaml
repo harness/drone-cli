@@ -47,7 +47,7 @@ plugin: nil
       go build --ldflags "-s -w \
         -X 'github.com/drone/drone-cli/version.GitCommit=$(git rev-list -1 HEAD)' \
         -X 'github.com/drone/drone-cli/version.Version=$(git describe --tags --abbrev=0)'" \
-        -a -installsuffix cgo -o $SNAPCRAFT_PART_INSTALL/bin/drone
+        -a -installsuffix cgo -o $SNAPCRAFT_PART_INSTALL/bin/drone-cli
     build-snaps:
       - go
     build-packages:
