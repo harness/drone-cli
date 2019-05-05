@@ -30,7 +30,7 @@ var serverListCmd = cli.Command{
 		},
 		cli.BoolTFlag{
 			Name:  "H",
-			Usage: "include columne headers",
+			Usage: "include column headers",
 		},
 		cli.StringFlag{
 			Name:   "format",
