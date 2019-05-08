@@ -1,11 +1,11 @@
 // Copyright 2019 Drone IO, Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ type (
 func (p *Parameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	d := new(parameter)
 	err := unmarshal(d)
-	if err == nil && d.Secret != ""{
+	if err == nil && d.Secret != "" {
 		p.Secret = d.Secret
 		return nil
 	}
@@ -42,4 +42,17 @@ func (p *Parameter) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	err = unmarshal(&i)
 	p.Value = i
 	return err
+}
+
+// MarshalYAML implements yaml marshalling.
+func (p *Parameter) MarshalYAML() (interface{}, error) {
+	if p.Secret != "" {
+		m := map[string]interface{}{}
+		m["from_secret"] = p.Secret
+		return m, nil
+	}
+	if p.Value != "" {
+		return p.Value, nil
+	}
+	return nil, nil
 }

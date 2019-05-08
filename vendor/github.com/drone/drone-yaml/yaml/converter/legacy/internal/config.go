@@ -91,6 +91,40 @@ func Convert(d []byte) ([]byte, error) {
 			current := pipeline
 			current.Name = fmt.Sprintf("matrix-%d", index+1)
 
+			services := make([]*droneyaml.Container, 0)
+			for _, service := range current.Services {
+				if len(service.When.Matrix) == 0 {
+					services = append(services, service)
+					continue
+				}
+
+				for whenKey, whenValue := range service.When.Matrix {
+					for envKey, envValue := range environ {
+						if whenKey == envKey && whenValue == envValue {
+							services = append(services, service)
+						}
+					}
+				}
+			}
+			current.Services = services
+
+			steps := make([]*droneyaml.Container, 0)
+			for _, step := range current.Steps {
+				if len(step.When.Matrix) == 0 {
+					steps = append(steps, step)
+					continue
+				}
+
+				for whenKey, whenValue := range step.When.Matrix {
+					for envKey, envValue := range environ {
+						if whenKey == envKey && whenValue == envValue {
+							steps = append(steps, step)
+						}
+					}
+				}
+			}
+			current.Steps = steps
+
 			marshaled, err := yaml.Marshal(&current)
 
 			if err != nil {
@@ -180,6 +214,7 @@ func toConditions(from Constraints) droneyaml.Conditions {
 			Include: from.Status.Include,
 			Exclude: from.Status.Exclude,
 		},
+		Matrix: from.Matrix,
 	}
 }
 

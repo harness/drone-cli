@@ -42,3 +42,16 @@ func (v *Variable) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	v.Secret = d.Secret
 	return err
 }
+
+// MarshalYAML implements yaml marshalling.
+func (v *Variable) MarshalYAML() (interface{}, error) {
+	if v.Secret != "" {
+		m := map[string]interface{}{}
+		m["from_secret"] = v.Secret
+		return m, nil
+	}
+	if v.Value != "" {
+		return v.Value, nil
+	}
+	return nil, nil
+}
