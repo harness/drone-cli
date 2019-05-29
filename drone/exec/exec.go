@@ -136,7 +136,7 @@ var Command = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "repo",
-			Usage: "git repository name (e.g. ocotcat/hello-world)",
+			Usage: "git repository name (e.g. octocat/hello-world)",
 		},
 		cli.StringFlag{
 			Name:  "deploy-to",
