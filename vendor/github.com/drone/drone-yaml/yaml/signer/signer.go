@@ -9,7 +9,7 @@ import (
 
 	"github.com/drone/drone-yaml/yaml"
 
-	goyaml "gopkg.in/yaml.v2"
+	goyaml "github.com/buildkite/yaml"
 )
 
 // ErrInvalidKey is returned when the key is missing or

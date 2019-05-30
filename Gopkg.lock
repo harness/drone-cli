@@ -44,6 +44,12 @@
   version = "v1.1.1"
 
 [[projects]]
+  name = "github.com/buildkite/yaml"
+  packages = ["."]
+  revision = "0caa5f0796e36057e59d6782832a9c774f457842"
+  version = "v2.2.0"
+
+[[projects]]
   name = "github.com/docker/distribution"
   packages = [
     "digestset",
@@ -68,6 +74,7 @@
   version = "v0.3.3"
 
 [[projects]]
+  branch = "master"
   name = "github.com/drone/drone-go"
   packages = [
     "drone",
@@ -78,8 +85,7 @@
     "plugin/registry",
     "plugin/secret"
   ]
-  revision = "8dcd49ee509e4753547bb738b4c38e4da3b4f72e"
-  version = "v1.0.4"
+  revision = "4d6116b897baf4f687b99d6960bd009a1945fdc1"
 
 [[projects]]
   name = "github.com/drone/drone-runtime"
@@ -113,8 +119,8 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "7441be0ed5a9bd800e56989caad519d0545c2759"
-  version = "v1.0.8"
+  revision = "8ea6eb1cc335afeb4eae129d92d77d261e7173d0"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -231,6 +237,12 @@
   packages = ["."]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
+
+[[projects]]
+  branch = "v2"
+  name = "github.com/vinzenz/yaml"
+  packages = ["."]
+  revision = "35282ab071f92dad183b70e7ed117f1ab244c880"
 
 [[projects]]
   branch = "master"

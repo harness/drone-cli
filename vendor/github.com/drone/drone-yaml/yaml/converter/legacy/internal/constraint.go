@@ -14,6 +14,7 @@ type (
 		Event       Constraint
 		Branch      Constraint
 		Status      Constraint
+		Matrix      map[string]string
 	}
 
 	// Constraint defines a runtime constraint.

@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/buildkite/yaml"
 	json "github.com/ghodss/yaml"
-	"gopkg.in/yaml.v2"
 )
 
 // helper funciton encodes an interface value as a string.

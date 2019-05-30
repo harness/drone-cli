@@ -65,7 +65,7 @@ func isZero(v interface{}) bool {
 
 func isQuoted(b rune) bool {
 	switch b {
-	case '#', ',', '[', ']', '{', '}', '&', '*', '!', '|', '>', '\'', '"', '%', '@', '`':
+	case '#', ',', '[', ']', '{', '}', '&', '*', '!', '\'', '"', '%', '@', '`':
 		return true
 	case '\a', '\b', '\f', '\n', '\r', '\t', '\v':
 		return true

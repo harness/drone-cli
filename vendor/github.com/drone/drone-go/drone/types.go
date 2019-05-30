@@ -42,29 +42,33 @@ type (
 
 	// Repo represents a repository.
 	Repo struct {
-		ID         int64  `json:"id"`
-		UID        string `json:"uid"`
-		UserID     int64  `json:"user_id"`
-		Namespace  string `json:"namespace"`
-		Name       string `json:"name"`
-		Slug       string `json:"slug"`
-		SCM        string `json:"scm"`
-		HTTPURL    string `json:"git_http_url"`
-		SSHURL     string `json:"git_ssh_url"`
-		Link       string `json:"link"`
-		Branch     string `json:"default_branch"`
-		Private    bool   `json:"private"`
-		Visibility string `json:"visibility"`
-		Active     bool   `json:"active"`
-		Config     string `json:"config_path"`
-		Trusted    bool   `json:"trusted"`
-		Protected  bool   `json:"protected"`
-		Timeout    int64  `json:"timeout"`
-		Counter    int64  `json:"counter"`
-		Synced     int64  `json:"synced"`
-		Created    int64  `json:"created"`
-		Updated    int64  `json:"updated"`
-		Version    int64  `json:"version"`
+		ID          int64  `json:"id"`
+		UID         string `json:"uid"`
+		UserID      int64  `json:"user_id"`
+		Namespace   string `json:"namespace"`
+		Name        string `json:"name"`
+		Slug        string `json:"slug"`
+		SCM         string `json:"scm"`
+		HTTPURL     string `json:"git_http_url"`
+		SSHURL      string `json:"git_ssh_url"`
+		Link        string `json:"link"`
+		Branch      string `json:"default_branch"`
+		Private     bool   `json:"private"`
+		Visibility  string `json:"visibility"`
+		Active      bool   `json:"active"`
+		Config      string `json:"config_path"`
+		Trusted     bool   `json:"trusted"`
+		Protected   bool   `json:"protected"`
+		IgnoreForks bool   `json:"ignore_forks"`
+		IgnorePulls bool   `json:"ignore_pull_requests"`
+		Timeout     int64  `json:"timeout"`
+		Counter     int64  `json:"counter"`
+		Synced      int64  `json:"synced"`
+		Created     int64  `json:"created"`
+		Updated     int64  `json:"updated"`
+		Version     int64  `json:"version"`
+		Signer      string `json:"signer,omitempty"`
+		Secret      string `json:"secret,omitempty"`
 	}
 
 	// RepoPatch defines a repository patch request.
@@ -104,6 +108,7 @@ type (
 		AuthorAvatar string            `json:"author_avatar"`
 		Sender       string            `json:"sender"`
 		Params       map[string]string `json:"params,omitempty"`
+		Cron         string            `json:"cron,omitempty"`
 		Deploy       string            `json:"deploy_to,omitempty"`
 		Started      int64             `json:"started"`
 		Finished     int64             `json:"finished"`
@@ -130,6 +135,7 @@ type (
 		Arch      string            `json:"arch"`
 		Variant   string            `json:"variant,omitempty"`
 		Kernel    string            `json:"kernel,omitempty"`
+		Limit     int               `json:"limit,omitempty"`
 		Started   int64             `json:"started"`
 		Stopped   int64             `json:"stopped"`
 		Created   int64             `json:"created"`
@@ -248,6 +254,14 @@ type (
 		Commit  string `json:"commit,omitempty"`
 	}
 
+	// System stores system information.
+	System struct {
+		Proto   string `json:"proto,omitempty"`
+		Host    string `json:"host,omitempty"`
+		Link    string `json:"link,omitempty"`
+		Version string `json:"version,omitempty"`
+	}
+
 	// Node provides node details.
 	Node struct {
 		ID        int64             `json:"id"`
@@ -297,6 +311,14 @@ type (
 		TLSCert   *[]byte            `json:"tls_cert"`
 		Paused    *bool              `json:"paused"`
 		Protected *bool              `json:"protected"`
+	}
+
+	// Netrc contains login and initialization information used
+	// by an automated login process.
+	Netrc struct {
+		Machine  string `json:"machine"`
+		Login    string `json:"login"`
+		Password string `json:"password"`
 	}
 )
 

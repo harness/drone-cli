@@ -14,7 +14,7 @@ import (
 	"github.com/drone/drone-yaml/yaml/converter/legacy/matrix"
 	"github.com/drone/drone-yaml/yaml/pretty"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
 
 // Config provides the high-level configuration.
@@ -39,6 +39,13 @@ type Config struct {
 // Convert converts the yaml configuration file from
 // the legacy format to the 1.0+ format.
 func Convert(d []byte) ([]byte, error) {
+	// hack: this is a hack to support teams migrating
+	// from 0.8 to 1.0 that are using yaml merge keys.
+	// it can be removed in a future version.
+	if hasMergeKeys(d) {
+		d, _ = expandMergeKeys(d)
+	}
+
 	from := new(Config)
 	err := yaml.Unmarshal(d, from)
 
@@ -90,6 +97,40 @@ func Convert(d []byte) ([]byte, error) {
 		for index, environ := range axes {
 			current := pipeline
 			current.Name = fmt.Sprintf("matrix-%d", index+1)
+
+			services := make([]*droneyaml.Container, 0)
+			for _, service := range current.Services {
+				if len(service.When.Matrix) == 0 {
+					services = append(services, service)
+					continue
+				}
+
+				for whenKey, whenValue := range service.When.Matrix {
+					for envKey, envValue := range environ {
+						if whenKey == envKey && whenValue == envValue {
+							services = append(services, service)
+						}
+					}
+				}
+			}
+			current.Services = services
+
+			steps := make([]*droneyaml.Container, 0)
+			for _, step := range current.Steps {
+				if len(step.When.Matrix) == 0 {
+					steps = append(steps, step)
+					continue
+				}
+
+				for whenKey, whenValue := range step.When.Matrix {
+					for envKey, envValue := range environ {
+						if whenKey == envKey && whenValue == envValue {
+							steps = append(steps, step)
+						}
+					}
+				}
+			}
+			current.Steps = steps
 
 			marshaled, err := yaml.Marshal(&current)
 
@@ -180,6 +221,7 @@ func toConditions(from Constraints) droneyaml.Conditions {
 			Include: from.Status.Include,
 			Exclude: from.Status.Exclude,
 		},
+		Matrix: from.Matrix,
 	}
 }
 
