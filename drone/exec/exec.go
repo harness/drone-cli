@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"os/user"
 	"strconv"
 	"time"
 
@@ -99,6 +100,11 @@ var Command = cli.Command{
 				"plugins/gcr",
 				"plugins/ecr",
 			},
+		},
+		cli.StringFlag{
+			Name:  "user",
+			Usage: "running container with user[:group] or uid[:gid]",
+			Value: "",
 		},
 
 		//
@@ -270,6 +276,18 @@ func exec(c *cli.Context) error {
 	}
 	comp.TransformFunc = transform.Combine(transforms...)
 	ir := comp.Compile(pipeline)
+
+	idstr := c.String("user")
+	if idstr == "" {
+		u, err := user.Current()
+		if err != nil {
+			return err
+		}
+		idstr = u.Uid + ":" + u.Gid
+	}
+	for _, step := range ir.Steps {
+		step.Docker.User = idstr
+	}
 
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
