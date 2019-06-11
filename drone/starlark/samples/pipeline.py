@@ -1,7 +1,7 @@
 # cd drone/starlark/samples
 # drone script --source pipeline.py --stdout
 
-load('docker.py', 'docker');
+load('docker.py', 'docker')
 
 def build(version):
   return {
@@ -13,7 +13,9 @@ def build(version):
     ]
   }
 
-def main():
+def main(ctx):
+  if ctx['repo']['name'] == 'hello-world':
+    print('hello-world')
   return {
     'kind': 'pipeline',
     'name': 'default',

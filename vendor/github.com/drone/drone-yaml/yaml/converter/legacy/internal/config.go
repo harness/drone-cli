@@ -61,6 +61,9 @@ func Convert(d []byte) ([]byte, error) {
 
 	pipeline.Workspace.Base = from.Workspace.Base
 	pipeline.Workspace.Path = from.Workspace.Path
+	if pipeline.Workspace.Path == "." {
+		pipeline.Workspace.Path = ""
+	}
 
 	if len(from.Clone.Containers) != 0 {
 		pipeline.Clone.Disable = true
@@ -81,6 +84,14 @@ func Convert(d []byte) ([]byte, error) {
 		pipeline.Steps = append(pipeline.Steps,
 			toContainer(container),
 		)
+	}
+
+	names := map[string]struct{}{}
+	for i, step := range pipeline.Steps {
+		if _, ok := names[step.Name]; ok {
+			step.Name = fmt.Sprintf("%s_%d", step.Name, i)
+		}
+		names[step.Name] = struct{}{}
 	}
 
 	pipeline.Volumes = toVolumes(from)

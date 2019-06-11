@@ -10,9 +10,14 @@ import (
 	"github.com/vinzenz/yaml"
 )
 
+type temporary struct {
+	Attributes map[string]interface{} `yaml:",inline"`
+	Pipeline   yaml.MapSlice          `yaml:"pipeline"`
+}
+
 // this is a helper function that expands merge keys
 func expandMergeKeys(b []byte) ([]byte, error) {
-	v := map[interface{}]interface{}{}
+	v := new(temporary)
 	if err := yaml.Unmarshal(b, v); err != nil {
 		return b, err
 	}

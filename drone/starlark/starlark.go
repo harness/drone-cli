@@ -45,6 +45,21 @@ var Command = cli.Command{
 			Name:  "stdout",
 			Usage: "Write output to stdout",
 		},
+		//
+		// Drone Parameters
+		//
+		cli.StringFlag{
+			Name:  "repo.name",
+			Usage: "repository name",
+		},
+		cli.StringFlag{
+			Name:  "repo.namespace",
+			Usage: "repository namespace",
+		},
+		cli.StringFlag{
+			Name:  "repo.slug",
+			Usage: "repository slug",
+		},
 	},
 }
 
@@ -76,7 +91,16 @@ func generate(c *cli.Context) error {
 		return fmt.Errorf("main must be a function")
 	}
 
-	mainVal, err = starlark.Call(thread, main, nil, nil)
+	// TODO this needs to be flushed out.
+	dict := starlark.Dict{}
+	repo := starlark.Dict{}
+	repo.SetKey(starlark.String("name"), starlark.String(c.String("repo.name")))
+	repo.SetKey(starlark.String("namespace"), starlark.String(c.String("repo.namespace")))
+	repo.SetKey(starlark.String("slug"), starlark.String(c.String("repo.slug")))
+	dict.SetKey(starlark.String("repo"), &repo)
+
+	args := starlark.Tuple([]starlark.Value{&dict})
+	mainVal, err = starlark.Call(thread, main, args, nil)
 	if err != nil {
 		return err
 	}
@@ -101,6 +125,16 @@ func generate(c *cli.Context) error {
 		}
 	default:
 		return fmt.Errorf("invalid return type (got a %s)", mainVal.Type())
+	}
+
+	// if the user disables pretty printing, the yaml is printed
+	// to the console or written to the file in json format.
+	if c.BoolT("format") == false {
+		if c.Bool("stdout") {
+			io.Copy(os.Stdout, buf)
+			return nil
+		}
+		return ioutil.WriteFile(target, buf.Bytes(), 0644)
 	}
 
 	manifest, err := yaml.Parse(buf)

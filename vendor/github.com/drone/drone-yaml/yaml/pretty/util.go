@@ -14,7 +14,11 @@
 
 package pretty
 
-import "github.com/drone/drone-yaml/yaml"
+import (
+	"strings"
+
+	"github.com/drone/drone-yaml/yaml"
+)
 
 func isPrimative(v interface{}) bool {
 	switch v.(type) {
@@ -63,15 +67,68 @@ func isZero(v interface{}) bool {
 	}
 }
 
-func isQuoted(b rune) bool {
+func isEscapeCode(b rune) bool {
 	switch b {
-	case '#', ',', '[', ']', '{', '}', '&', '*', '!', '\'', '"', '%', '@', '`':
-		return true
 	case '\a', '\b', '\f', '\n', '\r', '\t', '\v':
 		return true
 	default:
 		return false
 	}
+}
+
+func isQuoted(s string) bool {
+	// if the string is empty it should be quoted.
+	if len(s) == 0 {
+		return true
+	}
+
+	var r0, r1 byte
+	t := strings.TrimSpace(s)
+
+	// if the trimmed string does not match the string, it
+	// has starting or tailing white space and therefore
+	// needs to be quoted to preserve the whitespace
+	if t != s {
+		return true
+	}
+
+	if len(t) > 0 {
+		r0 = t[0]
+	}
+	if len(t) > 1 {
+		r1 = t[1]
+	}
+
+	switch r0 {
+	// if the yaml starts with any of these characters
+	// the string should be quoted.
+	case ',', '[', ']', '{', '}', '*', '"', '\'', '%', '@', '`', '|', '>', '#':
+		return true
+
+	case '&', '!', '-', ':', '?':
+		// if the yaml starts with any of these characters,
+		// followed by whitespace, the string should be quoted.
+		if r1 == ' ' {
+			return true
+		}
+	}
+
+	var prev rune
+	for _, b := range s {
+		switch {
+		case isEscapeCode(b):
+			return true
+		case b == ' ' && prev == ':':
+			return true
+		case b == '#' && prev == ' ':
+			return true
+		}
+		prev = b
+	}
+
+	// if the string ends in : it should be quoted otherwise
+	// it is interpreted as an object.
+	return strings.HasSuffix(t, ":")
 }
 
 func chunk(s string, chunkSize int) []string {

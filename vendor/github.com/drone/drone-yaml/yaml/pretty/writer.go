@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/drone/drone-yaml/yaml"
 )
@@ -196,28 +195,11 @@ func writeEncode(w writer, v string) {
 		w.WriteByte('"')
 		return
 	}
-	trimmed := strings.TrimSpace(v)
-	if strings.HasPrefix(trimmed, "| ") {
+	if isQuoted(v) {
 		fmt.Fprintf(w, "%q", v)
-		return
+	} else {
+		w.WriteString(v)
 	}
-	if strings.HasPrefix(trimmed, "> ") {
-		fmt.Fprintf(w, "%q", v)
-		return
-	}
-	var prev rune
-	for _, b := range v {
-		if isQuoted(b) {
-			fmt.Fprintf(w, "%q", v)
-			return
-		}
-		if b == ' ' && prev == ':' {
-			fmt.Fprintf(w, "%q", v)
-			return
-		}
-		prev = b
-	}
-	w.WriteString(v)
 }
 
 func writeValue(w writer, v interface{}) {
