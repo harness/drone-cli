@@ -14,11 +14,17 @@ def build(version):
   }
 
 def main(ctx):
-  if ctx['repo']['name'] == 'hello-world':
-    print('hello-world')
+  if ctx['build']['message'].find('[skip build]'):
+    return {
+      'kind': 'pipeline',
+      'name': 'publish_only',
+      'steps': [
+        docker('octocat/hello-world'),
+      ],
+    }
   return {
     'kind': 'pipeline',
-    'name': 'default',
+    'name': 'build_and_publish',
     'steps': [
       build('1.11'),
       build('1.12'),

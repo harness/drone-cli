@@ -60,6 +60,40 @@ var Command = cli.Command{
 			Name:  "repo.slug",
 			Usage: "repository slug",
 		},
+
+		cli.StringFlag{
+			Name:  "build.event",
+			Usage: "build event",
+			Value: "push",
+		},
+		cli.StringFlag{
+			Name:  "build.branch",
+			Usage: "build branch",
+			Value: "master",
+		},
+		cli.StringFlag{
+			Name:  "build.source",
+			Usage: "build source branch",
+			Value: "master",
+		},
+		cli.StringFlag{
+			Name:  "build.target",
+			Usage: "build target branch",
+			Value: "master",
+		},
+		cli.StringFlag{
+			Name:  "build.ref",
+			Usage: "build ref",
+			Value: "refs/heads/master",
+		},
+		cli.StringFlag{
+			Name:  "build.commit",
+			Usage: "build commit sha",
+		},
+		cli.StringFlag{
+			Name:  "build.message",
+			Usage: "build commit message",
+		},
 	},
 }
 
@@ -98,6 +132,16 @@ func generate(c *cli.Context) error {
 	repo.SetKey(starlark.String("namespace"), starlark.String(c.String("repo.namespace")))
 	repo.SetKey(starlark.String("slug"), starlark.String(c.String("repo.slug")))
 	dict.SetKey(starlark.String("repo"), &repo)
+
+	build := starlark.Dict{}
+	build.SetKey(starlark.String("event"), starlark.String(c.String("build.event")))
+	build.SetKey(starlark.String("branch"), starlark.String(c.String("build.branch")))
+	build.SetKey(starlark.String("source"), starlark.String(c.String("build.source_branch")))
+	build.SetKey(starlark.String("target"), starlark.String(c.String("build.target_branch")))
+	build.SetKey(starlark.String("ref"), starlark.String(c.String("build.ref")))
+	build.SetKey(starlark.String("commit"), starlark.String(c.String("build.commit")))
+	build.SetKey(starlark.String("message"), starlark.String(c.String("build.message")))
+	dict.SetKey(starlark.String("build"), &build)
 
 	args := starlark.Tuple([]starlark.Value{&dict})
 	mainVal, err = starlark.Call(thread, main, args, nil)
