@@ -18,6 +18,7 @@ import filepath "github.com/bmatcuk/doublestar"
 
 // Conditions defines a group of conditions.
 type Conditions struct {
+	Action   Condition         `json:"action,omitempty"`
 	Cron     Condition         `json:"cron,omitempty"`
 	Ref      Condition         `json:"ref,omitempty"`
 	Repo     Condition         `json:"repo,omitempty"`

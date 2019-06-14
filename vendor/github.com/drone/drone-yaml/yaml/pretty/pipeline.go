@@ -122,6 +122,9 @@ func printConcurrency(w writer, v yaml.Concurrency) {
 func printConditions(w writer, name string, v yaml.Conditions) {
 	w.WriteTag(name)
 	w.IndentIncrease()
+	if !isConditionEmpty(v.Action) {
+		printCondition(w, "action", v.Action)
+	}
 	if !isConditionEmpty(v.Branch) {
 		printCondition(w, "branch", v.Branch)
 	}
@@ -276,7 +279,9 @@ func isConcurrencyEmpty(v yaml.Concurrency) bool {
 // helper function returns true if the conditions
 // object is empty.
 func isConditionsEmpty(v yaml.Conditions) bool {
-	return isConditionEmpty(v.Branch) &&
+	return isConditionEmpty(v.Action) &&
+		isConditionEmpty(v.Branch) &&
+		isConditionEmpty(v.Cron) &&
 		isConditionEmpty(v.Event) &&
 		isConditionEmpty(v.Instance) &&
 		isConditionEmpty(v.Paths) &&

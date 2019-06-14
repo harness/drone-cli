@@ -120,7 +120,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "a338c245d7d71d0a863636fdbdb6439317e3cc9d"
+  revision = "4889634ea9ae8f5fc81a1ea6c63f85d0b7572fbd"
 
 [[projects]]
   name = "github.com/drone/envsubst"
@@ -252,7 +252,6 @@
     "internal/spell",
     "resolve",
     "starlark",
-    "starlarkstruct",
     "syntax"
   ]
   revision = "4eb76950c5f02ec5bcfd3ca898231a6543942fd9"
@@ -315,6 +314,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8e7820dcb75c642426ea45a3252bc878be6e60d2d4db7d12aea95c00932d3d4f"
+  inputs-digest = "c30d9d882ed28c6f89a05c22d8c5c553e439349f0d56856ccf8f9e1c6a7f2c96"
   solver-name = "gps-cdcl"
   solver-version = 1
