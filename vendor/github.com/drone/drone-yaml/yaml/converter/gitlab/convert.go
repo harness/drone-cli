@@ -12,7 +12,7 @@ import (
 	"github.com/drone/drone-yaml/yaml/compiler/image"
 	"github.com/drone/drone-yaml/yaml/pretty"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
 
 // Convert converts the yaml configuration file from

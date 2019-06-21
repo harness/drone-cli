@@ -195,13 +195,11 @@ func writeEncode(w writer, v string) {
 		w.WriteByte('"')
 		return
 	}
-	for _, b := range v {
-		if isQuoted(b) {
-			fmt.Fprintf(w, "%q", v)
-			return
-		}
+	if isQuoted(v) {
+		fmt.Fprintf(w, "%q", v)
+	} else {
+		w.WriteString(v)
 	}
-	w.WriteString(v)
 }
 
 func writeValue(w writer, v interface{}) {

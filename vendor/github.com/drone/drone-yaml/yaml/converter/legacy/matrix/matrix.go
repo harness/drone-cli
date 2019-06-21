@@ -7,7 +7,7 @@ package matrix
 import (
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
 
 const (

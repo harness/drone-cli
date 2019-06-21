@@ -17,12 +17,15 @@ package yaml
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
+
+var errorMissingKind = errors.New("yaml: missing kind attribute")
 
 // Parse parses the configuration from io.Reader r.
 func Parse(r io.Reader) (*Manifest, error) {
@@ -38,6 +41,9 @@ func Parse(r io.Reader) (*Manifest, error) {
 		resource, err := parseRaw(raw)
 		if err != nil {
 			return nil, err
+		}
+		if resource.GetKind() == "" {
+			return nil, errorMissingKind
 		}
 		manifest.Resources = append(
 			manifest.Resources,

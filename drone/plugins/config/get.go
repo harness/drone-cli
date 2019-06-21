@@ -23,10 +23,12 @@ var configFindCmd = cli.Command{
 		cli.StringFlag{
 			Name:  "source",
 			Usage: "source branch",
+			Value: "master",
 		},
 		cli.StringFlag{
 			Name:  "target",
 			Usage: "target branch",
+			Value: "master",
 		},
 		cli.StringFlag{
 			Name:  "before",
@@ -35,6 +37,11 @@ var configFindCmd = cli.Command{
 		cli.StringFlag{
 			Name:  "after",
 			Usage: "commit sha after the change",
+		},
+		cli.StringFlag{
+			Name:  "path",
+			Usage: "configuration file path",
+			Value: ".drone.jsonnet",
 		},
 
 		// TODO(bradrydzewski) these parameters should
@@ -69,6 +76,7 @@ func configFind(c *cli.Context) error {
 		Namespace: owner,
 		Name:      name,
 		Slug:      slug,
+		Config:    c.String("path"),
 	}
 
 	build := drone.Build{

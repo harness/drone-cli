@@ -7,7 +7,7 @@ package yaml
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
 
 type (

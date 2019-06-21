@@ -14,7 +14,7 @@ import (
 	"github.com/drone/drone-yaml/yaml/converter/legacy/matrix"
 	"github.com/drone/drone-yaml/yaml/pretty"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
 
 // Config provides the high-level configuration.
@@ -39,6 +39,13 @@ type Config struct {
 // Convert converts the yaml configuration file from
 // the legacy format to the 1.0+ format.
 func Convert(d []byte) ([]byte, error) {
+	// hack: this is a hack to support teams migrating
+	// from 0.8 to 1.0 that are using yaml merge keys.
+	// it can be removed in a future version.
+	if hasMergeKeys(d) {
+		d, _ = expandMergeKeys(d)
+	}
+
 	from := new(Config)
 	err := yaml.Unmarshal(d, from)
 
@@ -54,6 +61,9 @@ func Convert(d []byte) ([]byte, error) {
 
 	pipeline.Workspace.Base = from.Workspace.Base
 	pipeline.Workspace.Path = from.Workspace.Path
+	if pipeline.Workspace.Path == "." {
+		pipeline.Workspace.Path = ""
+	}
 
 	if len(from.Clone.Containers) != 0 {
 		pipeline.Clone.Disable = true
@@ -74,6 +84,14 @@ func Convert(d []byte) ([]byte, error) {
 		pipeline.Steps = append(pipeline.Steps,
 			toContainer(container),
 		)
+	}
+
+	names := map[string]struct{}{}
+	for i, step := range pipeline.Steps {
+		if _, ok := names[step.Name]; ok {
+			step.Name = fmt.Sprintf("%s_%d", step.Name, i)
+		}
+		names[step.Name] = struct{}{}
 	}
 
 	pipeline.Volumes = toVolumes(from)

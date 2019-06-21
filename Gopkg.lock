@@ -52,7 +52,12 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:4189ee6a3844f555124d9d2656fe7af02fca961c2a9bad9074789df13a0c62e0"
+  name = "github.com/buildkite/yaml"
+  packages = ["."]
+  revision = "0caa5f0796e36057e59d6782832a9c774f457842"
+  version = "v2.2.0"
+
+[[projects]]
   name = "github.com/docker/distribution"
   packages = [
     "digestset",
@@ -83,7 +88,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0de8394356614e57f2d709259cdb433722ca31bd264f71a9616b90c7cde6c2ef"
   name = "github.com/drone/drone-go"
   packages = [
     "drone",
@@ -94,7 +98,6 @@
     "plugin/registry",
     "plugin/secret",
   ]
-  pruneopts = "UT"
   revision = "4d6116b897baf4f687b99d6960bd009a1945fdc1"
 
 [[projects]]
@@ -114,7 +117,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:01bb5feb8af0ddf376b6cc4072bb23d5383c5aafc8083a4ab62f29c10cb05d83"
   name = "github.com/drone/drone-yaml"
   packages = [
     "yaml",
@@ -133,8 +135,7 @@
     "yaml/pretty",
     "yaml/signer",
   ]
-  pruneopts = "UT"
-  revision = "115b2ff5f99e0fb30055a173cfe2259399eec722"
+  revision = "4889634ea9ae8f5fc81a1ea6c63f85d0b7572fbd"
 
 [[projects]]
   digest = "1:62963b8ba778d17f8c4678b2586ad2e0cd4d3e2f40e16ba1fe31c08e2c6a5dec"
@@ -287,6 +288,12 @@
   version = "v1.20.0"
 
 [[projects]]
+  branch = "v2"
+  name = "github.com/vinzenz/yaml"
+  packages = ["."]
+  revision = "35282ab071f92dad183b70e7ed117f1ab244c880"
+
+[[projects]]
   branch = "master"
   digest = "1:4aafff6a0b6999c4f5b618db52e17f8042409329036b85b6ab7fcce57514e9e9"
   name = "go.starlark.net"
@@ -370,37 +377,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/docker/go-units",
-    "github.com/drone/drone-go/drone",
-    "github.com/drone/drone-go/plugin/config",
-    "github.com/drone/drone-go/plugin/registry",
-    "github.com/drone/drone-go/plugin/secret",
-    "github.com/drone/drone-runtime/engine",
-    "github.com/drone/drone-runtime/engine/docker",
-    "github.com/drone/drone-runtime/runtime",
-    "github.com/drone/drone-runtime/runtime/term",
-    "github.com/drone/drone-yaml/yaml",
-    "github.com/drone/drone-yaml/yaml/compiler",
-    "github.com/drone/drone-yaml/yaml/compiler/transform",
-    "github.com/drone/drone-yaml/yaml/converter",
-    "github.com/drone/drone-yaml/yaml/linter",
-    "github.com/drone/drone-yaml/yaml/pretty",
-    "github.com/drone/drone-yaml/yaml/signer",
-    "github.com/drone/envsubst",
-    "github.com/drone/signal",
-    "github.com/fatih/color",
-    "github.com/google/go-jsonnet",
-    "github.com/jackspirou/syscerts",
-    "github.com/joho/godotenv",
-    "github.com/joho/godotenv/autoload",
-    "github.com/mattn/go-colorable",
-    "github.com/mattn/go-isatty",
-    "github.com/pkg/browser",
-    "github.com/urfave/cli",
-    "go.starlark.net/starlark",
-    "golang.org/x/net/proxy",
-    "golang.org/x/oauth2",
-  ]
+  inputs-digest = "c30d9d882ed28c6f89a05c22d8c5c553e439349f0d56856ccf8f9e1c6a7f2c96"
   solver-name = "gps-cdcl"
   solver-version = 1

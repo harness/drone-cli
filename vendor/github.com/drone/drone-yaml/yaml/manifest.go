@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gopkg.in/yaml.v2"
+	"github.com/buildkite/yaml"
 )
 
 // Resource enums.
