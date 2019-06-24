@@ -3,11 +3,11 @@ package orgsecret
 import (
 	"html/template"
 	"os"
-	"strings"
 
 	"github.com/urfave/cli"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
 )
 
 var secretListCmd = cli.Command{
@@ -18,7 +18,7 @@ var secretListCmd = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "filter",
-			Usage: "filter output",
+			Usage: "filter output by organization",
 		},
 		cli.StringFlag{
 			Name:   "format",
@@ -36,7 +36,12 @@ func secretList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	list, err := client.OrgSecretListAll()
+	var list []*drone.Secret
+	if filter == "" {
+		list, err = client.OrgSecretListAll()
+	} else {
+		list, err = client.OrgSecretList(filter)
+	}
 	if err != nil {
 		return err
 	}
@@ -45,9 +50,6 @@ func secretList(c *cli.Context) error {
 		return err
 	}
 	for _, secret := range list {
-		if filter != "" && !strings.EqualFold(secret.Namespace, filter) {
-			continue
-		}
 		tmpl.Execute(os.Stdout, secret)
 	}
 	return nil
