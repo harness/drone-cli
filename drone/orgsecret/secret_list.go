@@ -3,6 +3,7 @@ package orgsecret
 import (
 	"html/template"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli"
 
@@ -16,6 +17,10 @@ var secretListCmd = cli.Command{
 	Action:    secretList,
 	Flags: []cli.Flag{
 		cli.StringFlag{
+			Name:  "filter",
+			Usage: "filter output",
+		},
+		cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
 			Value:  tmplSecretList,
@@ -25,6 +30,7 @@ var secretListCmd = cli.Command{
 }
 
 func secretList(c *cli.Context) error {
+	filter := c.String("filter")
 	format := c.String("format") + "\n"
 	client, err := internal.NewClient(c)
 	if err != nil {
@@ -39,6 +45,9 @@ func secretList(c *cli.Context) error {
 		return err
 	}
 	for _, secret := range list {
+		if filter != "" && !strings.EqualFold(secret.Namespace, filter) {
+			continue
+		}
 		tmpl.Execute(os.Stdout, secret)
 	}
 	return nil
