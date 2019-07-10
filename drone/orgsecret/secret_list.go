@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
 )
 
 var secretListCmd = cli.Command{
@@ -15,6 +16,10 @@ var secretListCmd = cli.Command{
 	ArgsUsage: "",
 	Action:    secretList,
 	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "filter",
+			Usage: "filter output by organization",
+		},
 		cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
@@ -25,12 +30,18 @@ var secretListCmd = cli.Command{
 }
 
 func secretList(c *cli.Context) error {
+	filter := c.String("filter")
 	format := c.String("format") + "\n"
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	list, err := client.OrgSecretListAll()
+	var list []*drone.Secret
+	if filter == "" {
+		list, err = client.OrgSecretListAll()
+	} else {
+		list, err = client.OrgSecretList(filter)
+	}
 	if err != nil {
 		return err
 	}
