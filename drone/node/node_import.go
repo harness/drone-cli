@@ -62,10 +62,9 @@ var nodeImportCmd = cli.Command{
 			EnvVar: "MACHINE_STORAGE_PATH",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplNodeInfo,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplNodeInfo,
 		},
 	},
 }

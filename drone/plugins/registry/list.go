@@ -66,9 +66,8 @@ var registryListCmd = cli.Command{
 			EnvVar: "DRONE_REGISTRY_VERIFY",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Value:  tmplList,
-			Hidden: true,
+			Name:  "format",
+			Value: tmplList,
 		},
 	},
 }

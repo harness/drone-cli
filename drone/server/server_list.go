@@ -33,10 +33,9 @@ var serverListCmd = cli.Command{
 			Usage: "include column headers",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplServerList,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplServerList,
 		},
 		cli.BoolFlag{
 			Name:   "la",

@@ -15,10 +15,9 @@ var serverCreateCmd = cli.Command{
 	Action: serverCreate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplServerCreate,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplServerCreate,
 		},
 	},
 }

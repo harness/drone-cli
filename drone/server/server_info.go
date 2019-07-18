@@ -17,10 +17,9 @@ var serverInfoCmd = cli.Command{
 	Action:    serverInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplServerInfo,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplServerInfo,
 		},
 	},
 }

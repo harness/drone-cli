@@ -21,10 +21,9 @@ var secretListCmd = cli.Command{
 			Usage: "filter output by organization",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplSecretList,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplSecretList,
 		},
 	},
 }

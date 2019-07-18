@@ -20,10 +20,9 @@ var buildPromoteCmd = cli.Command{
 			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplBuildInfo,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplBuildInfo,
 		},
 	},
 }

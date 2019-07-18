@@ -84,10 +84,9 @@ var nodeCreateCmd = cli.Command{
 			Usage: "node is protected from deletion",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplNodeInfo,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplNodeInfo,
 		},
 	},
 }

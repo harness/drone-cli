@@ -15,10 +15,9 @@ var nodeInfoCmd = cli.Command{
 	Action: nodeInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplNodeInfo,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplNodeInfo,
 		},
 	},
 }

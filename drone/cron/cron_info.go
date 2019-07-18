@@ -16,10 +16,9 @@ var cronInfoCmd = cli.Command{
 	Action:    cronInfo,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplCronList,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplCronList,
 		},
 	},
 }

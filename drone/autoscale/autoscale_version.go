@@ -15,10 +15,9 @@ var autoscaleVersionCmd = cli.Command{
 	Action: autoscaleVersion,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplAutoscaleVersion,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplAutoscaleVersion,
 		},
 	},
 }

@@ -20,10 +20,9 @@ var secretListCmd = cli.Command{
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplSecretList,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplSecretList,
 		},
 	},
 }

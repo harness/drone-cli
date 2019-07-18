@@ -17,10 +17,9 @@ var serverDestroyCmd = cli.Command{
 	Action:    serverDestroy,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplServerDestroy,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplServerDestroy,
 		},
 	},
 }
