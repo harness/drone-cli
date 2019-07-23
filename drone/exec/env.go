@@ -27,7 +27,7 @@ func getEnv(c *cli.Context) map[string]string {
 		env["DRONE_SYSTEM_HOSTNAME"] = v
 	}
 	if c.IsSet("ref") {
-		v := c.String("instance")
+		v := c.String("ref")
 		env["DRONE_COMMIT_REF"] = v
 	}
 	if c.IsSet("repo") {
