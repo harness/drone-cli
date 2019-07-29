@@ -81,6 +81,7 @@ type (
 		DNSSearch  []string   `json:"dns_search,omitempty"`
 		ExtraHosts []string   `json:"extra_hosts,omitempty"`
 		Image      string     `json:"image,omitempty"`
+		Network    string     `json:"network,omitempty"`
 		Networks   []string   `json:"networks,omitempty"`
 		Ports      []*Port    `json:"ports,omitempty"`
 		Privileged bool       `json:"privileged,omitempty"`

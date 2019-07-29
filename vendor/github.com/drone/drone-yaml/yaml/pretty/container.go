@@ -42,6 +42,7 @@ func printContainer(w writer, v *yaml.Container) {
 	w.WriteTagValue("dns", v.DNS)
 	w.WriteTagValue("dns_search", v.DNSSearch)
 	w.WriteTagValue("extra_hosts", v.ExtraHosts)
+	w.WriteTagValue("network_mode", v.Network)
 
 	if len(v.Settings) > 0 {
 		printSettings(w, v.Settings)

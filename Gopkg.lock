@@ -88,6 +88,7 @@
   revision = "4d6116b897baf4f687b99d6960bd009a1945fdc1"
 
 [[projects]]
+  branch = "master"
   name = "github.com/drone/drone-runtime"
   packages = [
     "engine",
@@ -97,8 +98,7 @@
     "runtime",
     "runtime/term"
   ]
-  revision = "7884b81bee212ab864786b581a55e67843303e18"
-  version = "v1.0.6"
+  revision = "807d0aeaa2212bee10be22b80d12b061fdb66eb9"
 
 [[projects]]
   branch = "master"
@@ -120,7 +120,7 @@
     "yaml/pretty",
     "yaml/signer"
   ]
-  revision = "4889634ea9ae8f5fc81a1ea6c63f85d0b7572fbd"
+  revision = "70fa398b356003054d1df23e8d1c53b0aa86ad87"
 
 [[projects]]
   name = "github.com/drone/envsubst"

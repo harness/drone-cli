@@ -29,7 +29,7 @@ func Convert(d []byte, m Metadata) ([]byte, error) {
 	// systems we check to see if the configuration
 	// file is a legacy (pre 1.0) .drone.yml format.
 	if legacy.Match(d) {
-		return legacy.Convert(d)
+		return legacy.Convert(d, m.URL)
 	}
 	// else return the unmodified configuration
 	// back to the caller.

@@ -15,6 +15,7 @@
 package docker
 
 import (
+	"os"
 	"strings"
 
 	"github.com/drone/drone-runtime/engine"
@@ -23,6 +24,10 @@ import (
 	"docker.io/go-docker/api/types/mount"
 	"docker.io/go-docker/api/types/network"
 )
+
+// feature flag to enables setting the config volume set
+// to emulate 0.8 behavior.
+var volumeSetFlag = os.Getenv("DRONE_FEATURE_VOLUME_SET") == "true"
 
 // returns a container configuration.
 func toConfig(spec *engine.Spec, step *engine.Step) *container.Config {
@@ -56,13 +61,13 @@ func toConfig(spec *engine.Spec, step *engine.Step) *container.Config {
 		config.Entrypoint = step.Docker.Command
 	}
 
-	// NOTE it appears this is no longer required,
-	// however this could cause incompatibility with
-	// certain docker versions.
-	//
-	//   if len(step.Volumes) != 0 {
-	// 	    config.Volumes = toVolumeSet(spec, step)
-	//   }
+	// feature flag enables setting the config Volumes
+	// for improved 0.8 compatibility.
+	if volumeSetFlag {
+		if len(step.Volumes) != 0 {
+			config.Volumes = toVolumeSet(spec, step)
+		}
+	}
 	return config
 }
 
@@ -79,6 +84,9 @@ func toHostConfig(spec *engine.Spec, step *engine.Step) *container.HostConfig {
 	// this value to false.
 	if spec.Platform.OS == "windows" {
 		config.Privileged = false
+	}
+	if len(step.Docker.Network) > 0 {
+		config.NetworkMode = container.NetworkMode(step.Docker.Network)
 	}
 	if len(step.Docker.DNS) > 0 {
 		config.DNS = step.Docker.DNS
@@ -113,6 +121,11 @@ func toHostConfig(spec *engine.Spec, step *engine.Step) *container.HostConfig {
 
 // helper function returns the container network configuration.
 func toNetConfig(spec *engine.Spec, proc *engine.Step) *network.NetworkingConfig {
+	// if the user overrides the default network we do not
+	// attach to the user-defined network.
+	if proc.Docker.Network != "" {
+		return &network.NetworkingConfig{}
+	}
 	endpoints := map[string]*network.EndpointSettings{}
 	endpoints[spec.Metadata.UID] = &network.EndpointSettings{
 		NetworkID: spec.Metadata.UID,
@@ -147,6 +160,29 @@ func toDeviceSlice(spec *engine.Spec, step *engine.Step) []container.DeviceMappi
 	return to
 }
 
+// helper function that converts a slice of volume paths to a set
+// of unique volume names.
+func toVolumeSet(spec *engine.Spec, step *engine.Step) map[string]struct{} {
+	set := map[string]struct{}{}
+	for _, mount := range step.Volumes {
+		volume, ok := engine.LookupVolume(spec, mount.Name)
+		if !ok {
+			continue
+		}
+		if isDevice(volume) {
+			continue
+		}
+		if isNamedPipe(volume) {
+			continue
+		}
+		if isBindMount(volume) == false {
+			continue
+		}
+		set[mount.Path] = struct{}{}
+	}
+	return set
+}
+
 // helper function returns a slice of volume mounts.
 func toVolumeSlice(spec *engine.Spec, step *engine.Step) []string {
 	// this entire function should be deprecated in
@@ -161,11 +197,25 @@ func toVolumeSlice(spec *engine.Spec, step *engine.Step) []string {
 		if isDevice(volume) {
 			continue
 		}
+
+		// experimental
+		if volumeSetFlag {
+			if isDataVolume(volume) {
+				path := volume.Metadata.UID + ":" + mount.Path
+				to = append(to, path)
+			} else if isBindMount(volume) {
+				path := volume.HostPath.Path + ":" + mount.Path
+				to = append(to, path)
+			}
+			continue
+		}
+
 		if isDataVolume(volume) == false {
 			continue
 		}
 		path := volume.Metadata.UID + ":" + mount.Path
 		to = append(to, path)
+
 	}
 	return to
 }
@@ -179,6 +229,13 @@ func toVolumeMounts(spec *engine.Spec, step *engine.Step) []mount.Mount {
 		if !ok {
 			continue
 		}
+
+		if volumeSetFlag {
+			if isBindMount(source) && !isDevice(source) {
+				continue
+			}
+		}
+
 		// HACK: this condition can be removed once
 		// toVolumeSlice has been fully replaced. at this
 		// time, I cannot figure out how to get mounts
@@ -277,4 +334,25 @@ func isNamedPipe(volume *engine.Volume) bool {
 // 		})
 // 	}
 // 	return to
+// }
+
+// // helper function that split volume path
+// func splitVolumeParts(volumeParts string) ([]string, error) {
+// 	pattern := `^((?:[\w]\:)?[^\:]*)\:((?:[\w]\:)?[^\:]*)(?:\:([rwom]*))?`
+// 	r, err := regexp.Compile(pattern)
+// 	if err != nil {
+// 		return []string{}, err
+// 	}
+// 	if r.MatchString(volumeParts) {
+// 		results := r.FindStringSubmatch(volumeParts)[1:]
+// 		cleanResults := []string{}
+// 		for _, item := range results {
+// 			if item != "" {
+// 				cleanResults = append(cleanResults, item)
+// 			}
+// 		}
+// 		return cleanResults, nil
+// 	} else {
+// 		return strings.Split(volumeParts, ":"), nil
+// 	}
 // }

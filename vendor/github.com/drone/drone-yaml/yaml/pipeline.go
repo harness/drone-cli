@@ -69,6 +69,7 @@ type (
 		ExtraHosts  []string              `json:"extra_hosts,omitempty" yaml:"extra_hosts"`
 		Failure     string                `json:"failure,omitempty"`
 		Image       string                `json:"image,omitempty"`
+		Network     string                `json:"network_mode,omitempty" yaml:"network_mode"`
 		Name        string                `json:"name,omitempty"`
 		Ports       []*Port               `json:"ports,omitempty"`
 		Privileged  bool                  `json:"privileged,omitempty"`
