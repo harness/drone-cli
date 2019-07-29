@@ -21,7 +21,12 @@ type Metadata struct {
 	// determine the yaml configuration format.
 	Filename string
 
-	// Ref of the commit use to choose the correct
+	// URL of the repository used to create the repository
+	// workspace directory using the fully qualified name.
+	// e.g. /drone/src/github.com/octocat/hello-world
+	URL string
+
+	// Ref of the commit used to choose the correct
 	// pipeline if the configuration format defines
 	// multiple pipelines (like Bitbucket)
 	Ref string

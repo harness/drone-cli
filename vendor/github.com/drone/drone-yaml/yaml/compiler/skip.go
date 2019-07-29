@@ -26,6 +26,7 @@ type SkipData struct {
 	Ref      string
 	Repo     string
 	Target   string
+	Action   string
 }
 
 // SkipFunc returns a function that can be used to skip
@@ -46,6 +47,8 @@ func SkipFunc(data SkipData) func(*yaml.Container) bool {
 		case !container.When.Repo.Match(data.Repo):
 			return true
 		case !container.When.Target.Match(data.Target):
+			return true
+		case !container.When.Action.Match(data.Action):
 			return true
 		default:
 			return false

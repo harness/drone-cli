@@ -179,12 +179,14 @@ func (e *dockerEngine) Create(ctx context.Context, spec *engine.Spec, step *engi
 		}
 	}
 
-	for _, net := range step.Docker.Networks {
-		err = e.client.NetworkConnect(ctx, net, step.Metadata.UID, &network.EndpointSettings{
-			Aliases: []string{net},
-		})
-		if err != nil {
-			return nil
+	if step.Docker.Network != "" {
+		for _, net := range step.Docker.Networks {
+			err = e.client.NetworkConnect(ctx, net, step.Metadata.UID, &network.EndpointSettings{
+				Aliases: []string{net},
+			})
+			if err != nil {
+				return nil
+			}
 		}
 	}
 

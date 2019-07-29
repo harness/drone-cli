@@ -153,6 +153,9 @@ func checkContainer(container *yaml.Container, trusted bool) error {
 	if trusted == false && len(container.ExtraHosts) > 0 {
 		return errors.New("linter: untrusted repositories cannot configure extra_hosts")
 	}
+	if trusted == false && len(container.Network) > 0 {
+		return errors.New("linter: untrusted repositories cannot configure network_mode")
+	}
 	for _, mount := range container.Volumes {
 		switch mount.Name {
 		case "workspace", "_workspace", "_docker_socket":

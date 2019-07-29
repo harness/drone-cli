@@ -43,6 +43,7 @@ func createStep(spec *engine.Spec, src *yaml.Container) *engine.Step {
 			DNSSearch:  src.DNSSearch,
 			ExtraHosts: src.ExtraHosts,
 			Image:      image.Expand(src.Image),
+			Network:    src.Network,
 			Networks:   nil, // set in compiler.go
 			Ports:      toPorts(src),
 			Privileged: src.Privileged,
