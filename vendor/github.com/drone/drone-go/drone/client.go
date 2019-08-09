@@ -568,8 +568,11 @@ func (c *client) ServerCreate() (*Server, error) {
 }
 
 // ServerDelete terminates a server.
-func (c *client) ServerDelete(name string) error {
+func (c *client) ServerDelete(name string, force bool) error {
 	uri := fmt.Sprintf(pathServer, c.addr, name)
+	if force {
+		uri = uri + "?force=true"
+	}
 	return c.delete(uri)
 }
 

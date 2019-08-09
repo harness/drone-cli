@@ -212,7 +212,7 @@ type Client interface {
 	ServerCreate() (*Server, error)
 
 	// ServerDelete terminates a server.
-	ServerDelete(name string) error
+	ServerDelete(name string, force bool) error
 
 	// AutoscalePause pauses the autoscaler.
 	AutoscalePause() error

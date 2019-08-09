@@ -21,6 +21,10 @@ var serverDestroyCmd = cli.Command{
 			Usage: "format output",
 			Value: tmplServerDestroy,
 		},
+		cli.BoolFlag{
+			Name:  "force",
+			Usage: "force destroy",
+		},
 	},
 }
 
@@ -35,7 +39,7 @@ func serverDestroy(c *cli.Context) error {
 		return fmt.Errorf("Missing or invalid server name")
 	}
 
-	err = client.ServerDelete(name)
+	err = client.ServerDelete(name, c.Bool("foorce"))
 	if err != nil {
 		return err
 	}
