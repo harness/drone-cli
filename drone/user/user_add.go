@@ -38,12 +38,18 @@ func userAdd(c *cli.Context) error {
 		return err
 	}
 
+	if login == "" {
+		err := fmt.Errorf("Error: blank username not allowed.")
+		return err
+	}
+
 	in := &drone.User{
 		Login:   login,
 		Admin:   c.Bool("admin"),
 		Machine: c.Bool("machine"),
 		Token:   c.String("token"),
 	}
+
 	user, err := client.UserCreate(in)
 	if err != nil {
 		return err
