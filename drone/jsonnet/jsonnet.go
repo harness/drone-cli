@@ -129,7 +129,7 @@ func generate(c *cli.Context) error {
 			return err
 		}
 		jsonnetBuf := new(bytes.Buffer)
-		r, _ := regexp.Compile(`\s*\+\s*\[\s*\{\s*kind\s*:\s*"signature"\s*,.*}\s*\]`)
+		r, _ := regexp.Compile(`\s*\+\s*\[\s*\{\s*kind\s*:\s*"signature"\s*,(.|\s)*}\s*\]`)
 		jsonnetBuf.Write(r.ReplaceAll(data, []byte("")))
 		jsonnetBuf.WriteString(fmt.Sprintf(" + [{kind: \"signature\",hmac: \"%s\"}]\n", hmac))
 		return ioutil.WriteFile(source, jsonnetBuf.Bytes(), 0644)
