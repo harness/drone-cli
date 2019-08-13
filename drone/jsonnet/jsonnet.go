@@ -111,6 +111,9 @@ func generate(c *cli.Context) error {
 		pretty.Print(buf, manifest)
 	}
 
+	// the user can optionally sign and write the hmac
+	// generated from the signing process to the jsonnet
+	// file in a way that compiles to yaml as expected
 	if c.Bool("sign") {
 		repo := c.Args().First()
 		owner, name, err := internal.ParseRepo(repo)
