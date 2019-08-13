@@ -6,7 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"fmt"
+	"regexp"
 
+	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/pretty"
 	"github.com/fatih/color"
@@ -18,7 +21,7 @@ import (
 var Command = cli.Command{
 	Name:      "jsonnet",
 	Usage:     "generate .drone.yml from jsonnet",
-	ArgsUsage: "[path/to/.drone.jsonnet]",
+	ArgsUsage: "[path/to/repo]",
 	Action: func(c *cli.Context) {
 		if err := generate(c); err != nil {
 			log.Fatalln(err)
@@ -50,6 +53,10 @@ var Command = cli.Command{
 		cli.BoolFlag{
 			Name:  "string",
 			Usage: "Expect a string, manifest as plain text",
+		},
+		cli.BoolFlag{
+			Name:  "sign",
+			Usage: "Sign jsonnet file and save",
 		},
 	},
 }
@@ -102,6 +109,27 @@ func generate(c *cli.Context) error {
 		}
 		buf.Reset()
 		pretty.Print(buf, manifest)
+	}
+
+	if c.Bool("sign") {
+		repo := c.Args().First()
+		owner, name, err := internal.ParseRepo(repo)
+		if err != nil {
+			return err
+		}
+		client, err := internal.NewClient(c)
+		if err != nil {
+			return err
+		}
+		hmac, err := client.Sign(owner, name, string(buf.Bytes()))
+		if err != nil {
+			return err
+		}
+		jsonnetBuf := new(bytes.Buffer)
+		r, _ := regexp.Compile(`\s*\+\s*\[\s*\{\s*kind\s*:\s*"signature"\s*,.*}\s*\]`)
+		jsonnetBuf.Write(r.ReplaceAll(data, []byte("")))
+		jsonnetBuf.WriteString(fmt.Sprintf(" + [{kind: \"signature\",hmac: \"%s\"}]\n", hmac))
+		return ioutil.WriteFile(source, jsonnetBuf.Bytes(), 0644)
 	}
 
 	// the user can optionally write the yaml to stdout. This
