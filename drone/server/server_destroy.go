@@ -39,7 +39,7 @@ func serverDestroy(c *cli.Context) error {
 		return fmt.Errorf("Missing or invalid server name")
 	}
 
-	err = client.ServerDelete(name, c.Bool("foorce"))
+	err = client.ServerDelete(name, c.Bool("force"))
 	if err != nil {
 		return err
 	}
