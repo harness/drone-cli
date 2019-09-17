@@ -14,13 +14,14 @@ import (
 
 	"github.com/urfave/cli"
 	"go.starlark.net/starlark"
+	"go.starlark.net/starlarkstruct"
 )
 
 // Command exports the jsonnet command.
 var Command = cli.Command{
-	Name:      "script",
-	Usage:     "generate .drone.yml from script",
-	ArgsUsage: "[path/to/.drone.script]",
+	Name:      "starlark",
+	Usage:     "generate .drone.yml from starlark",
+	ArgsUsage: "[path/to/.drone.star]",
 	Action: func(c *cli.Context) {
 		if err := generate(c); err != nil {
 			log.Fatalln(err)
@@ -30,7 +31,7 @@ var Command = cli.Command{
 		cli.StringFlag{
 			Name:  "source",
 			Usage: "Source file",
-			Value: ".drone.script",
+			Value: ".drone.star",
 		},
 		cli.StringFlag{
 			Name:  "target",
@@ -126,24 +127,31 @@ func generate(c *cli.Context) error {
 	}
 
 	// TODO this needs to be flushed out.
-	dict := starlark.Dict{}
-	repo := starlark.Dict{}
-	repo.SetKey(starlark.String("name"), starlark.String(c.String("repo.name")))
-	repo.SetKey(starlark.String("namespace"), starlark.String(c.String("repo.namespace")))
-	repo.SetKey(starlark.String("slug"), starlark.String(c.String("repo.slug")))
-	dict.SetKey(starlark.String("repo"), &repo)
+	repo := starlark.StringDict{
+		"name":      starlark.String(c.String("repo.name")),
+		"namespace": starlark.String(c.String("repo.namespace")),
+		"slug":      starlark.String(c.String("repo.slug")),
+	}
 
-	build := starlark.Dict{}
-	build.SetKey(starlark.String("event"), starlark.String(c.String("build.event")))
-	build.SetKey(starlark.String("branch"), starlark.String(c.String("build.branch")))
-	build.SetKey(starlark.String("source"), starlark.String(c.String("build.source_branch")))
-	build.SetKey(starlark.String("target"), starlark.String(c.String("build.target_branch")))
-	build.SetKey(starlark.String("ref"), starlark.String(c.String("build.ref")))
-	build.SetKey(starlark.String("commit"), starlark.String(c.String("build.commit")))
-	build.SetKey(starlark.String("message"), starlark.String(c.String("build.message")))
-	dict.SetKey(starlark.String("build"), &build)
+	build := starlark.StringDict{
+		"event":   starlark.String(c.String("build.event")),
+		"branch":  starlark.String(c.String("build.branch")),
+		"source":  starlark.String(c.String("build.source_branch")),
+		"target":  starlark.String(c.String("build.target_branch")),
+		"ref":     starlark.String(c.String("build.ref")),
+		"commit":  starlark.String(c.String("build.commit")),
+		"message": starlark.String(c.String("build.message")),
+	}
 
-	args := starlark.Tuple([]starlark.Value{&dict})
+	args := starlark.Tuple([]starlark.Value{
+		starlarkstruct.FromStringDict(
+			starlark.String("context"),
+			starlark.StringDict{
+				"repo":  starlarkstruct.FromStringDict(starlark.String("repo"), repo),
+				"build": starlarkstruct.FromStringDict(starlark.String("build"), build),
+			},
+		),
+	})
 	mainVal, err = starlark.Call(thread, main, args, nil)
 	if err != nil {
 		return err
