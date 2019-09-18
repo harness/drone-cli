@@ -5,9 +5,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli"
-
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
+	"github.com/urfave/cli"
 )
 
 var userInfoCmd = cli.Command{
@@ -40,7 +40,7 @@ func userInfo(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
