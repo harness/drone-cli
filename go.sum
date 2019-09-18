@@ -23,6 +23,8 @@ github.com/drone/drone-go v0.0.0-20190809073937-cba78c0895aa h1:XRCcOdGaOUd74BZR
 github.com/drone/drone-go v0.0.0-20190809073937-cba78c0895aa/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
 github.com/drone/drone-go v1.0.6 h1:YbMwEwlE3HC4InN0bT21EDvzImct5dGG1I56dSdUhjI=
 github.com/drone/drone-go v1.0.6/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
+github.com/drone/drone-go v1.0.7-0.20190918192642-21c14e63f89a h1:GgG6EpzcAx9GavIZONS10tm32kvaz4FYpggWOCvwE7M=
+github.com/drone/drone-go v1.0.7-0.20190918192642-21c14e63f89a/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
 github.com/drone/drone-runtime v0.0.0-20190729082142-807d0aeaa221/go.mod h1:+osgwGADc/nyl40J0fdsf8Z09bgcBZXvXXnLOY48zYs=
 github.com/drone/drone-runtime v1.0.7-0.20190729070836-38f28a11afe8 h1:lcS2z7+ZySmVM+XJJjBZZPTcn6IB1BSfLWtDGyco3xo=
 github.com/drone/drone-runtime v1.0.7-0.20190729070836-38f28a11afe8/go.mod h1:+osgwGADc/nyl40J0fdsf8Z09bgcBZXvXXnLOY48zYs=
@@ -30,6 +32,8 @@ github.com/drone/drone-yaml v0.0.0-20190729072335-70fa398b3560 h1:3QL4NnDpGtaXpg
 github.com/drone/drone-yaml v0.0.0-20190729072335-70fa398b3560/go.mod h1:rCLISp/rqZ50s6G4nKsm971tRSzolxzqqXfgjDqPYoE=
 github.com/drone/envsubst v1.0.1 h1:NOOStingM2sbBwsIUeQkKUz8ShwCUzmqMxWrpXItfPE=
 github.com/drone/envsubst v1.0.1/go.mod h1:bkZbnc/2vh1M12Ecn7EYScpI4YGYU0etwLJICOWi8Z0=
+github.com/drone/funcmap v0.0.0-20190918184546-d4ef6e88376d h1:/IO7UVVu191Jc0DajV4cDVoO+91cuppvgxg2MZl+AXI=
+github.com/drone/funcmap v0.0.0-20190918184546-d4ef6e88376d/go.mod h1:Hph0/pT6ZxbujnE1Z6/08p5I0XXuOsppqF6NQlGOK0E=
 github.com/drone/signal v1.0.0 h1:NrnM2M/4yAuU/tXs6RP1a1ZfxnaHwYkd0kJurA1p6uI=
 github.com/drone/signal v1.0.0/go.mod h1:S8t92eFT0g4WUgEc/LxG+LCuiskpMNsG0ajAMGnyZpc=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
@@ -43,6 +47,7 @@ github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfb
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
+github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-jsonnet v0.11.2 h1:oSCkvGPE72ouWJLOajr4p0clGFCOFmwhqo52faGsudk=
 github.com/google/go-jsonnet v0.11.2/go.mod h1:gVu3UVSfOt5fRFq+dh9duBqXa5905QY8S1QvMNcEIVs=
 github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf/go.mod h1:HP5RmnzzSNb993RKQDq4+1A4ia9nllfqcQFTQJedwGI=

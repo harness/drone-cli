@@ -11,15 +11,17 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/go-connections v0.3.0
 	github.com/docker/go-units v0.3.3
-	github.com/drone/drone-go v1.0.6
+	github.com/drone/drone-go v1.0.7-0.20190918192642-21c14e63f89a
 	github.com/drone/drone-runtime v1.0.7-0.20190729070836-38f28a11afe8
 	github.com/drone/drone-yaml v0.0.0-20190729072335-70fa398b3560
 	github.com/drone/envsubst v1.0.1
+	github.com/drone/funcmap v0.0.0-20190918184546-d4ef6e88376d
 	github.com/drone/signal v1.0.0
 	github.com/fatih/color v1.7.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/protobuf v0.0.0-20170307180453-100ba4e88506
 	github.com/golang/protobuf v1.2.0
+	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/go-jsonnet v0.11.2
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
