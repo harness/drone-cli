@@ -49,6 +49,10 @@ func NewClient(c *cli.Context) (drone.Client, error) {
 		},
 	)
 
+	auther.CheckRedirect = func(*http.Request, []*http.Request) error {
+		return fmt.Errorf("Attempting to redirect the requests. Did you configure the correct drone server address?")
+	}
+
 	trans, _ := auther.Transport.(*oauth2.Transport)
 
 	if len(socks) != 0 && !socksoff {
