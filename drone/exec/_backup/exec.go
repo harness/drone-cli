@@ -69,8 +69,10 @@ var Command = cli.Command{
 			Usage: "privileged plugins",
 			Value: &cli.StringSlice{
 				"plugins/docker",
-				"plugins/gcr",
+				"plugins/acr",
 				"plugins/ecr",
+				"plugins/gcr",
+				"plugins/heroku",
 			},
 		},
 
