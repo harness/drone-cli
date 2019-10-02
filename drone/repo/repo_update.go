@@ -32,6 +32,22 @@ var repoUpdateCmd = cli.Command{
 			Name:  "visibility",
 			Usage: "repository visibility",
 		},
+		cli.BoolFlag{
+			Name:  "ignore-forks",
+			Usage: "ignore forks",
+		},
+		cli.BoolFlag{
+			Name:  "ignore-pull-requests",
+			Usage: "ignore pull requests",
+		},
+		cli.BoolFlag{
+			Name:  "auto-cancel-pull-requests",
+			Usage: "automatically cancel pending pull request builds",
+		},
+		cli.BoolFlag{
+			Name:  "auto-cancel-pushes",
+			Usage: "automatically cancel pending push builds",
+		},
 		cli.StringFlag{
 			Name:  "config",
 			Usage: "repository configuration path (e.g. .drone.yml)",
@@ -65,6 +81,10 @@ func repoUpdate(c *cli.Context) error {
 		timeout      = c.Duration("timeout")
 		trusted      = c.Bool("trusted")
 		protected    = c.Bool("protected")
+		ignoreForks  = c.Bool("ignore-forks")
+		ignorePulls  = c.Bool("ignore-pull-requests")
+		cancelPulls  = c.Bool("auto-cancel-pull-requests")
+		cancelPush   = c.Bool("auto-cancel-pushes")
 		buildCounter = c.Int("build-counter")
 		unsafe       = c.Bool("unsafe")
 	)
@@ -82,6 +102,18 @@ func repoUpdate(c *cli.Context) error {
 	}
 	if c.IsSet("config") {
 		patch.Config = &config
+	}
+	if c.IsSet("ignore-forks") {
+		patch.IgnoreForks = &ignoreForks
+	}
+	if c.IsSet("ignore-pull-requests") {
+		patch.IgnorePulls = &ignorePulls
+	}
+	if c.IsSet("auto-cancel-pull-requests") {
+		patch.CancelPulls = &cancelPulls
+	}
+	if c.IsSet("auto-cancel-pushes") {
+		patch.CancelPush = &cancelPush
 	}
 	if c.IsSet("visibility") {
 		switch visibility {
