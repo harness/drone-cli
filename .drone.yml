@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: build
-  image: golang:1.9
+  image: golang:1.13
   commands:
   - sh .drone.sh
 
