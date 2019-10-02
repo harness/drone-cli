@@ -7,7 +7,7 @@ import (
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
-
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -141,7 +141,7 @@ func nodeCreate(c *cli.Context) error {
 	}
 
 	format := c.String("format")
-	tmpl, err := template.New("_").Parse(format)
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(format)
 	if err != nil {
 		return err
 	}

@@ -9,10 +9,10 @@ import (
 	"path"
 	"text/template"
 
-	"github.com/urfave/cli"
-
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
+	"github.com/drone/funcmap"
+	"github.com/urfave/cli"
 )
 
 var serverEnvCmd = cli.Command{
@@ -108,7 +108,7 @@ func serverEnv(c *cli.Context) error {
 	})
 }
 
-var shellT = template.Must(template.New("_").Parse(`
+var shellT = template.Must(template.New("_").Funcs(funcmap.Funcs).Parse(`
 {{- if eq .Shell "fish" -}}
 sex -x DOCKER_TLS "1";
 set -x DOCKER_TLS_VERIFY "";

@@ -4,9 +4,9 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli"
-
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
+	"github.com/urfave/cli"
 )
 
 var secretListCmd = cli.Command{
@@ -47,7 +47,7 @@ func secretList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	tmpl, err := template.New("_").Parse(format)
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(format)
 	if err != nil {
 		return err
 	}

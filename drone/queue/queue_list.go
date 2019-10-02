@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -37,7 +38,7 @@ func queueList(c *cli.Context) (err error) {
 		return nil
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
