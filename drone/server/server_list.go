@@ -21,15 +21,15 @@ var serverListCmd = cli.Command{
 	Action:    serverList,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
-			Name:  "a",
+			Name:  "a, all",
 			Usage: "include stopped servers",
 		},
 		cli.BoolFlag{
-			Name:  "l",
+			Name:  "l, long",
 			Usage: "list in long format",
 		},
 		cli.BoolTFlag{
-			Name:  "H",
+			Name:  "H, headers",
 			Usage: "include column headers",
 		},
 		cli.StringFlag{
