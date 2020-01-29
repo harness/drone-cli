@@ -24,6 +24,10 @@ var repoListCmd = cli.Command{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
+		cli.BoolFlag{
+			Name:  "active",
+			Usage: "filter active repositories only",
+		},
 	},
 }
 
@@ -43,9 +47,12 @@ func repoList(c *cli.Context) error {
 		return err
 	}
 
-	org := c.String("org")
+	org, active := c.String("org"), c.Bool("active")
 	for _, repo := range repos {
 		if org != "" && org != repo.Namespace {
+			continue
+		}
+		if !repo.Active && active {
 			continue
 		}
 		tmpl.Execute(os.Stdout, repo)
