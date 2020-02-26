@@ -2,11 +2,11 @@
 
 Command line client for the Drone continuous integration server.
 
-Documentation:
+Documentation:<br/>
 https://docs.drone.io/cli
 
-Technical Support:
+Technical Support:<br/>
 https://discourse.drone.io
 
-Bug Tracker:
+Bug Tracker:<br/>
 https://discourse.drone.io/c/bugs
