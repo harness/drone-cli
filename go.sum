@@ -27,6 +27,10 @@ github.com/drone/drone-go v1.0.7-0.20190918192642-21c14e63f89a h1:GgG6EpzcAx9Gav
 github.com/drone/drone-go v1.0.7-0.20190918192642-21c14e63f89a/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
 github.com/drone/drone-go v1.0.7-0.20191002153459-173e210cf8d6 h1:qwBSqbhs6hLMsqALZ/CUEqZawlK1Sui4Bn1nNTJfDHY=
 github.com/drone/drone-go v1.0.7-0.20191002153459-173e210cf8d6/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
+github.com/drone/drone-go v1.2.0 h1:Gnp79mJHf4Q5Kwkw2nIRQcj7ZAA/kqKNEz5dJ3n/0Uk=
+github.com/drone/drone-go v1.2.0/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
+github.com/drone/drone-go v1.3.0 h1:eIk79qCiw+hzmDFYSofZKrR7E0tPs7Vm13kKH80n0zs=
+github.com/drone/drone-go v1.3.0/go.mod h1:GxyeGClYohaKNYJv/ZpsmVHtMJ7WhoT+uDaJNcDIrk4=
 github.com/drone/drone-runtime v0.0.0-20190729082142-807d0aeaa221/go.mod h1:+osgwGADc/nyl40J0fdsf8Z09bgcBZXvXXnLOY48zYs=
 github.com/drone/drone-runtime v1.0.7-0.20190729070836-38f28a11afe8 h1:lcS2z7+ZySmVM+XJJjBZZPTcn6IB1BSfLWtDGyco3xo=
 github.com/drone/drone-runtime v1.0.7-0.20190729070836-38f28a11afe8/go.mod h1:+osgwGADc/nyl40J0fdsf8Z09bgcBZXvXXnLOY48zYs=

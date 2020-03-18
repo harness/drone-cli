@@ -10,6 +10,7 @@ var Command = cli.Command{
 		buildListCmd,
 		buildLastCmd,
 		buildInfoCmd,
+		buildCreateCmd,
 		buildStopCmd,
 		buildStartCmd,
 		buildApproveCmd,
