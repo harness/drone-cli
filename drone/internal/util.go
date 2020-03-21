@@ -42,18 +42,18 @@ func NewClient(c *cli.Context) (drone.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	auther := config.Client(
+	author := config.Client(
 		oauth2.NoContext,
 		&oauth2.Token{
 			AccessToken: token,
 		},
 	)
 
-	auther.CheckRedirect = func(*http.Request, []*http.Request) error {
+	author.CheckRedirect = func(*http.Request, []*http.Request) error {
 		return fmt.Errorf("Attempting to redirect the requests. Did you configure the correct drone server address?")
 	}
 
-	trans, _ := auther.Transport.(*oauth2.Transport)
+	trans, _ := author.Transport.(*oauth2.Transport)
 
 	if len(socks) != 0 && !socksoff {
 		dialer, err := proxy.SOCKS5("tcp", socks, nil, proxy.Direct)
