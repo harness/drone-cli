@@ -62,6 +62,20 @@ steps:
   when:
     event: [push, tag]
 
+- name: publish_linux_ppc64le
+  image: plugins/docker
+  settings:
+    repo: drone/cli
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    auto_tag: true
+    auto_tag_suffix: linux-ppc64le
+    dockerfile: Dockerfile.linux.ppc64le
+  when:
+    event: [push, tag]
+
 - name: release
   image: plugins/github-release
   settings:
