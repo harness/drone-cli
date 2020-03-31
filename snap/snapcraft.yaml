@@ -77,23 +77,6 @@ parts:
     stage:
       - -bin/README.*
 
-  # Stage snap for fixing the glibc locales(and gnu gettext I18N support)
-  # https://forum.snapcraft.io/t/the-locales-launch-stage-snap/10296
-  locales-launch:
-    plugin: nil
-    stage-snaps:
-      - locales-launch
-    stage-packages:
-      - libc-bin
-      - locales
-    stage:
-      - bin/locales-launch
-      - etc/locale.alias
-      - usr/bin/localedef
-      - usr/share/doc/locales
-      - usr/share/i18n
-      - usr/share/locale
-
   # Check out the tagged release revision if it isn't promoted to the stable channel
   # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
   selective-checkout:
@@ -110,8 +93,10 @@ apps:
     adapter: full
     command: bin/drone
     command-chain:
-      - bin/locales-launch
       - bin/drone-launch
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
 
 plugs:
   docker:
