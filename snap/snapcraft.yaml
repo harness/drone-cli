@@ -47,7 +47,6 @@ parts:
       - selective-checkout
 
     source: .
-    source-depth: 30
     override-pull: |
       snapcraftctl pull
 
