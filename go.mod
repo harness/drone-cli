@@ -34,11 +34,11 @@ require (
 	github.com/pkg/errors v0.8.0
 	github.com/urfave/cli v1.20.0
 	github.com/vinzenz/yaml v0.0.0-20170920082545-91409cdd725d
-	go.starlark.net v0.0.0-20190219202100-4eb76950c5f0
+	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5
 	golang.org/x/net v0.0.0-20181005035420-146acd28ed58
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
-	golang.org/x/sys v0.0.0-20181005133103-4497e2df6f9e
+	golang.org/x/sys v0.0.0-20191002063906-3421d5a6bb1c
 	google.golang.org/appengine v1.3.0
 	gopkg.in/yaml.v2 v2.2.2
 )

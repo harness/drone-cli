@@ -24,6 +24,9 @@ var Command = cli.Command{
 	ArgsUsage: "[path/to/.drone.star]",
 	Action: func(c *cli.Context) {
 		if err := generate(c); err != nil {
+			if err, ok := err.(*starlark.EvalError); ok {
+				log.Fatalf("starlark evaluation error:\n%s", err.Backtrace())
+			}
 			log.Fatalln(err)
 		}
 	},
