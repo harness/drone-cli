@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/docker/go-units"
-	"github.com/urfave/cli"
-
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
+	"github.com/drone/funcmap"
+	"github.com/urfave/cli"
 )
 
 var serverListCmd = cli.Command{
@@ -20,23 +20,26 @@ var serverListCmd = cli.Command{
 	ArgsUsage: " ",
 	Action:    serverList,
 	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "s, state",
+			Usage: "filter by state",
+		},
 		cli.BoolFlag{
-			Name:  "a",
+			Name:  "a, all",
 			Usage: "include stopped servers",
 		},
 		cli.BoolFlag{
-			Name:  "l",
+			Name:  "l, long",
 			Usage: "list in long format",
 		},
 		cli.BoolTFlag{
-			Name:  "H",
-			Usage: "include columne headers",
+			Name:  "H, headers",
+			Usage: "include column headers",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplServerList,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplServerList,
 		},
 		cli.BoolFlag{
 			Name:   "la",
@@ -50,6 +53,7 @@ func serverList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	s := c.String("s")
 	a := c.Bool("a")
 	l := c.Bool("l")
 	h := c.BoolT("H")
@@ -65,11 +69,11 @@ func serverList(c *cli.Context) error {
 	}
 
 	if l && h {
-		printLong(servers, a, h)
+		printLong(servers, s, a, h)
 		return nil
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
@@ -78,18 +82,26 @@ func serverList(c *cli.Context) error {
 		if !a && server.State == "stopped" {
 			continue
 		}
+
+		if s != "" && s != server.State {
+			continue
+		}
+
 		tmpl.Execute(os.Stdout, server)
 	}
 	return nil
 }
 
-func printLong(servers []*drone.Server, a, h bool) {
+func printLong(servers []*drone.Server, s string, a, h bool) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
 	if h {
 		fmt.Fprintln(w, "Name\tAddress\tState\tCreated")
 	}
 	for _, server := range servers {
 		if !a && server.State == "stopped" {
+			continue
+		}
+		if s != "" && s != server.State {
 			continue
 		}
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s ago\n",

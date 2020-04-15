@@ -5,6 +5,8 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/drone-go/drone"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -36,6 +38,11 @@ var buildListCmd = cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
+		cli.IntFlag{
+			Name:  "page",
+			Usage: "page number",
+			Value: 1,
+		},
 	},
 }
 
@@ -51,12 +58,12 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	builds, err := client.BuildList(owner, name)
+	builds, err := client.BuildList(owner, name, drone.ListOptions{Page: c.Int("page")})
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
@@ -71,7 +78,7 @@ func buildList(c *cli.Context) error {
 		if count >= limit {
 			break
 		}
-		if branch != "" && build.Branch != branch {
+		if branch != "" && build.Target != branch {
 			continue
 		}
 		if event != "" && build.Event != event {
@@ -90,9 +97,9 @@ func buildList(c *cli.Context) error {
 var tmplBuildList = "\x1b[33mBuild #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
+Commit: {{ .After }}
+Branch: {{ .Target }}
 Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Author: {{ .Author }} {{ if .AuthorEmail }}<{{.AuthorEmail}}>{{ end }}
 Message: {{ .Message }}
 `

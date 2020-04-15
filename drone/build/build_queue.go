@@ -1,18 +1,18 @@
 package build
 
 import (
-	"fmt"
 	"os"
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
 var buildQueueCmd = cli.Command{
 	Name:      "queue",
 	Usage:     "show build queue",
-	ArgsUsage: " ",
+	ArgsUsage: "",
 	Action:    buildQueue,
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -20,44 +20,74 @@ var buildQueueCmd = cli.Command{
 			Usage: "format output",
 			Value: tmplBuildQueue,
 		},
+		cli.StringFlag{
+			Name:  "repo",
+			Usage: "repo filter",
+		},
+		cli.StringFlag{
+			Name:  "branch",
+			Usage: "branch filter",
+		},
+		cli.StringFlag{
+			Name:  "event",
+			Usage: "event filter",
+		},
+		cli.StringFlag{
+			Name:  "status",
+			Usage: "status filter",
+		},
 	},
 }
 
 func buildQueue(c *cli.Context) error {
-
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	builds, err := client.BuildQueue()
+	repos, err := client.Incomplete()
 	if err != nil {
 		return err
 	}
 
-	if len(builds) == 0 {
-		fmt.Println("there are no pending or running builds")
-		return nil
-	}
-
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
 
-	for _, build := range builds {
-		tmpl.Execute(os.Stdout, build)
+	slug := c.String("repo")
+	branch := c.String("branch")
+	event := c.String("event")
+	status := c.String("status")
+
+	for _, repo := range repos {
+		if slug != "" && repo.Slug != slug {
+			continue
+		}
+		if branch != "" && repo.Build.Target != branch {
+			continue
+		}
+		if event != "" && repo.Build.Event != event {
+			continue
+		}
+		if status != "" && repo.Build.Status != status {
+			continue
+		}
+		tmpl.Execute(os.Stdout, repo)
 	}
 	return nil
 }
 
-// template for build list information
-var tmplBuildQueue = "\x1b[33m{{ .FullName }} #{{ .Number }} \x1b[0m" + `
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
+// template for build queue information
+var tmplBuildQueue = "\x1b[33m{{ .Slug }}#{{ .Build.Number }} \x1b[0m" + `
+Name: {{ .Slug }}
+Build: {{ .Build.Number }}
+Status: {{ .Build.Status }}
+Event: {{ .Build.Event }}
+Branch: {{ .Build.Target }}
+Ref: {{ .Build.Ref }}
+Author: {{ .Build.Author }}{{ if .Build.AuthorEmail }} <{{ .Build.AuthorEmail }}>{{ end }}
+Created: {{ .Build.Created | time }}
+Started: {{ .Build.Started | time }}
+Updated: {{ .Build.Updated | time }}
 `

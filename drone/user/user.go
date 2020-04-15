@@ -10,6 +10,8 @@ var Command = cli.Command{
 		userListCmd,
 		userInfoCmd,
 		userAddCmd,
+		userUpdateCmd,
 		userRemoveCmd,
+		userBlockCmd,
 	},
 }

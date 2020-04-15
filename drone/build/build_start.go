@@ -2,22 +2,29 @@ package build
 
 import (
 	"errors"
-	"fmt"
+	"os"
 	"strconv"
+	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
 var buildStartCmd = cli.Command{
-	Name:      "start",
-	Usage:     "start a build",
+	Name:      "restart",
+	Usage:     "restart a build",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildStart,
 	Flags: []cli.Flag{
 		cli.StringSliceFlag{
 			Name:  "param, p",
 			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
+		},
+		cli.StringFlag{
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplBuildInfo,
 		},
 	},
 }
@@ -42,7 +49,7 @@ func buildStart(c *cli.Context) (err error) {
 		if err != nil {
 			return err
 		}
-		number = build.Number
+		number = int(build.Number)
 	} else {
 		if len(buildArg) == 0 {
 			return errors.New("missing job number")
@@ -55,11 +62,14 @@ func buildStart(c *cli.Context) (err error) {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	build, err := client.BuildStart(owner, name, number, params)
+	build, err := client.BuildRestart(owner, name, number, params)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Starting build %s/%s#%d\n", owner, name, build.Number)
-	return nil
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format"))
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, build)
 }

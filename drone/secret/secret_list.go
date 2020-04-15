@@ -3,11 +3,10 @@ package secret
 import (
 	"html/template"
 	"os"
-	"strings"
-
-	"github.com/urfave/cli"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
+	"github.com/urfave/cli"
 )
 
 var secretListCmd = cli.Command{
@@ -21,10 +20,9 @@ var secretListCmd = cli.Command{
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplSecretList,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplSecretList,
 		},
 	},
 }
@@ -49,28 +47,18 @@ func secretList(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(format)
 	if err != nil {
 		return err
 	}
-	for _, registry := range list {
-		tmpl.Execute(os.Stdout, registry)
+	for _, secret := range list {
+		tmpl.Execute(os.Stdout, secret)
 	}
 	return nil
 }
 
 // template for secret list items
 var tmplSecretList = "\x1b[33m{{ .Name }} \x1b[0m" + `
-Events: {{ list .Events }}
-{{- if .Images }}
-Images: {{ list .Images }}
-{{- else }}
-Images: <any>
-{{- end }}
+Pull Request Read:  {{ .PullRequest }}
+Pull Request Write: {{ .PullRequestPush }}
 `
-
-var secretFuncMap = template.FuncMap{
-	"list": func(s []string) string {
-		return strings.Join(s, ", ")
-	},
-}

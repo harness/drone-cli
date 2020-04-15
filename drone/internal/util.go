@@ -49,6 +49,10 @@ func NewClient(c *cli.Context) (drone.Client, error) {
 		},
 	)
 
+	auther.CheckRedirect = func(*http.Request, []*http.Request) error {
+		return fmt.Errorf("Attempting to redirect the requests. Did you configure the correct drone server address?")
+	}
+
 	trans, _ := auther.Transport.(*oauth2.Transport)
 
 	if len(socks) != 0 && !socksoff {
@@ -79,7 +83,7 @@ func NewAutoscaleClient(c *cli.Context) (drone.Client, error) {
 	}
 	autoscaler := c.GlobalString("autoscaler")
 	if autoscaler == "" {
-		return nil, fmt.Errorf("Please provide the autoscaler address")
+		return nil, fmt.Errorf("Please provide the autoscaler address.")
 	}
 	client.SetAddress(
 		strings.TrimSuffix(autoscaler, "/"),
@@ -91,7 +95,7 @@ func NewAutoscaleClient(c *cli.Context) (drone.Client, error) {
 func ParseRepo(str string) (user, repo string, err error) {
 	var parts = strings.Split(str, "/")
 	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world.")
+		err = fmt.Errorf("Error: Invalid or missing repository (e.g. octocat/hello-world).")
 		return
 	}
 	user = parts[0]

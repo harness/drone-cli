@@ -21,8 +21,8 @@ var repoUpdateCmd = cli.Command{
 			Usage: "repository is trusted",
 		},
 		cli.BoolFlag{
-			Name:  "gated",
-			Usage: "repository is gated",
+			Name:  "protected",
+			Usage: "repository is protected",
 		},
 		cli.DurationFlag{
 			Name:  "timeout",
@@ -31,6 +31,22 @@ var repoUpdateCmd = cli.Command{
 		cli.StringFlag{
 			Name:  "visibility",
 			Usage: "repository visibility",
+		},
+		cli.BoolFlag{
+			Name:  "ignore-forks",
+			Usage: "ignore forks",
+		},
+		cli.BoolFlag{
+			Name:  "ignore-pull-requests",
+			Usage: "ignore pull requests",
+		},
+		cli.BoolFlag{
+			Name:  "auto-cancel-pull-requests",
+			Usage: "automatically cancel pending pull request builds",
+		},
+		cli.BoolFlag{
+			Name:  "auto-cancel-pushes",
+			Usage: "automatically cancel pending push builds",
 		},
 		cli.StringFlag{
 			Name:  "config",
@@ -64,17 +80,21 @@ func repoUpdate(c *cli.Context) error {
 		config       = c.String("config")
 		timeout      = c.Duration("timeout")
 		trusted      = c.Bool("trusted")
-		gated        = c.Bool("gated")
+		protected    = c.Bool("protected")
+		ignoreForks  = c.Bool("ignore-forks")
+		ignorePulls  = c.Bool("ignore-pull-requests")
+		cancelPulls  = c.Bool("auto-cancel-pull-requests")
+		cancelPush   = c.Bool("auto-cancel-pushes")
 		buildCounter = c.Int("build-counter")
 		unsafe       = c.Bool("unsafe")
 	)
 
 	patch := new(drone.RepoPatch)
 	if c.IsSet("trusted") {
-		patch.IsTrusted = &trusted
+		patch.Trusted = &trusted
 	}
-	if c.IsSet("gated") {
-		patch.IsGated = &gated
+	if c.IsSet("protected") {
+		patch.Protected = &protected
 	}
 	if c.IsSet("timeout") {
 		v := int64(timeout / time.Minute)
@@ -82,6 +102,18 @@ func repoUpdate(c *cli.Context) error {
 	}
 	if c.IsSet("config") {
 		patch.Config = &config
+	}
+	if c.IsSet("ignore-forks") {
+		patch.IgnoreForks = &ignoreForks
+	}
+	if c.IsSet("ignore-pull-requests") {
+		patch.IgnorePulls = &ignorePulls
+	}
+	if c.IsSet("auto-cancel-pull-requests") {
+		patch.CancelPulls = &cancelPulls
+	}
+	if c.IsSet("auto-cancel-pushes") {
+		patch.CancelPush = &cancelPush
 	}
 	if c.IsSet("visibility") {
 		switch visibility {
@@ -93,10 +125,10 @@ func repoUpdate(c *cli.Context) error {
 		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
 	}
 	if c.IsSet("build-counter") && unsafe {
-		patch.BuildCounter = &buildCounter
+		patch.Counter = &buildCounter
 	}
 
-	if _, err := client.RepoPatch(owner, name, patch); err != nil {
+	if _, err := client.RepoUpdate(owner, name, patch); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully updated repository %s/%s\n", owner, name)

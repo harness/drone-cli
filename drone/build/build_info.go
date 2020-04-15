@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -43,7 +44,7 @@ func buildInfo(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		number = build.Number
+		number = int(build.Number)
 	} else {
 		number, err = strconv.Atoi(buildArg)
 		if err != nil {
@@ -56,7 +57,7 @@ func buildInfo(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format"))
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format"))
 	if err != nil {
 		return err
 	}
@@ -67,9 +68,9 @@ func buildInfo(c *cli.Context) error {
 var tmplBuildInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
+Commit: {{ .After }}
+Branch: {{ .Target }}
 Ref: {{ .Ref }}
+Author: {{ .Author }} {{ if .AuthorEmail }}<{{.AuthorEmail}}>{{ end }}
 Message: {{ .Message }}
-Author: {{ .Author }}
 `

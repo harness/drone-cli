@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -39,7 +40,7 @@ func repoInfo(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format"))
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format"))
 	if err != nil {
 		return err
 	}
@@ -47,13 +48,12 @@ func repoInfo(c *cli.Context) error {
 }
 
 // template for repo information
-var tmplRepoInfo = `Owner: {{ .Owner }}
+var tmplRepoInfo = `Owner: {{ .Namespace }}
 Repo: {{ .Name }}
-Type: {{ .Kind }}
 Config: {{ .Config }}
 Visibility: {{ .Visibility }}
-Private: {{ .IsPrivate }}
-Trusted: {{ .IsTrusted }}
-Gated: {{ .IsGated }}
-Remote: {{ .Clone }}
+Private: {{ .Private }}
+Trusted: {{ .Trusted }}
+Protected: {{ .Protected }}
+Remote: {{ .HTTPURL }}
 `

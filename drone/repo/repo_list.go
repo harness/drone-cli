@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -23,6 +24,10 @@ var repoListCmd = cli.Command{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
+		cli.BoolFlag{
+			Name:  "active",
+			Usage: "filter active repositories only",
+		},
 	},
 }
 
@@ -37,14 +42,17 @@ func repoList(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
 
-	org := c.String("org")
+	org, active := c.String("org"), c.Bool("active")
 	for _, repo := range repos {
-		if org != "" && org != repo.Owner {
+		if org != "" && org != repo.Namespace {
+			continue
+		}
+		if !repo.Active && active {
 			continue
 		}
 		tmpl.Execute(os.Stdout, repo)
@@ -53,4 +61,4 @@ func repoList(c *cli.Context) error {
 }
 
 // template for repository list items
-var tmplRepoList = `{{ .FullName }}`
+var tmplRepoList = `{{ .Slug }}`

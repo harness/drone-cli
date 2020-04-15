@@ -5,9 +5,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli"
-
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
+	"github.com/urfave/cli"
 )
 
 var serverDestroyCmd = cli.Command{
@@ -17,10 +17,13 @@ var serverDestroyCmd = cli.Command{
 	Action:    serverDestroy,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplServerDestroy,
-			Hidden: true,
+			Name:  "format",
+			Usage: "format output",
+			Value: tmplServerDestroy,
+		},
+		cli.BoolFlag{
+			Name:  "force",
+			Usage: "force destroy",
 		},
 	},
 }
@@ -36,7 +39,7 @@ func serverDestroy(c *cli.Context) error {
 		return fmt.Errorf("Missing or invalid server name")
 	}
 
-	err = client.ServerDelete(name)
+	err = client.ServerDelete(name, c.Bool("force"))
 	if err != nil {
 		return err
 	}
@@ -46,7 +49,7 @@ func serverDestroy(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}

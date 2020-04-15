@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/drone/drone-cli/drone/internal"
+	"github.com/drone/funcmap"
 	"github.com/urfave/cli"
 )
 
@@ -28,21 +29,17 @@ func repoSync(c *cli.Context) error {
 		return err
 	}
 
-	repos, err := client.RepoListOpts(true, true)
+	repos, err := client.RepoListSync()
 	if err != nil || len(repos) == 0 {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	tmpl, err := template.New("_").Funcs(funcmap.Funcs).Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
 
-	org := c.String("org")
 	for _, repo := range repos {
-		if org != "" && org != repo.Owner {
-			continue
-		}
 		tmpl.Execute(os.Stdout, repo)
 	}
 	return nil

@@ -11,7 +11,7 @@ import (
 var logPurgeCmd = cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
-	ArgsUsage: "<repo/name> <build>",
+	ArgsUsage: "<repo/name> <build> <stage> <step>",
 	Action:    logPurge,
 }
 
@@ -25,13 +25,21 @@ func logPurge(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
+	stage, err := strconv.Atoi(c.Args().Get(2))
+	if err != nil {
+		return err
+	}
+	step, err := strconv.Atoi(c.Args().Get(3))
+	if err != nil {
+		return err
+	}
 
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	err = client.LogsPurge(owner, name, number)
+	err = client.LogsPurge(owner, name, number, stage, step)
 	if err != nil {
 		return err
 	}

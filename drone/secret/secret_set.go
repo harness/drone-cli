@@ -25,16 +25,16 @@ var secretUpdateCmd = cli.Command{
 			Usage: "secret name",
 		},
 		cli.StringFlag{
-			Name:  "value",
+			Name:  "data",
 			Usage: "secret value",
 		},
-		cli.StringSliceFlag{
-			Name:  "event",
-			Usage: "secret limited to these events",
+		cli.BoolFlag{
+			Name:  "allow-pull-request",
+			Usage: "permit read access to pull requests",
 		},
-		cli.StringSliceFlag{
-			Name:  "image",
-			Usage: "secret limited to these images",
+		cli.BoolFlag{
+			Name:  "allow-push-on-pull-request",
+			Usage: "permit write access to pull requests (e.g. allow docker push)",
 		},
 	},
 }
@@ -53,18 +53,18 @@ func secretUpdate(c *cli.Context) error {
 		return err
 	}
 	secret := &drone.Secret{
-		Name:   c.String("name"),
-		Value:  c.String("value"),
-		Images: c.StringSlice("image"),
-		Events: c.StringSlice("event"),
+		Name:            c.String("name"),
+		Data:            c.String("data"),
+		PullRequest:     c.Bool("allow-pull-request"),
+		PullRequestPush: c.Bool("allow-push-on-pull-request"),
 	}
-	if strings.HasPrefix(secret.Value, "@") {
-		path := strings.TrimPrefix(secret.Value, "@")
+	if strings.HasPrefix(secret.Data, "@") {
+		path := strings.TrimPrefix(secret.Data, "@")
 		out, ferr := ioutil.ReadFile(path)
 		if ferr != nil {
 			return ferr
 		}
-		secret.Value = string(out)
+		secret.Data = string(out)
 	}
 	_, err = client.SecretUpdate(owner, name, secret)
 	return err
