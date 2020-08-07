@@ -58,7 +58,7 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	builds, err := client.BuildList(owner, name, drone.ListOptions{Page: c.Int("page")})
+	builds, err := client.BuildList(owner, name, drone.ListOptions{Page: c.Int("page"), Size: c.Int("limit")})
 	if err != nil {
 		return err
 	}
@@ -71,13 +71,8 @@ func buildList(c *cli.Context) error {
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
-	limit := c.Int("limit")
 
-	var count int
 	for _, build := range builds {
-		if count >= limit {
-			break
-		}
 		if branch != "" && build.Target != branch {
 			continue
 		}
@@ -88,7 +83,6 @@ func buildList(c *cli.Context) error {
 			continue
 		}
 		tmpl.Execute(os.Stdout, build)
-		count++
 	}
 	return nil
 }
