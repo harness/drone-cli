@@ -3,6 +3,7 @@ package exec
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/url"
@@ -188,6 +189,11 @@ func exec(c *cli.Context) error {
 		if !ok {
 			continue
 		}
+
+		if v.Type != "" && v.Type != "docker" {
+			return fmt.Errorf("pipeline type (%s) is not supported with 'drone exec'", v.Type)
+		}
+
 		if filter == "" || filter == v.Name {
 			pipeline = v
 			break
