@@ -81,6 +81,10 @@ var Command = cli.Command{
 			Value: "master",
 		},
 		cli.StringFlag{
+			Name:  "build.source_repo",
+			Usage: "repo slug of source repository",
+		},
+		cli.StringFlag{
 			Name:  "build.target",
 			Usage: "build target branch",
 			Value: "master",
@@ -97,6 +101,10 @@ var Command = cli.Command{
 		cli.StringFlag{
 			Name:  "build.message",
 			Usage: "build commit message",
+		},
+		cli.StringFlag{
+			Name:  "build.title",
+			Usage: "build title",
 		},
 	},
 }
@@ -137,13 +145,15 @@ func generate(c *cli.Context) error {
 	}
 
 	build := starlark.StringDict{
-		"event":   starlark.String(c.String("build.event")),
-		"branch":  starlark.String(c.String("build.branch")),
-		"source":  starlark.String(c.String("build.source_branch")),
-		"target":  starlark.String(c.String("build.target_branch")),
-		"ref":     starlark.String(c.String("build.ref")),
-		"commit":  starlark.String(c.String("build.commit")),
-		"message": starlark.String(c.String("build.message")),
+		"event":       starlark.String(c.String("build.event")),
+		"branch":      starlark.String(c.String("build.branch")),
+		"source":      starlark.String(c.String("build.source_branch")),
+		"source_repo": starlark.String(c.String("build.source_repo")),
+		"target":      starlark.String(c.String("build.target_branch")),
+		"ref":         starlark.String(c.String("build.ref")),
+		"commit":      starlark.String(c.String("build.commit")),
+		"message":     starlark.String(c.String("build.message")),
+		"title":       starlark.String(c.String("build.title")),
 	}
 
 	args := starlark.Tuple([]starlark.Value{
