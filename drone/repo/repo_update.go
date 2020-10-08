@@ -85,7 +85,7 @@ func repoUpdate(c *cli.Context) error {
 		ignorePulls  = c.Bool("ignore-pull-requests")
 		cancelPulls  = c.Bool("auto-cancel-pull-requests")
 		cancelPush   = c.Bool("auto-cancel-pushes")
-		buildCounter = c.Int("build-counter")
+		buildCounter = c.Int64("build-counter")
 		unsafe       = c.Bool("unsafe")
 	)
 
