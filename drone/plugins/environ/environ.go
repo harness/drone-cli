@@ -91,13 +91,13 @@ func environAction(c *cli.Context) error {
 		c.String("secret"),
 		c.Bool("ssl-skip-verify"),
 	)
-	list, err := client.List(context.Background(), req)
+	envs, err := client.List(context.Background(), req)
 	if err != nil {
 		return err
 	}
 
-	for k, v := range list {
-		fmt.Printf("%s=%s\n", k, v)
+	for _, env := range envs {
+		fmt.Printf("%s=%q\n", env.Name, env.Data)
 	}
 	return nil
 }

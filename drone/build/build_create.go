@@ -23,6 +23,10 @@ var buildCreateCmd = cli.Command{
 			Name:  "branch",
 			Usage: "source branch",
 		},
+		cli.StringSliceFlag{
+			Name:  "param, p",
+			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
+		},
 		cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
@@ -43,7 +47,8 @@ func buildCreate(c *cli.Context) (err error) {
 		return err
 	}
 
-	build, err := client.BuildCreate(owner, name, c.String("commit"), c.String("branch"))
+	params := internal.ParseKeyPair(c.StringSlice("param"))
+	build, err := client.BuildCreate(owner, name, c.String("commit"), c.String("branch"), params)
 	if err != nil {
 		return err
 	}
