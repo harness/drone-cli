@@ -4,6 +4,7 @@ import (
 	"github.com/drone/drone-cli/drone/plugins/admit"
 	"github.com/drone/drone-cli/drone/plugins/config"
 	"github.com/drone/drone-cli/drone/plugins/convert"
+	"github.com/drone/drone-cli/drone/plugins/environ"
 	"github.com/drone/drone-cli/drone/plugins/registry"
 	"github.com/drone/drone-cli/drone/plugins/secret"
 
@@ -18,7 +19,8 @@ var Command = cli.Command{
 		admit.Command,
 		config.Command,
 		convert.Command,
-		secret.Command,
+		environ.Command,
 		registry.Command,
+		secret.Command,
 	},
 }
