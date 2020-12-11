@@ -138,6 +138,10 @@ var Command = cli.Command{
 			Usage: "git reference",
 		},
 		cli.StringFlag{
+			Name:  "sha",
+			Usage: "git sha",
+		},
+		cli.StringFlag{
 			Name:  "repo",
 			Usage: "git repository name (e.g. octocat/hello-world)",
 		},

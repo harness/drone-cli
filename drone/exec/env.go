@@ -30,6 +30,10 @@ func getEnv(c *cli.Context) map[string]string {
 		v := c.String("ref")
 		env["DRONE_COMMIT_REF"] = v
 	}
+	if c.IsSet("sha") {
+		v := c.String("sha")
+		env["DRONE_COMMIT_SHA"] = v
+	}
 	if c.IsSet("repo") {
 		v := c.String("repo")
 		env["DRONE_REPO"] = v
