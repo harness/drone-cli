@@ -49,6 +49,11 @@ var Command = cli.Command{
 			Name:  "stdout",
 			Usage: "Write output to stdout",
 		},
+		cli.Uint64Flag{
+			Name:  "max-execution-steps",
+			Usage: "maximum number of execution steps",
+			Value: 50000,
+		},
 		//
 		// Drone Parameters
 		//
@@ -155,6 +160,7 @@ func generate(c *cli.Context) error {
 			},
 		),
 	})
+	thread.SetMaxExecutionSteps(c.Uint64("max-execution-steps"))
 	mainVal, err = starlark.Call(thread, main, args, nil)
 	if err != nil {
 		return err

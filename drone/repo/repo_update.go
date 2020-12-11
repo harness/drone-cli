@@ -24,6 +24,10 @@ var repoUpdateCmd = cli.Command{
 			Name:  "protected",
 			Usage: "repository is protected",
 		},
+		cli.Int64Flag{
+			Name:  "throttle",
+			Usage: "repository throttle",
+		},
 		cli.DurationFlag{
 			Name:  "timeout",
 			Usage: "repository timeout",
@@ -80,6 +84,7 @@ func repoUpdate(c *cli.Context) error {
 		config       = c.String("config")
 		timeout      = c.Duration("timeout")
 		trusted      = c.Bool("trusted")
+		throttle     = c.Int64("throttle")
 		protected    = c.Bool("protected")
 		ignoreForks  = c.Bool("ignore-forks")
 		ignorePulls  = c.Bool("ignore-pull-requests")
@@ -95,6 +100,9 @@ func repoUpdate(c *cli.Context) error {
 	}
 	if c.IsSet("protected") {
 		patch.Protected = &protected
+	}
+	if c.IsSet("throttle") {
+		patch.Throttle = &throttle
 	}
 	if c.IsSet("timeout") {
 		v := int64(timeout / time.Minute)
