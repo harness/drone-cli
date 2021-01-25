@@ -57,7 +57,7 @@ func main() {
 		},
 		cli.BoolFlag{
 			Name:   "skip-verify",
-			Usage:  "skip ssl verfification",
+			Usage:  "skip ssl verification",
 			EnvVar: "DRONE_SKIP_VERIFY",
 			Hidden: true,
 		},
