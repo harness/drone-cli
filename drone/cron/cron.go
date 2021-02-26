@@ -12,5 +12,6 @@ var Command = cli.Command{
 		cronCreateCmd,
 		cronDisableCmd,
 		cronEnableCmd,
+		cronExecCmd,
 	},
 }
