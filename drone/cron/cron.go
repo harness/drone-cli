@@ -10,6 +10,7 @@ var Command = cli.Command{
 		cronListCmd,
 		cronInfoCmd,
 		cronCreateCmd,
+		cronDeleteCmd,
 		cronDisableCmd,
 		cronEnableCmd,
 	},
