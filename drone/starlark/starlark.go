@@ -111,6 +111,14 @@ var Command = cli.Command{
 			Name:  "build.title",
 			Usage: "build title",
 		},
+		cli.StringFlag{
+			Name:  "build.link",
+			Usage: "build link",
+		},
+		cli.StringFlag{
+			Name:  "build.environment",
+			Usage: "build environment",
+		},
 	},
 }
 
@@ -159,6 +167,8 @@ func generate(c *cli.Context) error {
 		"commit":      starlark.String(c.String("build.commit")),
 		"message":     starlark.String(c.String("build.message")),
 		"title":       starlark.String(c.String("build.title")),
+		"link":        starlark.String(c.String("build.link")),
+		"environment": starlark.String(c.String("build.environment")),
 	}
 
 	args := starlark.Tuple([]starlark.Value{
