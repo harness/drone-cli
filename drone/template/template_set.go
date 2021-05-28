@@ -11,12 +11,16 @@ import (
 var templateUpdateCmd = cli.Command{
 	Name:      "update",
 	Usage:     "update a template",
-	ArgsUsage: "[name]",
+	ArgsUsage: "[namespace] [name] [data]",
 	Action:    templateUpdate,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
 			Usage: "template name",
+		},
+		cli.StringFlag{
+			Name:  "namespace",
+			Usage: "organization name",
 		},
 		cli.StringFlag{
 			Name:  "data",
@@ -31,7 +35,8 @@ func templateUpdate(c *cli.Context) error {
 		return err
 	}
 	template := &drone.Template{
-		Name: c.String("name"),
+		Name:      c.String("name"),
+		Namespace: c.String("namespace"),
 	}
 	if strings.HasPrefix(c.String("data"), "@") {
 		path := strings.TrimPrefix(c.String("data"), "@")
@@ -39,8 +44,8 @@ func templateUpdate(c *cli.Context) error {
 		if ferr != nil {
 			return ferr
 		}
-		template.Data = out
+		template.Data = string(out)
 	}
-	_, err = client.TemplateUpdate(template.Name, template)
+	_, err = client.TemplateUpdate(template.Namespace, template.Name, template)
 	return err
 }

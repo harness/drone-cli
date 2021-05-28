@@ -8,23 +8,28 @@ import (
 var templateDeleteCmd = cli.Command{
 	Name:      "rm",
 	Usage:     "remove a template",
-	ArgsUsage: "[name]",
+	ArgsUsage: "[namespace] [name]",
 	Action:    templateDelete,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
 			Usage: "template name",
 		},
+		cli.StringFlag{
+			Name:  "namespace",
+			Usage: "organization name",
+		},
 	},
 }
 
 func templateDelete(c *cli.Context) error {
 	var (
-		name = c.String("name")
+		namespace = c.String("namespace")
+		name      = c.String("name")
 	)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	return client.TemplateDelete(name)
+	return client.TemplateDelete(namespace, name)
 }

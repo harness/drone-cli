@@ -24,13 +24,14 @@ var templateListCmd = cli.Command{
 
 func templateList(c *cli.Context) error {
 	var (
-		format = c.String("format") + "\n"
+		namespace = c.Args().First()
+		format    = c.String("format") + "\n"
 	)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	list, err := client.TemplateList()
+	list, err := client.TemplateList(namespace)
 	if err != nil {
 		return err
 	}
