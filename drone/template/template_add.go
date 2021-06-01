@@ -2,11 +2,12 @@ package template
 
 import (
 	"errors"
+	"io/ioutil"
+	"strings"
+
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
 	"github.com/urfave/cli"
-	"io/ioutil"
-	"strings"
 )
 
 var templateCreateCmd = cli.Command{
