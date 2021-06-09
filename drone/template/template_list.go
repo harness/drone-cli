@@ -12,9 +12,13 @@ import (
 var templateListCmd = cli.Command{
 	Name:      "ls",
 	Usage:     "list templates",
-	ArgsUsage: "[]",
+	ArgsUsage: "[namespace]",
 	Action:    templateList,
 	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "namespace",
+			Usage: "namespace (e.g. octocat)",
+		},
 		cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
