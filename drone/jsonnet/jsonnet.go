@@ -41,7 +41,7 @@ var Command = cli.Command{
 			Name:  "stream",
 			Usage: "Write output as a YAML stream.",
 		},
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name:  "format",
 			Usage: "Write output as formatted YAML",
 		},
@@ -109,9 +109,8 @@ func generate(c *cli.Context) error {
 		buf.WriteString(result)
 	}
 
-	// the yaml file is parsed and formatted by default. This
-	// can be disabled for --format=false.
-	if c.BoolT("format") {
+	// enable yaml formatting with --format
+	if c.Bool("format") {
 		manifest, err := yaml.Parse(buf)
 		if err != nil {
 			return err

@@ -23,6 +23,7 @@ import (
 	"github.com/drone/drone-cli/drone/server"
 	"github.com/drone/drone-cli/drone/sign"
 	"github.com/drone/drone-cli/drone/starlark"
+	"github.com/drone/drone-cli/drone/template"
 	"github.com/drone/drone-cli/drone/user"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -95,6 +96,7 @@ func main() {
 		jsonnet.Command,
 		starlark.Command,
 		plugins.Command,
+		template.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {
