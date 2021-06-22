@@ -119,6 +119,10 @@ var Command = cli.Command{
 			Name:  "build.environment",
 			Usage: "build environment",
 		},
+		cli.BoolTFlag{
+			Name:  "build.debug",
+			Usage: "debug build",
+		},
 	},
 }
 
@@ -169,6 +173,7 @@ func generate(c *cli.Context) error {
 		"title":       starlark.String(c.String("build.title")),
 		"link":        starlark.String(c.String("build.link")),
 		"environment": starlark.String(c.String("build.environment")),
+		"debug":       starlark.Bool(c.Bool("build.debug")),
 	}
 
 	args := starlark.Tuple([]starlark.Value{
