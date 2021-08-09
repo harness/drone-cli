@@ -2,7 +2,6 @@ package secret
 
 import (
 	"context"
-
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/secret"
@@ -54,14 +53,9 @@ var secretFindCmd = cli.Command{
 			EnvVar: "DRONE_SECRET_ENDPOINT",
 		},
 		cli.StringFlag{
-			Name:   "secret-secret",
-			Usage:  "plugin secret",
-			EnvVar: "DRONE_SECRET_SECRET",
-		},
-		cli.StringFlag{
 			Name:   "secret",
 			Usage:  "plugin secret",
-			EnvVar: "DRONE_SECRET_PLUGIN_TOKEN",
+			EnvVar: "DRONE_SECRET_SECRET, DRONE_SECRET_PLUGIN_TOKEN",
 		},
 		cli.StringFlag{
 			Name:   "ssl-skip-verify",
@@ -103,14 +97,9 @@ func secretFind(c *cli.Context) error {
 		Build: build,
 	}
 
-	droneSecret := c.String("secret-secret")
-	if droneSecret == ""{
-		droneSecret = c.String("secret")
-	}
-
 	client := secret.Client(
 		c.String("endpoint"),
-		droneSecret,
+		c.String("secret"),
 		c.Bool("ssl-skip-verify"),
 	)
 	res, err := client.Find(context.Background(), req)
