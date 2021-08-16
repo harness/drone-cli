@@ -9,9 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/drone/drone-yaml/yaml"
-	"github.com/drone/drone-yaml/yaml/pretty"
 	"github.com/fatih/color"
+	"github.com/ghodss/yaml"
 	"github.com/google/go-jsonnet"
 	"github.com/urfave/cli"
 )
@@ -42,8 +41,9 @@ var Command = cli.Command{
 			Usage: "Write output as a YAML stream.",
 		},
 		cli.BoolFlag{
-			Name:  "format",
-			Usage: "Write output as formatted YAML",
+			Name:   "format",
+			Hidden: true,
+			Usage:  "Write output as formatted YAML",
 		},
 		cli.BoolFlag{
 			Name:  "stdout",
@@ -97,31 +97,27 @@ func generate(c *cli.Context) error {
 			return err
 		}
 		for _, doc := range docs {
+			formatted, yErr := yaml.JSONToYAML([]byte(doc))
+			if yErr != nil {
+				return fmt.Errorf("failed to convert to YAML: %v", yErr)
+			}
 			buf.WriteString("---")
 			buf.WriteString("\n")
-			buf.WriteString(doc)
+			buf.Write(formatted)
 		}
 	} else {
 		result, err := vm.EvaluateSnippet(source, string(data))
 		if err != nil {
 			return err
 		}
-		buf.WriteString(result)
-	}
-
-	// enable yaml formatting with --format
-	if c.Bool("format") {
-		manifest, err := yaml.Parse(buf)
-		if err != nil {
-			return err
+		formatted, yErr := yaml.JSONToYAML([]byte(result))
+		if yErr != nil {
+			return fmt.Errorf("failed to convert to YAML: %v", yErr)
 		}
-		buf.Reset()
-		pretty.Print(buf, manifest)
+		buf.Write(formatted)
 	}
 
-	// the user can optionally write the yaml to stdout. This
-	// is useful for debugging purposes without mutating an
-	// existing file.
+	// the user can optionally write the yaml to stdout. This is useful for debugging purposes without mutating an existing file.
 	if c.Bool("stdout") {
 		io.Copy(os.Stdout, buf)
 		return nil
