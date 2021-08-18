@@ -36,16 +36,18 @@ func templateCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	namespace := c.String("namespace")
+	if namespace == "" {
+		return errors.New("missing namespace")
+	}
+
 	template := &drone.Template{
-		Namespace: c.String("namespace"),
-		Name:      c.String("name"),
+		Name: c.String("name"),
 	}
 
 	if template.Name == "" {
-		return errors.New("Missing template name")
-	}
-	if template.Namespace == "" {
-		return errors.New("Missing namespace")
+		return errors.New("missing template name")
 	}
 
 	if strings.HasPrefix(c.String("data"), "@") {
@@ -56,6 +58,6 @@ func templateCreate(c *cli.Context) error {
 		}
 		template.Data = string(out)
 	}
-	_, err = client.TemplateCreate(template)
+	_, err = client.TemplateCreate(namespace, template)
 	return err
 }

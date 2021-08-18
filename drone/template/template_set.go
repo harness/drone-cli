@@ -1,11 +1,13 @@
 package template
 
 import (
+	"errors"
 	"io/ioutil"
 	"strings"
 
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
+
 	"github.com/urfave/cli"
 )
 
@@ -35,9 +37,14 @@ func templateUpdate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	namespace := c.String("namespace")
+	if namespace == "" {
+		return errors.New("missing namespace")
+	}
+
 	template := &drone.Template{
-		Name:      c.String("name"),
-		Namespace: c.String("namespace"),
+		Name: c.String("name"),
 	}
 	if strings.HasPrefix(c.String("data"), "@") {
 		path := strings.TrimPrefix(c.String("data"), "@")
@@ -47,6 +54,6 @@ func templateUpdate(c *cli.Context) error {
 		}
 		template.Data = string(out)
 	}
-	_, err = client.TemplateUpdate(template.Namespace, template.Name, template)
+	_, err = client.TemplateUpdate(namespace, template.Name, template)
 	return err
 }
