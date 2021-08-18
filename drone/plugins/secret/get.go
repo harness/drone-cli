@@ -2,7 +2,6 @@ package secret
 
 import (
 	"context"
-
 	"github.com/drone/drone-cli/drone/internal"
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/drone-go/plugin/secret"
@@ -56,7 +55,7 @@ var secretFindCmd = cli.Command{
 		cli.StringFlag{
 			Name:   "secret",
 			Usage:  "plugin secret",
-			EnvVar: "DRONE_SECRET_SECRET",
+			EnvVar: "DRONE_SECRET_SECRET, DRONE_SECRET_PLUGIN_TOKEN",
 		},
 		cli.StringFlag{
 			Name:   "ssl-skip-verify",
