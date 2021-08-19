@@ -33,8 +33,8 @@ github.com/docker/go-connections v0.3.0 h1:3lOnM9cSzgGwx8VfK/NGOW5fLQ0GjIlCkaktF
 github.com/docker/go-connections v0.3.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
 github.com/docker/go-units v0.3.3 h1:Xk8S3Xj5sLGlG5g67hJmYMmUgXv5N4PhkjJHHqrwnTk=
 github.com/docker/go-units v0.3.3/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
-github.com/drone/drone-go v1.6.1-0.20210601150845-c0e5325523a6 h1:mLEgDgep0et7hQCm76xH3xkuMAQb92JYT+0HKQk/loM=
-github.com/drone/drone-go v1.6.1-0.20210601150845-c0e5325523a6/go.mod h1:fxCf9jAnXDZV1yDr0ckTuWd1intvcQwfJmTRpTZ1mXg=
+github.com/drone/drone-go v1.6.1 h1:6GRwCxu6K3vUWVUfRvqGhROzjkRE7OsV5UwxGW9sVfk=
+github.com/drone/drone-go v1.6.1/go.mod h1:fxCf9jAnXDZV1yDr0ckTuWd1intvcQwfJmTRpTZ1mXg=
 github.com/drone/drone-runtime v1.0.7-0.20190729070836-38f28a11afe8/go.mod h1:+osgwGADc/nyl40J0fdsf8Z09bgcBZXvXXnLOY48zYs=
 github.com/drone/drone-runtime v1.1.1-0.20200623162453-61e33e2cab5d h1:P5HI/Y9hARTZ3F3EKs0kYijhjXZWQRQHYn1neTi0pWM=
 github.com/drone/drone-runtime v1.1.1-0.20200623162453-61e33e2cab5d/go.mod h1:4/2QToW5+HGD0y1sTw7X35W1f7YINS14UfDY4isggT8=
