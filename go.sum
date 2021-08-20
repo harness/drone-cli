@@ -40,8 +40,8 @@ github.com/drone/drone-runtime v1.1.1-0.20200623162453-61e33e2cab5d h1:P5HI/Y9hA
 github.com/drone/drone-runtime v1.1.1-0.20200623162453-61e33e2cab5d/go.mod h1:4/2QToW5+HGD0y1sTw7X35W1f7YINS14UfDY4isggT8=
 github.com/drone/drone-yaml v0.0.0-20190729072335-70fa398b3560 h1:3QL4NnDpGtaXpgI9eNd6N2k5WK8W388CzD67ZTuuZQg=
 github.com/drone/drone-yaml v0.0.0-20190729072335-70fa398b3560/go.mod h1:rCLISp/rqZ50s6G4nKsm971tRSzolxzqqXfgjDqPYoE=
-github.com/drone/envsubst v1.0.1 h1:NOOStingM2sbBwsIUeQkKUz8ShwCUzmqMxWrpXItfPE=
-github.com/drone/envsubst v1.0.1/go.mod h1:bkZbnc/2vh1M12Ecn7EYScpI4YGYU0etwLJICOWi8Z0=
+github.com/drone/envsubst v1.0.3 h1:PCIBwNDYjs50AsLZPYdfhSATKaRg/FJmDc2D6+C2x8g=
+github.com/drone/envsubst v1.0.3/go.mod h1:N2jZmlMufstn1KEqvbHjw40h1KyTmnVzHcSc9bFiJ2g=
 github.com/drone/funcmap v0.0.0-20190918184546-d4ef6e88376d h1:/IO7UVVu191Jc0DajV4cDVoO+91cuppvgxg2MZl+AXI=
 github.com/drone/funcmap v0.0.0-20190918184546-d4ef6e88376d/go.mod h1:Hph0/pT6ZxbujnE1Z6/08p5I0XXuOsppqF6NQlGOK0E=
 github.com/drone/signal v1.0.0 h1:NrnM2M/4yAuU/tXs6RP1a1ZfxnaHwYkd0kJurA1p6uI=

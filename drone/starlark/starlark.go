@@ -9,9 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/drone/drone-yaml/yaml"
-	"github.com/drone/drone-yaml/yaml/pretty"
-
+	"github.com/ghodss/yaml"
 	"github.com/urfave/cli"
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarkstruct"
@@ -213,8 +211,7 @@ func generate(c *cli.Context) error {
 		return fmt.Errorf("invalid return type (got a %s)", mainVal.Type())
 	}
 
-	// if the user disables pretty printing, the yaml is printed
-	// to the console or written to the file in json format.
+	// if the user disables pretty printing, the yaml is printed to the console or written to the file in json format.
 	if c.BoolT("format") == false {
 		if c.Bool("stdout") {
 			io.Copy(os.Stdout, buf)
@@ -223,16 +220,14 @@ func generate(c *cli.Context) error {
 		return ioutil.WriteFile(target, buf.Bytes(), 0644)
 	}
 
-	manifest, err := yaml.Parse(buf)
-	if err != nil {
-		return err
+	yml, yErr := yaml.JSONToYAML(buf.Bytes())
+	if yErr != nil {
+		return fmt.Errorf("failed to convert to YAML: %v", yErr)
 	}
 	buf.Reset()
-	pretty.Print(buf, manifest)
+	buf.Write(yml)
 
-	// the user can optionally write the yaml to stdout. This
-	// is useful for debugging purposes without mutating an
-	// existing file.
+	// the user can optionally write the yaml to stdout. This is useful for debugging purposes without mutating an existing file.
 	if c.Bool("stdout") {
 		io.Copy(os.Stdout, buf)
 		return nil
