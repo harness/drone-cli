@@ -41,9 +41,8 @@ var Command = cli.Command{
 			Usage: "Write output as a YAML stream.",
 		},
 		cli.BoolFlag{
-			Name:   "format",
-			Hidden: true,
-			Usage:  "Write output as formatted YAML",
+			Name:  "format",
+			Usage: "Write output as formatted YAML",
 		},
 		cli.BoolFlag{
 			Name:  "stdout",
@@ -97,26 +96,26 @@ func generate(c *cli.Context) error {
 			return err
 		}
 		for _, doc := range docs {
-			formatted, yErr := yaml.JSONToYAML([]byte(doc))
-			if yErr != nil {
-				return fmt.Errorf("failed to convert to YAML: %v", yErr)
-			}
 			buf.WriteString("---")
 			buf.WriteString("\n")
-			buf.Write(formatted)
+			buf.WriteString(doc)
 		}
 	} else {
 		result, err := vm.EvaluateSnippet(source, string(data))
 		if err != nil {
 			return err
 		}
-		formatted, yErr := yaml.JSONToYAML([]byte(result))
+		buf.WriteString(result)
+	}
+	// enable yaml output
+	if c.Bool("format") {
+		formatted, yErr := yaml.JSONToYAML(buf.Bytes())
 		if yErr != nil {
 			return fmt.Errorf("failed to convert to YAML: %v", yErr)
 		}
+		buf.Reset()
 		buf.Write(formatted)
 	}
-
 	// the user can optionally write the yaml to stdout. This is useful for debugging purposes without mutating an existing file.
 	if c.Bool("stdout") {
 		io.Copy(os.Stdout, buf)
