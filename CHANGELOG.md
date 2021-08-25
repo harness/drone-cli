@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.3.2](https://github.com/drone/drone-cli/tree/v1.3.2) (2021-08-25)
+
+[Full Changelog](https://github.com/drone/drone-cli/compare/v1.3.1...v1.3.2)
+
+**Fixed bugs:**
+
+- \(fix\) re-enable format option for jsonnet command [\#193](https://github.com/drone/drone-cli/pull/193) ([tphoney](https://github.com/tphoney))
+
 ## [v1.3.1](https://github.com/drone/drone-cli/tree/v1.3.1) (2021-08-20)
 
 [Full Changelog](https://github.com/drone/drone-cli/compare/v1.3.0...v1.3.1)
@@ -9,6 +17,10 @@
 - Defect/permission template [\#191](https://github.com/drone/drone-cli/pull/191) ([eoinmcafee00](https://github.com/eoinmcafee00))
 - \(DRON-113\) use ghodss/yaml for yaml printing [\#189](https://github.com/drone/drone-cli/pull/189) ([tphoney](https://github.com/tphoney))
 - fixes issue were cli required an additional parameter in order to com… [\#188](https://github.com/drone/drone-cli/pull/188) ([eoinmcafee00](https://github.com/eoinmcafee00))
+
+**Merged pull requests:**
+
+- release prep v1.3.1 [\#192](https://github.com/drone/drone-cli/pull/192) ([eoinmcafee00](https://github.com/eoinmcafee00))
 
 
 
