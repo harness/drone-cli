@@ -60,17 +60,30 @@ var Command = cli.Command{
 }
 
 func generate(c *cli.Context) error {
-	source := c.String("source")
-	target := c.String("target")
-
-	data, err := ioutil.ReadFile(source)
+	result, err := convert(c.String("source"), c.Bool("string"), c.Bool("format"), c.Bool("stream"), c.StringSlice("extVar"))
 	if err != nil {
 		return err
 	}
 
+	// the user can optionally write the yaml to stdout. This is useful for debugging purposes without mutating an existing file.
+	if c.Bool("stdout") {
+		io.WriteString(os.Stdout, result)
+		return nil
+	}
+
+	target := c.String("target")
+	return ioutil.WriteFile(target, []byte(result), 0644)
+}
+
+func convert(source string, stringOutput bool, format bool, stream bool, vars []string) (string, error) {
+	data, err := ioutil.ReadFile(source)
+	if err != nil {
+		return "", err
+	}
+
 	vm := jsonnet.MakeVM()
 	vm.MaxStack = 500
-	vm.StringOutput = c.Bool("string")
+	vm.StringOutput = stringOutput
 	vm.ErrorFormatter.SetMaxStackTraceSize(20)
 	vm.ErrorFormatter.SetColorFormatter(
 		color.New(color.FgRed).Fprintf,
@@ -80,49 +93,55 @@ func generate(c *cli.Context) error {
 	RegisterNativeFuncs(vm)
 
 	// extVars
-	vars := c.StringSlice("extVar")
 	for _, v := range vars {
 		name, value, err := getVarVal(v)
 		if err != nil {
-			return err
+			return "", err
 		}
 		vm.ExtVar(name, value)
 	}
 
+	formatDoc := func(doc []byte) ([]byte, error) {
+		// enable yaml output
+		if format {
+			formatted, yErr := yaml.JSONToYAML(doc)
+			if yErr != nil {
+				return nil, fmt.Errorf("failed to convert to YAML: %v", yErr)
+			}
+			return formatted, nil
+		}
+		return doc, nil
+	}
+
 	buf := new(bytes.Buffer)
-	if c.Bool("stream") {
+	if stream {
 		docs, err := vm.EvaluateSnippetStream(source, string(data))
 		if err != nil {
-			return err
+			return "", err
 		}
 		for _, doc := range docs {
+			formatted, err := formatDoc([]byte(doc))
+			if err != nil {
+				return "", err
+			}
+
 			buf.WriteString("---")
 			buf.WriteString("\n")
-			buf.WriteString(doc)
+			buf.Write(formatted)
 		}
 	} else {
 		result, err := vm.EvaluateSnippet(source, string(data))
 		if err != nil {
-			return err
+			return "", err
 		}
-		buf.WriteString(result)
-	}
-	// enable yaml output
-	if c.Bool("format") {
-		formatted, yErr := yaml.JSONToYAML(buf.Bytes())
-		if yErr != nil {
-			return fmt.Errorf("failed to convert to YAML: %v", yErr)
+		formatted, err := formatDoc([]byte(result))
+		if err != nil {
+			return "", err
 		}
-		buf.Reset()
 		buf.Write(formatted)
 	}
-	// the user can optionally write the yaml to stdout. This is useful for debugging purposes without mutating an existing file.
-	if c.Bool("stdout") {
-		io.Copy(os.Stdout, buf)
-		return nil
-	}
 
-	return ioutil.WriteFile(target, buf.Bytes(), 0644)
+	return buf.String(), nil
 }
 
 // https://github.com/google/go-jsonnet/blob/master/cmd/jsonnet/cmd.go#L149

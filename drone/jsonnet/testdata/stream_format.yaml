@@ -1,0 +1,32 @@
+---
+kind: pipeline
+name: first
+platform:
+  arch: amd64
+  os: linux
+steps:
+- commands:
+  - go test ./...
+  image: golang:1.16
+  name: test
+- commands:
+  - go build ./...
+  image: golang:1.16
+  name: build
+type: docker
+---
+kind: pipeline
+name: second
+platform:
+  arch: amd64
+  os: linux
+steps:
+- commands:
+  - go test ./...
+  image: golang:1.16
+  name: test
+- commands:
+  - go build ./...
+  image: golang:1.16
+  name: build
+type: docker
