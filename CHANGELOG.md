@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.3.3](https://github.com/drone/drone-cli/tree/v1.3.3) (2021-08-26)
+
+[Full Changelog](https://github.com/drone/drone-cli/compare/v1.3.2...v1.3.3)
+
+**Fixed bugs:**
+
+- Fix `--stream` combined with `--format` for `jsonnet` [\#195](https://github.com/drone/drone-cli/pull/195) ([julienduchesne](https://github.com/julienduchesne))
+
 ## [v1.3.2](https://github.com/drone/drone-cli/tree/v1.3.2) (2021-08-25)
 
 [Full Changelog](https://github.com/drone/drone-cli/compare/v1.3.1...v1.3.2)
@@ -7,6 +15,10 @@
 **Fixed bugs:**
 
 - \(fix\) re-enable format option for jsonnet command [\#193](https://github.com/drone/drone-cli/pull/193) ([tphoney](https://github.com/tphoney))
+
+**Merged pull requests:**
+
+- \(maint\) release prep for v1.3.2 [\#194](https://github.com/drone/drone-cli/pull/194) ([tphoney](https://github.com/tphoney))
 
 ## [v1.3.1](https://github.com/drone/drone-cli/tree/v1.3.1) (2021-08-20)
 
