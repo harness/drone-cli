@@ -3,6 +3,11 @@ type: docker
 name: default
 
 steps:
+- name: test
+  image: golang:1.16
+  commands:
+  - go test ./...
+
 - name: build
   image: golang:1.16
   commands:

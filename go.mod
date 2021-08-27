@@ -20,6 +20,7 @@ require (
 	github.com/mattn/go-colorable v0.1.4
 	github.com/mattn/go-isatty v0.0.11
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.20.0
 	go.starlark.net v0.0.0-20201118183435-e55f603d8c79
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
