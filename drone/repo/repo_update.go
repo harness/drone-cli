@@ -52,6 +52,10 @@ var repoUpdateCmd = cli.Command{
 			Name:  "auto-cancel-pushes",
 			Usage: "automatically cancel pending push builds",
 		},
+		cli.BoolFlag{
+			Name:  "auto-cancel-running",
+			Usage: "automatically cancel running builds if newer commit pushed",
+		},
 		cli.StringFlag{
 			Name:  "config",
 			Usage: "repository configuration path (e.g. .drone.yml)",
@@ -80,18 +84,19 @@ func repoUpdate(c *cli.Context) error {
 	}
 
 	var (
-		visibility   = c.String("visibility")
-		config       = c.String("config")
-		timeout      = c.Duration("timeout")
-		trusted      = c.Bool("trusted")
-		throttle     = c.Int64("throttle")
-		protected    = c.Bool("protected")
-		ignoreForks  = c.Bool("ignore-forks")
-		ignorePulls  = c.Bool("ignore-pull-requests")
-		cancelPulls  = c.Bool("auto-cancel-pull-requests")
-		cancelPush   = c.Bool("auto-cancel-pushes")
-		buildCounter = c.Int64("build-counter")
-		unsafe       = c.Bool("unsafe")
+		visibility    = c.String("visibility")
+		config        = c.String("config")
+		timeout       = c.Duration("timeout")
+		trusted       = c.Bool("trusted")
+		throttle      = c.Int64("throttle")
+		protected     = c.Bool("protected")
+		ignoreForks   = c.Bool("ignore-forks")
+		ignorePulls   = c.Bool("ignore-pull-requests")
+		cancelPulls   = c.Bool("auto-cancel-pull-requests")
+		cancelPush    = c.Bool("auto-cancel-pushes")
+		cancelRunning = c.Bool("auto-cancel-running")
+		buildCounter  = c.Int64("build-counter")
+		unsafe        = c.Bool("unsafe")
 	)
 
 	patch := new(drone.RepoPatch)
@@ -122,6 +127,9 @@ func repoUpdate(c *cli.Context) error {
 	}
 	if c.IsSet("auto-cancel-pushes") {
 		patch.CancelPush = &cancelPush
+	}
+	if c.IsSet("auto-cancel-running") {
+		patch.CancelRunning = &cancelRunning
 	}
 	if c.IsSet("visibility") {
 		switch visibility {

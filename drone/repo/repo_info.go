@@ -56,4 +56,7 @@ Private: {{ .Private }}
 Trusted: {{ .Trusted }}
 Protected: {{ .Protected }}
 Remote: {{ .HTTPURL }}
+CancelRunning: {{ .CancelRunning }}
+CancelPulls: {{ .CancelPulls }}
+CancelPush: {{ .CancelPush }}
 `
