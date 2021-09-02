@@ -50,7 +50,7 @@ var Command = cli.Command{
 		cli.Uint64Flag{
 			Name:  "max-execution-steps",
 			Usage: "maximum number of execution steps",
-			Value: 50000,
+			Value: 100000,
 		},
 		//
 		// Drone Parameters
