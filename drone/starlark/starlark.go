@@ -39,7 +39,7 @@ var Command = cli.Command{
 			Usage: "target file",
 			Value: ".drone.yml",
 		},
-		cli.BoolTFlag{
+		cli.BoolFlag{
 			Name:  "format",
 			Usage: "Write output as formatted YAML",
 		},
@@ -193,13 +193,24 @@ func generate(c *cli.Context) error {
 	switch v := mainVal.(type) {
 	case *starlark.List:
 		for i := 0; i < v.Len(); i++ {
+			tmpBuf := new(bytes.Buffer)
 			item := v.Index(i)
-			buf.WriteString("---\n")
-			err = writeJSON(buf, item)
+			tmpBuf.WriteString("---\n")
+			err = writeJSON(tmpBuf, item)
 			if err != nil {
 				return err
 			}
-			buf.WriteString("\n")
+			tmpBuf.WriteString("\n")
+			if c.Bool("format") {
+				yml, yErr := yaml.JSONToYAML(tmpBuf.Bytes())
+				if yErr != nil {
+					return fmt.Errorf("failed to convert to YAML: %v", yErr)
+				}
+				tmpBuf.Reset()
+				tmpBuf.WriteString("---\n")
+				tmpBuf.Write(yml)
+			}
+			buf.Write(tmpBuf.Bytes())
 		}
 	case *starlark.Dict:
 		buf.WriteString("---\n")
@@ -207,27 +218,18 @@ func generate(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
+		if c.BoolT("format") {
+			yml, yErr := yaml.JSONToYAML(buf.Bytes())
+			if yErr != nil {
+				return fmt.Errorf("failed to convert to YAML: %v", yErr)
+			}
+			buf.Reset()
+			buf.Write(yml)
+		}
 	default:
 		return fmt.Errorf("invalid return type (got a %s)", mainVal.Type())
 	}
-
-	// if the user disables pretty printing, the yaml is printed to the console or written to the file in json format.
-	if c.BoolT("format") == false {
-		if c.Bool("stdout") {
-			io.Copy(os.Stdout, buf)
-			return nil
-		}
-		return ioutil.WriteFile(target, buf.Bytes(), 0644)
-	}
-
-	yml, yErr := yaml.JSONToYAML(buf.Bytes())
-	if yErr != nil {
-		return fmt.Errorf("failed to convert to YAML: %v", yErr)
-	}
-	buf.Reset()
-	buf.Write(yml)
-
-	// the user can optionally write the yaml to stdout. This is useful for debugging purposes without mutating an existing file.
+	// the user can optionally write the to stdout. This is useful for debugging purposes without mutating an existing file.
 	if c.Bool("stdout") {
 		io.Copy(os.Stdout, buf)
 		return nil
