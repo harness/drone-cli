@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.4.0](https://github.com/drone/drone-cli/tree/v1.4.0) (2021-09-08)
+
+[Full Changelog](https://github.com/drone/drone-cli/compare/v1.3.3...v1.4.0)
+
+**Implemented enhancements:**
+
+- provides ability to update auto-cancel-running flag on repo [\#198](https://github.com/drone/drone-cli/pull/198) ([eoinmcafee00](https://github.com/eoinmcafee00))
+
+**Fixed bugs:**
+
+- \(fix\) fix multi-docs/lists in starlark [\#200](https://github.com/drone/drone-cli/pull/200) ([tphoney](https://github.com/tphoney))
+
 ## [v1.3.3](https://github.com/drone/drone-cli/tree/v1.3.3) (2021-08-26)
 
 [Full Changelog](https://github.com/drone/drone-cli/compare/v1.3.2...v1.3.3)
@@ -7,6 +19,10 @@
 **Fixed bugs:**
 
 - Fix `--stream` combined with `--format` for `jsonnet` [\#195](https://github.com/drone/drone-cli/pull/195) ([julienduchesne](https://github.com/julienduchesne))
+
+**Merged pull requests:**
+
+- \(maint\) release prep v1.3.3 [\#197](https://github.com/drone/drone-cli/pull/197) ([tphoney](https://github.com/tphoney))
 
 ## [v1.3.2](https://github.com/drone/drone-cli/tree/v1.3.2) (2021-08-25)
 
