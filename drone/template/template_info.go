@@ -61,6 +61,6 @@ func templateInfo(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, templates)
 }
 
-var tmplTemplateInfoList = "\x1b[33m{{ .Name }} \x1b[0m" + "\x1b [33m{{ .Namespace }} \x1b[0m" + `
+var tmplTemplateInfoList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Data:  {{ .Data }}
 `
