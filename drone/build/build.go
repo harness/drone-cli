@@ -18,5 +18,6 @@ var Command = cli.Command{
 		buildPromoteCmd,
 		buildRollbackCmd,
 		buildQueueCmd,
+		buildQueueV2Cmd,
 	},
 }
