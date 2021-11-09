@@ -10,7 +10,7 @@ Bug Tracker: https://discourse.drone.io/c/bugs
 
 ## Release procedure
 
-Run the changelog generator.
+Run the changelog generator
 
 ```BASH
 docker run -it --rm -v "$(pwd)":/usr/local/src/your-app githubchangeloggenerator/github-changelog-generator -u drone -p drone-cli -t <secret github token>
