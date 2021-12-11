@@ -1,21 +1,19 @@
-declare valid_commands=('build' 'cron' 'log' 'encrypt'
-                        'exec' 'info' 'repo' 'user'
-                        'secret' 'server' 'queue' 'orgsecret'
-                        'autoscale' 'convert' 'lint' 'sign'
-                        'jsonnet' 'starlark' 'plugins' 'template'
-                        'help' 'h')
+# Base options.
+_drone_short=('-t' '--token' '-s' '--server'
+    '--autoscaler' '--help' '-h' '--version'
+    '-v')
 
-declare valid_args=('-t' '--token' '-s' '--server'
-                    '--autoscaler' '--help' '-h' '--version'
-                    '-v')
+_drone_long=('build:s' 'cron:s' 'log:s' 'encrypt:s'
+             'exec:s' 'info:s' 'repo:s' 'user:s'
+             'secret:s' 'server:s' 'queue:s' 'orgsecret:s'
+             'autoscale:s' 'convert:s' 'lint:s' 'sign:s'
+             'jsonnet:s' 'starlark:s' 'plugins:s' 'template:s'
+             'help' 'h')
 
-declare contains_sub_commands=('build' 'cron' 'log' 'repo'
-                               'user' 'secret' 'server' 'queue'
-                               'orgsecret' 'autoscale' 'plugins' 'template')
 
 # Commands: build
 _drone_build_short=('-h')
-_drone_build_long=('ls' 'last' 'info' 'create' 'stop' 'restart' 'approve' 'decline' 'promote' 'rollback' 'queue' '--help')
+_drone_build_long=('ls:s' 'last:s' 'info:s' 'create:s' 'stop:s' 'restart:s' 'approve:s' 'decline:s' 'promote:s' 'rollback:s' 'queue:s' '--help:s')
 
 _drone_build_ls_short=()
 _drone_build_ls_long=('--format:u' '--branch:u' '--event:u' '--status:u' '--limit:u' '--page:u')
@@ -52,7 +50,7 @@ _drone_build_queue_long=('--format:u' '--repo:u' '--branch:u' '--event:u' '--sta
 
 # Commands: cron
 _drone_cron_short=('-h')
-_drone_cron_long=('ls' 'info' 'add' 'rm' 'disable' 'enable' 'exec' '--help')
+_drone_cron_long=('ls:s' 'info:s' 'add:s' 'rm:s' 'disable:s' 'enable:s' 'exec:s' '--help')
 
 _drone_cron_ls_short=()
 _drone_cron_ls_long=()
@@ -77,7 +75,7 @@ _drone_cron_exec_long=()
 
 # Commands: log
 _drone_log_short=('-h')
-_drone_log_long=('purge' 'view' '--help')
+_drone_log_long=('purge:s' 'view:s' '--help')
 
 _drone_log_purge_short=()
 _drone_log_purge_long=()
@@ -99,7 +97,7 @@ _drone_info_long=('--format:u')
 
 # Commands: repo
 _drone_repo_short=('-h')
-_drone_repo_long=('ls' 'info' 'enable' 'update' 'disable' 'repair' 'chown' 'sync' '--help')
+_drone_repo_long=('ls:s' 'info:s' 'enable:s' 'update:s' 'disable:s' 'repair:s' 'chown:s' 'sync:s' '--help')
 
 _drone_repo_ls_short=()
 _drone_repo_ls_long=('--format:u' '--org:u' '--active')
@@ -127,7 +125,7 @@ _drone_repo_sync_long=('--format:u')
 
 # Commands: user
 _drone_user_short=('-h')
-_drone_user_long=('ls' 'info' 'add' 'update' 'rm' 'block' '--help')
+_drone_user_long=('ls:s' 'info:s' 'add:s' 'update:s' 'rm:s' 'block:s' '--help')
 
 _drone_user_ls_short=()
 _drone_user_ls_long=('--format:u')
@@ -147,6 +145,147 @@ _drone_user_rm_long=()
 _drone_user_block_short=()
 _drone_user_block_long=()
 
+_drone_secret_short=('-h')
+_drone_secret_long=('add:s' 'rm:s' 'update:s' 'info:s' 'ls:s' '--help')
+
+_drone_secret_add_short=()
+_drone_secret_add_long=('--name:u' '--data:u' '--allow-pull-request' '--allow-push-on-pull-request')
+
+_drone_secret_rm_short=()
+_drone_secret_rm_long=('--repository:u' '--name:u')
+
+_drone_secret_update_short=()
+_drone_secret_update_long=('--name:u' '--data:u' '--allow-pull-request' '--alow-push-on-pull-request')
+
+_drone_secret_info_short=()
+_drone_secret_info_long=('--repository:u' '--name:u' '--format:u')
+
+_drone_secret_ls_short=()
+_drone_secret_ls_long=('--repository:u' '--format:u')
+
+_drone_server_short=('-h')
+_drone_server_long=('ls' 'info' 'create' 'destroy' 'env' '--help')
+
+_drone_server_ls_short=('-s:u' '-a' '-l' '-H')
+_drone_server_ls_long=('--state:u' '--all' '--long' '--headers' '--format:u')
+
+_drone_server_info_short=()
+_drone_server_info_long=('--format:u')
+
+_drone_server_create_short=()
+_drone_server_create_long=('--format:u')
+
+_drone_server_destroy_short=()
+_drone_server_destroy_long=('--format:u' '--force')
+
+_drone_server_env_short=()
+_drone_server_env_long=('--shell:u' '--no-proxy' '--clear')
+
+_drone_queue_short=('-h')
+_drone_queue_long=('ls:s' 'pause:s' 'resume:s' '--help')
+
+_drone_queue_ls_short=()
+_drone_queue_ls_long=('--format:u')
+
+_drone_queue_pause_short=()
+_drone_queue_pause_long=()
+
+_drone_queue_resume_short=()
+_drone_queue_resume_long=()
+
+_drone_orgsecret_short=('-h')
+_drone_orgsecret_long=('add:s' 'rm:s' 'update:s' 'info:s' 'ls:s')
+
+_drone_orgsecret_add_short=()
+_drone_orgsecret_add_long=('--allow-pull-request' '--allow-push-on-pull-request')
+
+_drone_orgsecret_rm_short=()
+_drone_orgsecret_rm_long=()
+
+_drone_orgsecret_update_short=()
+_drone_orgsecret_update_long=('--allow-pull-request' '--allow-push-on-pull-request')
+
+_drone_orgsecret_info_short=()
+_drone_orgsecret_info_long=('--format:u')
+
+_drone_orgsecret_ls_short=()
+_drone_orgsecret_ls_long=('--filter:u' '--format:u')
+
+_drone_autoscale_short=('-h')
+_drone_autoscale_long=('pause:s' 'resume:s' 'version:s' '--help')
+
+_drone_autoscale_pause_short=()
+_drone_autoscale_pause_long=()
+
+_drone_autoscale_resume_short=()
+_drone_autoscale_resume_long=()
+
+_drone_autoscale_version_short=()
+_drone_autoscale_version_long=('--format:u')
+
+_drone_convert_short=()
+_drone_convert_long=('--save')
+
+_drone_lint_short=()
+_drone_lint_long=('--trusted' ':f')
+
+_drone_sign_short=()
+_drone_sign_long=('--save' ':f')
+
+_drone_jsonnet_short=('-V:u')
+_drone_jsonnet_long=('--source:f' '--target:f' '--stream' '--format' '--stdout' '--string' '--extVar:u')
+
+_drone_starlark_short=()
+_drone_starlark_long=('--source:f' '--target:f' '--format' '--stdout' '--max-execution-steps:u' '--repo.name:u' '--repo.namespace:u' '--repo.slug:u' '--build.event:u' '--build.branch:u' '--build.source:u' '--build.source_repo:u' '--build.target:u' '--build.ref:u' '--build.commit:u' '--build.message:u' '--build.title:u' '--build.link:u' '--build.environment:u' '--build.debug:u')
+
+_drone_plugins_short=('-h')
+_drone_plugins_long=('admit:s' 'config:s' 'convert:s' 'env:s' 'registry:s' 'secret:s' '--help')
+
+_drone_plugins_admit_short=()
+_drone_plugins_admit_long=('--user:u' '--endpoint:u' '--secret:u' '--ssl-skip-verify:u')
+
+_drone_plugins_config_short=('-h')
+_drone_plugins_config_long=('get:s' '--help')
+
+_drone_plugins_config_get_short=()
+_drone_plugins_config_get_long=('--ref:u' '--source:u' '--target:u' '--before:u' '--after:u' '--path:u' '--endpoint:u' '--secret:u' '--ssl-skip-verify:u')
+
+_drone_plugins_convert_short=()
+_drone_plugins_convert_long=('--path:u' '--ref:u' '--source:u' '--target:u' '--before:u' '--after:u' '--repository:u' '--endpoint:u' '--secret:u' '--ssl-skip-verify:u')
+
+_drone_plugins_env_short=()
+_drone_plugins_env_long=('--ref:u' '--source:u' '--target:u' '--before:u' '--after:u' '--repository:u' '--endpoint:u' '--secret:u' '--skip-skip-verify:u')
+
+_drone_plugins_registry_short=('-h')
+_drone_plugins_registry_long=('list:s' '--help')
+
+_drone_plugins_registry_list_short=()
+_drone_plugins_registry_list_long=('--ref:u' '--source:u' '--target:u' '--before:u' '--after:u' '--event:u' '--repo:u' '--endpoint:u' '--secret:u' '--ssl-skip-verify:u' '--format:u')
+
+_drone_plugins_secret_short=('-h')
+_drone_plugins_secret_long=('get:s' '--help')
+
+_drone_plugins_secret_get_short=()
+_drone_plugins_secret_get_long=('--ref:u' '--source:u' '--target:u' '--before:u' '--after:u' '--event:u' '--repo:u' '--endpoint:u' '--secret:u' '--ssl-skip-verify:u')
+
+_drone_template_short=('-h')
+_drone_template_long=('add:s' 'info:s' 'ls:s' 'update:s' 'rm:s' '--help')
+
+_drone_template_add_short=()
+_drone_template_add_long=('--name:u' '--namespace:u' '--data:u')
+
+_drone_template_info_short=()
+_drone_template_info_long=('--namespace:u' '--name:u' '--format:u')
+
+_drone_template_ls_short=()
+_drone_template_ls_long=('--namespace:u' '--format:u')
+
+_drone_template_update_short=()
+_drone_template_update_long=('--name:u' '--namespace:u' '--data:u')
+
+_drone_template_rm_short=()
+_drone_template_rm_long=('--name:u' '--namespace:u')
+
 _drone() {
     declare command="${COMP_WORDS[1]}"
     declare sub_command="${COMP_WORDS[2]}"
@@ -163,14 +302,6 @@ _drone() {
         return
     fi
 
-    # Otherwise start processing subcommands.
-    for i in "${contains_sub_commands[@]}"; do
-        if [[ "${command}" == "${i}" ]]; then
-            has_sub_command="1"
-            break
-        fi
-    done
-
     unknown_argument_options=()
     file_argument_options=()
     no_argument_options=()
@@ -182,6 +313,7 @@ _drone() {
     else
         short_opts="_drone_${command}_short[@]"
         long_opts="_drone_${command}_long[@]"
+        previous_arg="${current_arg}"
     fi
 
     short_opts=("${!short_opts}")
@@ -217,6 +349,13 @@ _drone() {
 
     for i in "${file_argument_options[@]}"; do
         if [[ "${previous_arg}" == "${i}" ]]; then
+            mapfile -t COMPREPLY < <(find ./ -maxdepth 1 -type f -not -path './' | sed 's|^\./||' | grep "^${current_arg}" 2> /dev/null)
+            return
+        fi
+    done
+    
+    for i in "${accepts_files[@]}"; do
+        if [[ "${previous_arg}" == "" ]] && (echo "${previous_arg}" | grep -q '^[^-]'); then
             mapfile -t COMPREPLY < <(find ./ -maxdepth 1 -type f -not -path './' | sed 's|^\./||' | grep "^${current_arg}" 2> /dev/null)
             return
         fi
