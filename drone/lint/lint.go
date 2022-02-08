@@ -45,7 +45,7 @@ func lint(c *cli.Context) error {
 		path = ".drone.yml"
 	}
 
-	rawsource, err := ioutil.ReadFile(path)
+	rawSource, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func lint(c *cli.Context) error {
 		return v
 	}
 	// evaluates string replacement expressions and returns an update configuration.
-	config, err := envsubst.Eval(string(rawsource), subf)
+	config, err := envsubst.Eval(string(rawSource), subf)
 	if err != nil {
 		return err
 	}

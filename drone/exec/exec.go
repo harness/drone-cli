@@ -20,6 +20,7 @@ import (
 	"github.com/drone/drone-yaml/yaml"
 	"github.com/drone/drone-yaml/yaml/compiler"
 	"github.com/drone/drone-yaml/yaml/compiler/transform"
+	"github.com/drone/drone-yaml/yaml/converter"
 	"github.com/drone/drone-yaml/yaml/linter"
 	"github.com/drone/signal"
 
@@ -102,7 +103,10 @@ var Command = cli.Command{
 				"plugins/heroku",
 			},
 		},
+
+		//
 		// netrc parameters
+		//
 		cli.StringFlag{
 			Name: "netrc-username",
 		},
@@ -112,7 +116,11 @@ var Command = cli.Command{
 		cli.StringFlag{
 			Name: "netrc-machine",
 		},
+
+		//
 		// trigger parameters
+		//
+
 		cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
@@ -162,6 +170,17 @@ func exec(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// this code is temporarily in place to detect and convert
+	// the legacy yaml configuration file to the new format.
+	dataS, err = converter.ConvertString(dataS, converter.Metadata{
+		Filename: file,
+		Ref:      c.String("ref"),
+	})
+	if err != nil {
+		return err
+	}
+
 	manifest, err := yaml.ParseString(dataS)
 	if err != nil {
 		return err
