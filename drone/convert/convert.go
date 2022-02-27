@@ -1,19 +1,15 @@
 package convert
 
 import (
-	"bytes"
-	"io"
 	"io/ioutil"
-	"os"
 
-	"github.com/drone/drone-yaml/yaml/converter"
 	"github.com/urfave/cli"
 )
 
 // Command exports the convert command.
 var Command = cli.Command{
 	Name:      "convert",
-	Usage:     "convert legacy format",
+	Usage:     "<deprecated. this operation is a no-op> convert legacy format",
 	ArgsUsage: "<source>",
 	Action:    convert,
 	Flags: []cli.Flag{
@@ -30,20 +26,9 @@ func convert(c *cli.Context) error {
 		path = ".drone.yml"
 	}
 
-	raw, err := ioutil.ReadFile(path)
+	_, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
-
-	res, err := converter.Convert(raw, converter.Metadata{Filename: path})
-	if err != nil {
-		return err
-	}
-
-	if c.Bool("save") {
-		return ioutil.WriteFile(path, res, 0644)
-	}
-
-	_, err = io.Copy(os.Stderr, bytes.NewReader(res))
 	return err
 }
