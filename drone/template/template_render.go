@@ -43,6 +43,19 @@ type templateArgs struct {
 	Data map[string]interface{}
 }
 
+/*
+Example usage:
+
+drone template render --namespace foo --name my_template.yaml --input my_values.yaml
+
+Where "my_values.yaml" is a valid YAML file containing a `data` key:
+
+```
+data:
+  foo: bar
+```
+
+*/
 func templateRender(c *cli.Context) error {
 	var (
 		namespace    = c.String("namespace")
