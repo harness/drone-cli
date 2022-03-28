@@ -12,5 +12,6 @@ var Command = cli.Command{
 		templateCreateCmd,
 		templateUpdateCmd,
 		templateDeleteCmd,
+		templateRenderCmd,
 	},
 }
