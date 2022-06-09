@@ -12,7 +12,7 @@ Run the changelog generator.
 docker run -it --rm -v "$(pwd)":/usr/local/src/your-app githubchangeloggenerator/github-changelog-generator -u harness -p drone-cli -t <secret github token>
 ```
 
-You can generate a token by logging into your GitHub account and going to Settings -> Personal access tokens.
+You can generate a token by loasdasdgging into your GitHub account and going to Settings -> Personal access tokens.
 
 Next we tag the PR's with the fixes or enhancements labels. If the PR does not fufil the requirements, do not add a label.
 
