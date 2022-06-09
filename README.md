@@ -6,7 +6,7 @@ Documentation: https://docs.drone.io/cli
 
 ## Release procedure
 
-Run the changelog generator.
+Run the changelog generator.adasdas
 
 ```BASH
 docker run -it --rm -v "$(pwd)":/usr/local/src/your-app githubchangeloggenerator/github-changelog-generator -u harness -p drone-cli -t <secret github token>
