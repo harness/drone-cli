@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -300,6 +301,171 @@ func exec(cliContext *cli.Context) error {
 			Name:      step.Name,
 			Status:    drone.StatusPending,
 			ErrIgnore: step.ErrPolicy == runtime.ErrIgnore,
+
+		if v.Type != "" && v.Type != "docker" {
+			return fmt.Errorf("pipeline type (%s) is not supported with 'drone exec'", v.Type)
+		}
+
+		if filter == "" || filter == v.Name {
+			pipeline = v
+			break
+		}
+	}
+	if pipeline == nil {
+		return errors.New("cannot find pipeline")
+	}
+
+	trusted := c.Bool("trusted")
+	err = linter.Lint(pipeline, trusted)
+	if err != nil {
+		return err
+	}
+
+	// the user has the option to disable the git clone
+	// if the pipeline is being executed on the local
+	// codebase.
+	if c.Bool("clone") == false {
+		pipeline.Clone.Disable = true
+	}
+
+	comp := new(compiler.Compiler)
+	comp.PrivilegedFunc = compiler.DindFunc(
+		c.StringSlice("privileged"),
+	)
+	comp.SkipFunc = compiler.SkipFunc(
+		compiler.SkipData{
+			Branch:   environ["DRONE_BRANCH"],
+			Event:    environ["DRONE_EVENT"],
+			Instance: environ["DRONE_SYSTEM_HOST"],
+			Ref:      environ["DRONE_COMMIT_REF"],
+			Repo:     environ["DRONE_REPO"],
+			Target:   environ["DRONE_DEPLOY_TO"],
+		},
+	)
+	transforms := []func(*engine.Spec){
+		transform.Include(
+			c.StringSlice("include"),
+		),
+		transform.Exclude(
+			c.StringSlice("exclude"),
+		),
+		transform.ResumeAt(
+			c.String("resume-at"),
+		),
+		transform.WithAuths(
+			toRegistry(
+				c.StringSlice("registry"),
+			),
+		),
+		transform.WithEnviron(
+			readParams(
+				c.String("env-file"),
+			),
+		),
+		transform.WithEnviron(environ),
+		transform.WithLables(nil),
+		transform.WithLimits(0, 0),
+		transform.WithNetrc(
+			c.String("netrc-machine"),
+			c.String("netrc-username"),
+			c.String("netrc-password"),
+		),
+		transform.WithNetworks(
+			c.StringSlice("network"),
+		),
+		transform.WithProxy(),
+		transform.WithSecrets(
+			readParams(
+				c.String("secret-file"),
+			),
+		),
+		transform.WithVolumeSlice(
+			c.StringSlice("volume"),
+		),
+	}
+	if c.Bool("clone") == false {
+		pwd, _ := os.Getwd()
+		comp.WorkspaceMountFunc = compiler.MountHostWorkspace
+		comp.WorkspaceFunc = compiler.CreateHostWorkspace(pwd)
+	}
+	comp.TransformFunc = transform.Combine(transforms...)
+	ir := comp.Compile(pipeline)
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		c.Duration("timeout"),
+	)
+	ctx = signal.WithContext(ctx)
+	defer cancel()
+
+	// creates a docker-based engine. eventually we will
+	// include the kubernetes and vmware fusion engines.
+	engine, err := docker.NewEnv()
+	if err != nil {
+		return err
+	}
+
+	lPwd, _ := os.Getwd()
+	pipelineFQN := fmt.Sprintf("%s~~%s", strings.ReplaceAll(lPwd, "/", "-"), pipeline.Name)
+	// creates a hook to print the step output to stdout,
+	// with per-step color coding if a tty.
+	hooks := &runtime.Hook{}
+	hooks.BeforeEach = func(s *runtime.State) error {
+		s.Step.Metadata.Labels["io.drone.pipeline.dir"] = lPwd
+		s.Step.Metadata.Labels["io.drone.pipeline.name"] = pipelineFQN
+		s.Step.Envs["CI_BUILD_STATUS"] = "success"
+		s.Step.Envs["CI_BUILD_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		s.Step.Envs["DRONE_BUILD_STATUS"] = "success"
+		s.Step.Envs["DRONE_BUILD_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["DRONE_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		s.Step.Envs["CI_JOB_STATUS"] = "success"
+		s.Step.Envs["CI_JOB_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		s.Step.Envs["DRONE_JOB_STATUS"] = "success"
+		s.Step.Envs["DRONE_JOB_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
+		s.Step.Envs["DRONE_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		if s.Runtime.Error != nil {
+			s.Step.Envs["CI_BUILD_STATUS"] = "failure"
+			s.Step.Envs["CI_JOB_STATUS"] = "failure"
+			s.Step.Envs["DRONE_BUILD_STATUS"] = "failure"
+			s.Step.Envs["DRONE_JOB_STATUS"] = "failure"
+		}
+		return nil
+	}
+
+	hooks.GotLine = term.WriteLine(os.Stdout)
+	if tty {
+		hooks.GotLine = term.WriteLinePretty(
+			colorable.NewColorableStdout(),
+		)
+	}
+
+	return runtime.New(
+		runtime.WithEngine(engine),
+		runtime.WithConfig(ir),
+		runtime.WithHooks(hooks),
+	).Run(ctx)
+}
+
+// helper function converts a slice of urls to a slice
+// of docker registry credentials.
+func toRegistry(items []string) []*engine.DockerAuth {
+	auths := []*engine.DockerAuth{}
+	for _, item := range items {
+		uri, err := url.Parse(item)
+		if err != nil {
+			continue // skip invalid
+		}
+		user := uri.User.Username()
+		pass, _ := uri.User.Password()
+		uri.User = nil
+		auths = append(auths, &engine.DockerAuth{
+			Address:  uri.String(),
+			Username: user,
+			Password: pass,
 		})
 	}
 
