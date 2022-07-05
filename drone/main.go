@@ -10,7 +10,7 @@ import (
 	"github.com/drone/drone-cli/drone/cron"
 	"github.com/drone/drone-cli/drone/encrypt"
 	"github.com/drone/drone-cli/drone/exec"
-	"github.com/drone/drone-cli/drone/exec2"
+	"github.com/drone/drone-cli/drone/execold"
 	"github.com/drone/drone-cli/drone/format"
 	"github.com/drone/drone-cli/drone/info"
 	"github.com/drone/drone-cli/drone/jsonnet"
@@ -82,7 +82,7 @@ func main() {
 		log.Command,
 		encrypt.Command,
 		exec.Command,
-		exec2.Command,
+		execold.Command,
 		info.Command,
 		repo.Command,
 		user.Command,

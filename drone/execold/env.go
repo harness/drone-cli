@@ -1,4 +1,4 @@
-package exec2
+package execold
 
 import (
 	"os"
@@ -62,4 +62,16 @@ func prefixedEnviron(environ []string) map[string]string {
 		envs[key] = val
 	}
 	return envs
+}
+
+// helper function combines one or more maps of environment
+// variables into a single map.
+func combineEnviron(env ...map[string]string) map[string]string {
+	c := map[string]string{}
+	for _, e := range env {
+		for k, v := range e {
+			c[k] = v
+		}
+	}
+	return c
 }

@@ -5,8 +5,11 @@
 package exec
 
 import (
+	"strings"
+
 	"github.com/drone-runners/drone-runner-docker/engine/compiler"
 	"github.com/drone/drone-go/drone"
+	"github.com/joho/godotenv"
 	"github.com/urfave/cli"
 )
 
@@ -51,10 +54,11 @@ func mapOldToExecCommand(input *cli.Context) (returnVal *execCommand) {
 				Event:  input.String("event"),
 				Ref:    input.String("ref"),
 				Deploy: input.String("deploy-to"),
+				Target: input.String("branch"),
 			},
 			Repo: &drone.Repo{
 				Trusted: input.Bool("trusted"),
-				Timeout: int64(input.Int("timeout")),
+				Timeout: int64(input.Duration("timeout").Seconds()),
 				Branch:  input.String("branch"),
 				Name:    input.String("name"),
 			},
@@ -75,8 +79,33 @@ func mapOldToExecCommand(input *cli.Context) (returnVal *execCommand) {
 		Exclude:    input.StringSlice("exclude"),
 		Clone:      input.Bool("clone"),
 		Networks:   input.StringSlice("network"),
+		Environ:    readParams(input.String("env-file")),
+		Volumes:    withVolumeSlice(input.StringSlice("volume")),
+		Secrets:    readParams(input.String("secrets")),
+		Config:     input.String("registry"),
 		Privileged: input.StringSlice("privileged"),
 	}
 
 	return returnVal
+}
+
+// WithVolumeSlice is a transform function that adds a set of global volumes to the container that are defined in --volume=host:container format.
+func withVolumeSlice(volumes []string) (to map[string]string) {
+	to = map[string]string{}
+	for _, s := range volumes {
+		parts := strings.Split(s, ":")
+		if len(parts) != 2 {
+			continue
+		}
+		key := parts[0]
+		val := parts[1]
+		to[key] = val
+	}
+	return to
+}
+
+// helper function reads secrets from a key-value file.
+func readParams(path string) map[string]string {
+	data, _ := godotenv.Read(path)
+	return data
 }
