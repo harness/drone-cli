@@ -383,10 +383,13 @@ func exec(cliContext *cli.Context) error {
 			c.StringSlice("volume"),
 		),
 	}
+	var pipelineFQN, pwd string
 	if c.Bool("clone") == false {
-		pwd, _ := os.Getwd()
+		pwd, _ = os.Getwd()
 		comp.WorkspaceMountFunc = compiler.MountHostWorkspace
 		comp.WorkspaceFunc = compiler.CreateHostWorkspace(pwd)
+		//a unique name pattern for pipeline with pipeline dir and name
+		pipelineFQN = fmt.Sprintf("%s~~%s", strings.ReplaceAll(pwd, "/", "-"), pipeline.Name)
 	}
 	comp.TransformFunc = transform.Combine(transforms...)
 	ir := comp.Compile(pipeline)
@@ -405,14 +408,15 @@ func exec(cliContext *cli.Context) error {
 		return err
 	}
 
-	lPwd, _ := os.Getwd()
-	pipelineFQN := fmt.Sprintf("%s~~%s", strings.ReplaceAll(lPwd, "/", "-"), pipeline.Name)
 	// creates a hook to print the step output to stdout,
 	// with per-step color coding if a tty.
 	hooks := &runtime.Hook{}
 	hooks.BeforeEach = func(s *runtime.State) error {
-		s.Step.Metadata.Labels["io.drone.pipeline.dir"] = lPwd
-		s.Step.Metadata.Labels["io.drone.pipeline.name"] = pipelineFQN
+		//add this label only for Drone exec usage
+		if pwd != "" {
+			s.Step.Metadata.Labels["io.drone.pipeline.dir"] = pwd
+			s.Step.Metadata.Labels["io.drone.pipeline.name"] = pipelineFQN
+		}
 		s.Step.Envs["CI_BUILD_STATUS"] = "success"
 		s.Step.Envs["CI_BUILD_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
 		s.Step.Envs["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
