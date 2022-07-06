@@ -227,7 +227,16 @@ func exec(cliContext *cli.Context) error {
 	// disabled in favor of mounting the source code
 	// from the current working directory.
 	if !commy.Clone {
-		comp.Mount, _ = os.Getwd()
+		pwd, _ := os.Getwd()
+		comp.Mount = pwd
+		//Add the new labels that helps looking up the step containers
+		//by names
+		if comp.Labels == nil {
+			comp.Labels = make(map[string]string)
+		}
+		comp.Labels["io.drone.pipeline.dir"] = pwd
+		comp.Labels["io.drone.pipeline.FQN"] = fmt.Sprintf("%s~~%s", strings.ReplaceAll(pwd, "/", "-"), commy.Stage.Name)
+
 	}
 
 	args := runtime.CompilerArgs{
