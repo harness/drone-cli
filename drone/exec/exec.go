@@ -19,6 +19,7 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/drone/runner-go/environ"
 	"github.com/drone/runner-go/environ/provider"
+	"github.com/drone/runner-go/labels"
 	"github.com/drone/runner-go/logger"
 	"github.com/drone/runner-go/manifest"
 	"github.com/drone/runner-go/pipeline"
@@ -248,6 +249,15 @@ func exec(cliContext *cli.Context) error {
 		System:   commy.System,
 	}
 	spec := comp.Compile(nocontext, args).(*engine.Spec)
+
+	//As the Compiler does not add labels for Steps adding few here
+	for i, step := range spec.Steps {
+		step.Labels = labels.Combine(step.Labels,
+			map[string]string{
+				"io.drone.step.name":   step.Name,
+				"io.drone.step.number": fmt.Sprint(i),
+			})
+	}
 
 	// include only steps that are in the include list,
 	// if the list in non-empty.
