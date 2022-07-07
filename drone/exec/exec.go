@@ -234,8 +234,7 @@ func exec(cliContext *cli.Context) error {
 		if comp.Labels == nil {
 			comp.Labels = make(map[string]string)
 		}
-		comp.Labels["io.drone.pipeline.dir"] = pwd
-		comp.Labels["io.drone.pipeline.FQN"] = fmt.Sprintf("%s~~%s", strings.ReplaceAll(pwd, "/", "-"), commy.Stage.Name)
+		comp.Labels["io.drone.desktop.pipeline.dir"] = pwd
 
 	}
 
@@ -303,6 +302,7 @@ func exec(cliContext *cli.Context) error {
 		if step.RunPolicy == runtime.RunNever {
 			continue
 		}
+
 		commy.Stage.Steps = append(commy.Stage.Steps, &drone.Step{
 			StageID:   commy.Stage.ID,
 			Number:    len(commy.Stage.Steps) + 1,
