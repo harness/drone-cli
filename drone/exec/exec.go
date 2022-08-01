@@ -19,6 +19,7 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/drone/runner-go/environ"
 	"github.com/drone/runner-go/environ/provider"
+	"github.com/drone/runner-go/labels"
 	"github.com/drone/runner-go/logger"
 	"github.com/drone/runner-go/manifest"
 	"github.com/drone/runner-go/pipeline"
@@ -227,7 +228,15 @@ func exec(cliContext *cli.Context) error {
 	// disabled in favor of mounting the source code
 	// from the current working directory.
 	if !commy.Clone {
-		comp.Mount, _ = os.Getwd()
+		pwd, _ := os.Getwd()
+		comp.Mount = pwd
+		//Add the new labels that helps looking up the step containers
+		//by names
+		if comp.Labels == nil {
+			comp.Labels = make(map[string]string)
+		}
+		comp.Labels["io.drone.desktop.pipeline.dir"] = pwd
+
 	}
 
 	args := runtime.CompilerArgs{
@@ -240,6 +249,15 @@ func exec(cliContext *cli.Context) error {
 		System:   commy.System,
 	}
 	spec := comp.Compile(nocontext, args).(*engine.Spec)
+
+	//As the Compiler does not add labels for Steps adding few here
+	for i, step := range spec.Steps {
+		step.Labels = labels.Combine(step.Labels,
+			map[string]string{
+				"io.drone.step.name":   step.Name,
+				"io.drone.step.number": fmt.Sprint(i),
+			})
+	}
 
 	// include only steps that are in the include list,
 	// if the list in non-empty.
@@ -294,6 +312,7 @@ func exec(cliContext *cli.Context) error {
 		if step.RunPolicy == runtime.RunNever {
 			continue
 		}
+
 		commy.Stage.Steps = append(commy.Stage.Steps, &drone.Step{
 			StageID:   commy.Stage.ID,
 			Number:    len(commy.Stage.Steps) + 1,
