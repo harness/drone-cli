@@ -48,6 +48,10 @@ type execCommand struct {
 }
 
 func mapOldToExecCommand(input *cli.Context) (returnVal *execCommand) {
+	pipelineFile := input.Args().First()
+	if pipelineFile == "" {
+		pipelineFile = ".drone.yml"
+	}
 	returnVal = &execCommand{
 		Flags: &Flags{
 			Build: &drone.Build{
@@ -74,7 +78,7 @@ func mapOldToExecCommand(input *cli.Context) (returnVal *execCommand) {
 				Host: input.String("instance"),
 			},
 		},
-		Source:     input.Args().First(),
+		Source:     pipelineFile,
 		Include:    input.StringSlice("include"),
 		Exclude:    input.StringSlice("exclude"),
 		Clone:      input.Bool("clone"),
