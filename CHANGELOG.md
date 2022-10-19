@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.6.0](https://github.com/harness/drone-cli/tree/v1.6.0) (2022-10-19)
+
+[Full Changelog](https://github.com/harness/drone-cli/compare/v1.5.0...v1.6.0)
+
+**Implemented enhancements:**
+
+- \(drone-372\) use the modern docker runner for exec, upgrade deps [\#216](https://github.com/harness/drone-cli/pull/216) ([tphoney](https://github.com/tphoney))
+- \(feat\) start migration from drone-yaml dependency. use docker compiler for lint [\#210](https://github.com/harness/drone-cli/pull/210) ([tphoney](https://github.com/tphoney))
+
+**Fixed bugs:**
+
+- fix: use .drone.yml as default pipeline file [\#219](https://github.com/harness/drone-cli/pull/219) ([kameshsampath](https://github.com/kameshsampath))
+- \(fix\): add labels for tooling to query containers [\#218](https://github.com/harness/drone-cli/pull/218) ([kameshsampath](https://github.com/kameshsampath))
+
+**Merged pull requests:**
+
+- add community information [\#213](https://github.com/harness/drone-cli/pull/213) ([mrsantons](https://github.com/mrsantons))
+
 ## [v1.5.0](https://github.com/harness/drone-cli/tree/v1.5.0) (2022-01-04)
 
 [Full Changelog](https://github.com/harness/drone-cli/compare/v1.4.0...v1.5.0)
@@ -14,6 +32,10 @@
 - update libaries with vulnerabilies [\#208](https://github.com/harness/drone-cli/pull/208) ([eoinmcafee00](https://github.com/eoinmcafee00))
 - fixes issue where template info command wasn't working [\#203](https://github.com/harness/drone-cli/pull/203) ([eoinmcafee00](https://github.com/eoinmcafee00))
 - Update go-jsonnet to version v0.17.0 [\#202](https://github.com/harness/drone-cli/pull/202) ([hjkatz](https://github.com/hjkatz))
+
+**Merged pull requests:**
+
+- release prep v1.5 [\#211](https://github.com/harness/drone-cli/pull/211) ([eoinmcafee00](https://github.com/eoinmcafee00))
 
 ## [v1.4.0](https://github.com/harness/drone-cli/tree/v1.4.0) (2021-09-08)
 
