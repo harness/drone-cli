@@ -247,6 +247,7 @@ func exec(cliContext *cli.Context) error {
 		Repo:     commy.Repo,
 		Stage:    commy.Stage,
 		System:   commy.System,
+		Secret:   secret.StaticVars(commy.Secrets),
 	}
 	spec := comp.Compile(nocontext, args).(*engine.Spec)
 
