@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.6.1](https://github.com/harness/drone-cli/tree/v1.6.1) (2022-10-21)
+
+[Full Changelog](https://github.com/harness/drone-cli/compare/v1.6.0...v1.6.1)
+
+**Fixed bugs:**
+
+- \(fix\) add secret file to compiler in exec [\#222](https://github.com/harness/drone-cli/pull/222) ([tphoney](https://github.com/tphoney))
+
 ## [v1.6.0](https://github.com/harness/drone-cli/tree/v1.6.0) (2022-10-19)
 
 [Full Changelog](https://github.com/harness/drone-cli/compare/v1.5.0...v1.6.0)
@@ -16,6 +24,7 @@
 
 **Merged pull requests:**
 
+- \(maint\) v1.6.0 release prep [\#221](https://github.com/harness/drone-cli/pull/221) ([tphoney](https://github.com/tphoney))
 - add community information [\#213](https://github.com/harness/drone-cli/pull/213) ([mrsantons](https://github.com/mrsantons))
 
 ## [v1.5.0](https://github.com/harness/drone-cli/tree/v1.5.0) (2022-01-04)
