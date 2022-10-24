@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
@@ -56,11 +57,22 @@ var Command = cli.Command{
 			Name:  "extVar, V",
 			Usage: "Pass extVars to Jsonnet (can be specified multiple times)",
 		},
+		cli.StringSliceFlag{
+			Name:  "jpath, J",
+			Usage: "Specify an additional library search dir (right-most wins)",
+		},
 	},
 }
 
 func generate(c *cli.Context) error {
-	result, err := convert(c.String("source"), c.Bool("string"), c.Bool("format"), c.Bool("stream"), c.StringSlice("extVar"))
+	result, err := convert(
+		c.String("source"),
+		c.Bool("string"),
+		c.Bool("format"),
+		c.Bool("stream"),
+		c.StringSlice("extVar"),
+		c.StringSlice("jpath"),
+	)
 	if err != nil {
 		return err
 	}
@@ -75,7 +87,7 @@ func generate(c *cli.Context) error {
 	return ioutil.WriteFile(target, []byte(result), 0644)
 }
 
-func convert(source string, stringOutput bool, format bool, stream bool, vars []string) (string, error) {
+func convert(source string, stringOutput bool, format bool, stream bool, vars []string, jpath []string) (string, error) {
 	data, err := ioutil.ReadFile(source)
 	if err != nil {
 		return "", err
@@ -91,6 +103,12 @@ func convert(source string, stringOutput bool, format bool, stream bool, vars []
 
 	// register native functions
 	RegisterNativeFuncs(vm)
+
+	jsonnetPath := filepath.SplitList(os.Getenv("JSONNET_PATH"))
+	jsonnetPath = append(jsonnetPath, jpath...)
+	vm.Importer(&jsonnet.FileImporter{
+		JPaths: jsonnetPath,
+	})
 
 	// extVars
 	for _, v := range vars {
