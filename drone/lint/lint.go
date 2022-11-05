@@ -79,7 +79,6 @@ func lint(c *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%v\n", iter)
 		}
 	}
 	// now we can check the pipeline dependencies
