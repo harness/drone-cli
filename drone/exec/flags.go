@@ -47,12 +47,12 @@ type execCommand struct {
 	PrivateKey string
 }
 
-func mapOldToExecCommand(input *cli.Context) (returnVal *execCommand) {
+func mapOldToExecCommand(input *cli.Context) *execCommand {
 	pipelineFile := input.Args().First()
 	if pipelineFile == "" {
 		pipelineFile = ".drone.yml"
 	}
-	returnVal = &execCommand{
+	return &execCommand{
 		Flags: &Flags{
 			Build: &drone.Build{
 				Event:  input.String("event"),
@@ -88,9 +88,8 @@ func mapOldToExecCommand(input *cli.Context) (returnVal *execCommand) {
 		Secrets:    readParams(input.String("secrets")),
 		Config:     input.String("registry"),
 		Privileged: input.StringSlice("privileged"),
+		Pretty:     input.BoolT("pretty"),
 	}
-
-	return returnVal
 }
 
 // WithVolumeSlice is a transform function that adds a set of global volumes to the container that are defined in --volume=host:container format.
