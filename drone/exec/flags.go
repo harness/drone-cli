@@ -85,7 +85,7 @@ func mapOldToExecCommand(input *cli.Context) *execCommand {
 		Networks:   input.StringSlice("network"),
 		Environ:    readParams(input.String("env-file")),
 		Volumes:    withVolumeSlice(input.StringSlice("volume")),
-		Secrets:    readParams(input.String("secrets")),
+		Secrets:    readParams(input.String("secret-file")),
 		Config:     input.String("registry"),
 		Privileged: input.StringSlice("privileged"),
 		Pretty:     input.BoolT("pretty"),
