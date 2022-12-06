@@ -15,7 +15,6 @@ import (
 	"github.com/google/go-jsonnet"
 	"github.com/urfave/cli"
 )
-
 // Command exports the jsonnet command.
 var Command = cli.Command{
 	Name:      "jsonnet",
