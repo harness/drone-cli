@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/harness/drone-cli/tree/1.7.0) (2023-01-24)
+
+[Full Changelog](https://github.com/harness/drone-cli/compare/v1.6.2...1.7.0)
+
+**Implemented enhancements:**
+
+- Add support for jpath in jsonnet [\#224](https://github.com/harness/drone-cli/pull/224) ([rhiaxion](https://github.com/rhiaxion))
+
 ## [v1.6.2](https://github.com/harness/drone-cli/tree/v1.6.2) (2022-11-24)
 
 [Full Changelog](https://github.com/harness/drone-cli/compare/v1.6.1...v1.6.2)
@@ -7,6 +15,10 @@
 **Fixed bugs:**
 
 - fix: use right parameter name for secrets-file [\#226](https://github.com/harness/drone-cli/pull/226) ([kameshsampath](https://github.com/kameshsampath))
+
+**Merged pull requests:**
+
+- \(maint\) prep v1.6.2 [\#227](https://github.com/harness/drone-cli/pull/227) ([tphoney](https://github.com/tphoney))
 
 ## [v1.6.1](https://github.com/harness/drone-cli/tree/v1.6.1) (2022-10-21)
 
