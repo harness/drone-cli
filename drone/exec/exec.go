@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -214,6 +215,13 @@ func exec(cliContext *cli.Context) error {
 	}
 
 	// compile the pipeline to an intermediate representation.
+	insecure, _ := strconv.ParseBool(os.Getenv("DRONE_SECRET_PLUGIN_SKIP_VERIFY"))
+	secretsProvider := secret.Combine(
+		secret.StaticVars(commy.Secrets),
+		secret.External(
+			os.Getenv("DRONE_SECRET_PLUGIN_ENDPOINT"),
+			os.Getenv("DRONE_SECRET_PLUGIN_TOKEN"),
+			insecure))
 	comp := &compiler.Compiler{
 		Environ:    provider.Static(commy.Environ),
 		Labels:     commy.Labels,
@@ -222,7 +230,7 @@ func exec(cliContext *cli.Context) error {
 		Privileged: append(commy.Privileged, compiler.Privileged...),
 		Networks:   commy.Networks,
 		Volumes:    commy.Volumes,
-		Secret:     secret.StaticVars(commy.Secrets),
+		Secret:     secretsProvider,
 		Registry: registry.Combine(
 			registry.File(commy.Config),
 		),
@@ -251,7 +259,7 @@ func exec(cliContext *cli.Context) error {
 		Repo:     commy.Repo,
 		Stage:    commy.Stage,
 		System:   commy.System,
-		Secret:   secret.StaticVars(commy.Secrets),
+		Secret:   secretsProvider,
 	}
 	spec := comp.Compile(nocontext, args).(*engine.Spec)
 
