@@ -16,8 +16,6 @@ You can generate a token by logging into your GitHub account and going to Settin
 
 Next we tag the PR's with the fixes or enhancements labels. If the PR does not fufil the requirements, do not add a label.
 
-** Before moving on make sure to update the version file `version/version.go`. **
-
 Run the changelog generator again with the future version according to semver.
 
 ```BASH
@@ -34,3 +32,4 @@ Create your pull request for the release. Get it merged then tag the release.
 [Report or Track A Bug](https://community.harness.io/c/bugs/17) - Find a bug? Please report in our forum under Drone Bugs. Please provide screenshots and steps to reproduce. 
 
 [Events](https://www.meetup.com/harness/) - Keep up to date with Drone events and check out previous events [here](https://www.youtube.com/watch?v=Oq34ImUGcHA&list=PLXsYHFsLmqf3zwelQDAKoVNmLeqcVsD9o).
+

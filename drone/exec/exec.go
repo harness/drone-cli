@@ -70,6 +70,10 @@ var Command = cli.Command{
 			Name:  "trusted",
 			Usage: "build is trusted",
 		},
+		cli.BoolTFlag{
+			Name:  "pretty",
+			Usage: "enable pretty printing",
+		},
 		cli.DurationFlag{
 			Name:  "timeout",
 			Usage: "build timeout",
