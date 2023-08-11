@@ -91,3 +91,21 @@ steps:
       from_secret: github_token
   when:
     event: tag
+    
+- name: manifest
+  image: plugins/manifest:1.2
+  settings:
+    auto_tag: true
+    ignore_missing: true
+    spec: docker/manifest.server.tmpl
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+  depends_on:
+  - publish_latest
+  - publish_alpine
+  - publish_linux_arm
+  - publish_linux_arm64
+  - publish_linux_ppc64le
+
