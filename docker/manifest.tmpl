@@ -22,12 +22,14 @@ manifests:
       architecture: arm
       os: linux
       variant: v6
-  - image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-arm64
+  - 
+    image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-arm64
     platform:
       architecture: arm64
       os: linux
       variant: v8
-  - image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-ppc64le
+  - 
+    image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-ppc64le
     platform:
       architecture: ppc64le
       os: linux
