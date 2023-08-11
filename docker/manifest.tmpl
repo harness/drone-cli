@@ -7,12 +7,7 @@ tags:
 {{/if}}
 manifests:
   -
-    image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}
-    platform:
-      architecture: amd64
-      os: linux
-  -
-    image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}alpine
+    image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-amd64
     platform:
       architecture: amd64
       os: linux
