@@ -107,7 +107,7 @@ steps:
     - build
     
 - name: manifest
-  image: plugins/manifest:1.2
+  image: plugins/manifest
   settings:
     auto_tag: true
     ignore_missing: true
