@@ -12,6 +12,11 @@ manifests:
       architecture: amd64
       os: linux
   -
+    image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}alpine-amd64
+    platform:
+      architecture: amd64
+      os: linux
+  -
     image: drone/cli:{{#if build.tag}}{{trimPrefix "v" build.tag}}-{{/if}}linux-arm
     platform:
       architecture: arm
