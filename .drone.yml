@@ -24,6 +24,7 @@ steps:
     password:
       from_secret: docker_password
     auto_tag: true
+    auto_tag_suffix: linux-amd64
   when:
     event: [push, tag]
   depends_on:
@@ -38,7 +39,7 @@ steps:
     password:
       from_secret: docker_password
     auto_tag: true
-    auto_tag_suffix: alpine
+    auto_tag_suffix: alpine-amd64
     dockerfile: Dockerfile.alpine
   when:
     event: [push, tag]
