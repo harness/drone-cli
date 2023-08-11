@@ -91,3 +91,28 @@ steps:
       from_secret: github_token
   when:
     event: tag
+
+---
+kind: pipeline
+type: docker
+name: manifest
+
+steps:
+- name: publish
+  image: plugins/manifest:1.2
+  settings:
+    auto_tag: true
+    ignore_missing: true
+    spec: docker/manifest.server.tmpl
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+
+trigger:
+  event:
+  - push
+  - tag
+
+depends_on:
+- default
