@@ -1,5 +1,13 @@
-FROM drone/ca-certs
+FROM --platform=$BUILDPLATFORM alpine:3.18 as alpine
 
-COPY release/linux/amd64/drone /bin/
+RUN apk add -U --no-cache ca-certificates
+
+FROM scratch
+
+COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+ARG TARGETPLATFORM
+
+COPY release/${TARGETPLATFORM}/drone /bin/
 
 ENTRYPOINT ["/bin/drone"]
