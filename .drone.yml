@@ -25,6 +25,7 @@ steps:
       from_secret: docker_password
     auto_tag: true
     auto_tag_suffix: linux-amd64
+    platform: linux/amd64
   when:
     event: [push, tag]
   depends_on:
@@ -41,6 +42,7 @@ steps:
     auto_tag: true
     auto_tag_suffix: alpine-amd64
     dockerfile: Dockerfile.alpine
+    platform: linux/amd64
   when:
     event: [push, tag]
   depends_on:
@@ -57,6 +59,7 @@ steps:
     auto_tag: true
     auto_tag_suffix: linux-arm
     dockerfile: Dockerfile.linux.arm
+    platform: linux/arm
   when:
     event: [push, tag]
   depends_on:
@@ -73,6 +76,7 @@ steps:
     auto_tag: true
     auto_tag_suffix: linux-arm64
     dockerfile: Dockerfile.linux.arm64
+    platform: linux/arm64
   when:
     event: [push, tag]
   depends_on:
@@ -89,6 +93,7 @@ steps:
     auto_tag: true
     auto_tag_suffix: linux-ppc64le
     dockerfile: Dockerfile.linux.ppc64le
+    platform: linux/ppc64le
   when:
     event: [push, tag]
   depends_on:
