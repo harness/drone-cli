@@ -73,7 +73,6 @@ steps:
     auto_tag: true
     auto_tag_suffix: linux-arm64
     dockerfile: Dockerfile.linux.arm64
-    platform: linux/arm64
   when:
     event: [push, tag]
   depends_on:
