@@ -1,7 +1,10 @@
 kind: pipeline
-type: docker
+type: vm
 name: default
 
+pool:
+  use: ubuntu
+  
 steps:
 - name: test
   image: golang:1.18
