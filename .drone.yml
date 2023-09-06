@@ -18,7 +18,7 @@ steps:
   depends_on:
     - test
 
-- name: publish_latest
+- name: publish linux
   image: plugins/docker
   settings:
     repo: drone/cli
@@ -32,23 +32,33 @@ steps:
     event: [push, tag]
   depends_on:
     - build
-
-- name: publish_alpine
-  image: plugins/docker
+    
+- name: release 
+  image: plugins/github-release
   settings:
-    repo: drone/cli
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    auto_tag: true
-    auto_tag_suffix: alpine-amd64
-    dockerfile: Dockerfile.alpine
+    files:
+      - release/drone_*.tar.gz
+      - release/drone_checksums.txt
+    api_key:
+      from_secret: github_token
   when:
-    event: [push, tag]
+    event: tag
   depends_on:
     - build
 
+--- 
+kind: pipeline
+type: vm
+name: arm
+
+pool:
+  use: ubuntu_arm64
+
+steps:
+- name: build
+  image: golang:1.18
+  commands:
+    - sh .drone.sh
 - name: publish_linux_arm
   image: plugins/docker
   settings:
@@ -83,51 +93,31 @@ steps:
   depends_on:
     - build
 
-- name: publish_linux_ppc64le
-  image: plugins/docker
-  settings:
-    repo: drone/cli
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    auto_tag: true
-    auto_tag_suffix: linux-ppc64le
-    dockerfile: Dockerfile.linux.ppc64le
-  when:
-    event: [push, tag]
-  depends_on:
-    - build
+depends_on:
+  - default
+  
+---
+kind: pipeline
+type: vm
+name: manifest
 
-- name: release
-  image: plugins/github-release
-  settings:
-    files:
-      - release/drone_*.tar.gz
-      - release/drone_checksums.txt
-    api_key:
-      from_secret: github_token
-  when:
-    event: tag
-  depends_on:
-    - build
-    
-- name: manifest
-  image: plugins/manifest
-  settings:
-    auto_tag: true
-    ignore_missing: true
-    spec: docker/manifest.tmpl
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-  when:
-    event: [push, tag]
-  depends_on:
-    - publish_latest
-    - publish_alpine
-    - publish_linux_arm
-    - publish_linux_arm64
-    - publish_linux_ppc64le
+pool:
+  use: ubuntu
 
+steps:
+  - name: manifest
+    image: plugins/manifest
+    settings:
+      auto_tag: true
+      ignore_missing: true
+      spec: docker/manifest.tmpl
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event: [push, tag]
+
+depends_on:
+  - default
+  - arm
