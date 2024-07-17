@@ -15,7 +15,7 @@ require (
 	github.com/drone/signal v1.0.0
 	github.com/fatih/color v1.13.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/google/go-jsonnet v0.18.0
+	github.com/google/go-jsonnet v0.20.0
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
