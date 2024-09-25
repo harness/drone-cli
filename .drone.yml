@@ -1,123 +1,123 @@
-kind: pipeline
-type: vm
-name: default
+# kind: pipeline
+# type: vm
+# name: default
 
-pool:
-  use: ubuntu
+# pool:
+#   use: ubuntu
   
-steps:
-- name: test
-  image: golang:1.20
-  commands:
-    - go test ./...
+# steps:
+# - name: test
+#   image: golang:1.20
+#   commands:
+#     - go test ./...
 
-- name: build
-  image: golang:1.20
-  commands:
-    - sh .drone.sh
-  depends_on:
-    - test
+# - name: build
+#   image: golang:1.20
+#   commands:
+#     - sh .drone.sh
+#   depends_on:
+#     - test
 
-- name: publish linux
-  image: plugins/docker
-  settings:
-    repo: drone/cli
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    auto_tag: true
-    auto_tag_suffix: linux-amd64
-  when:
-    event: [push, tag]
-  depends_on:
-    - build
+# - name: publish linux
+#   image: plugins/docker
+#   settings:
+#     repo: drone/cli
+#     username:
+#       from_secret: docker_username
+#     password:
+#       from_secret: docker_password
+#     auto_tag: true
+#     auto_tag_suffix: linux-amd64
+#   when:
+#     event: [push, tag]
+#   depends_on:
+#     - build
     
-- name: release 
-  image: plugins/github-release
-  settings:
-    files:
-      - release/drone_*.tar.gz
-      - release/drone_checksums.txt
-    api_key:
-      from_secret: github_token
-  when:
-    event: tag
-  depends_on:
-    - build
+# - name: release 
+#   image: plugins/github-release
+#   settings:
+#     files:
+#       - release/drone_*.tar.gz
+#       - release/drone_checksums.txt
+#     api_key:
+#       from_secret: github_token
+#   when:
+#     event: tag
+#   depends_on:
+#     - build
 
---- 
-kind: pipeline
-type: vm
-name: arm
+# --- 
+# kind: pipeline
+# type: vm
+# name: arm
 
-pool:
-  use: ubuntu_arm64
+# pool:
+#   use: ubuntu_arm64
 
-steps:
-- name: build
-  image: golang:1.20
-  commands:
-    - sh .drone.sh
-- name: publish_linux_arm
-  image: plugins/docker
-  settings:
-    repo: drone/cli
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    auto_tag: true
-    auto_tag_suffix: linux-arm
-    dockerfile: Dockerfile.linux.arm
-    platform: linux/arm/v7
-  when:
-    event: [push, tag]
-  depends_on:
-    - build
+# steps:
+# - name: build
+#   image: golang:1.20
+#   commands:
+#     - sh .drone.sh
+# - name: publish_linux_arm
+#   image: plugins/docker
+#   settings:
+#     repo: drone/cli
+#     username:
+#       from_secret: docker_username
+#     password:
+#       from_secret: docker_password
+#     auto_tag: true
+#     auto_tag_suffix: linux-arm
+#     dockerfile: Dockerfile.linux.arm
+#     platform: linux/arm/v7
+#   when:
+#     event: [push, tag]
+#   depends_on:
+#     - build
 
-- name: publish_linux_arm64
-  image: plugins/docker
-  settings:
-    repo: drone/cli
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    auto_tag: true
-    auto_tag_suffix: linux-arm64
-    dockerfile: Dockerfile.linux.arm64
-    platform: linux/arm64
-  when:
-    event: [push, tag]
-  depends_on:
-    - build
+# - name: publish_linux_arm64
+#   image: plugins/docker
+#   settings:
+#     repo: drone/cli
+#     username:
+#       from_secret: docker_username
+#     password:
+#       from_secret: docker_password
+#     auto_tag: true
+#     auto_tag_suffix: linux-arm64
+#     dockerfile: Dockerfile.linux.arm64
+#     platform: linux/arm64
+#   when:
+#     event: [push, tag]
+#   depends_on:
+#     - build
 
-depends_on:
-  - default
+# depends_on:
+#   - default
   
----
-kind: pipeline
-type: vm
-name: manifest
+# ---
+# kind: pipeline
+# type: vm
+# name: manifest
 
-pool:
-  use: ubuntu
+# pool:
+#   use: ubuntu
 
-steps:
-  - name: manifest
-    image: plugins/manifest
-    settings:
-      auto_tag: true
-      ignore_missing: true
-      spec: docker/manifest.tmpl
-      username:
-        from_secret: docker_username
-      password:
-        from_secret: docker_password
-    when:
-      event: [push, tag]
+# steps:
+#   - name: manifest
+#     image: plugins/manifest
+#     settings:
+#       auto_tag: true
+#       ignore_missing: true
+#       spec: docker/manifest.tmpl
+#       username:
+#         from_secret: docker_username
+#       password:
+#         from_secret: docker_password
+#     when:
+#       event: [push, tag]
 
-depends_on:
-  - default
-  - arm
+# depends_on:
+#   - default
+#   - arm
