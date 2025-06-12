@@ -1,10 +1,24 @@
-FROM amd64/alpine:3.17 as alpine
+FROM amd64/alpine:3.19 as alpine
 RUN apk add -U --no-cache ca-certificates
 
-FROM amd64/alpine:3.17
+FROM amd64/alpine:3.19
 ENV GODEBUG netdns=go
+
+# Add security updates
+RUN apk add -U --no-cache ca-certificates zlib openssl busybox && \
+    # Create a non-root user
+    addgroup -S drone && \
+    adduser -S -G drone drone
+
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY release/linux/amd64/drone /bin/
+
+# Change ownership of the binary to the non-root user
+RUN chmod +x /bin/drone && \
+    chown drone:drone /bin/drone
+
+# Switch to non-root user
+USER drone
 
 ENTRYPOINT ["/bin/drone"]
