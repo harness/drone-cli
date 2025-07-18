@@ -24,7 +24,7 @@ require (
 	github.com/urfave/cli v1.22.14
 	go.starlark.net v0.0.0-20221020143700-22309ac47eac
 	golang.org/x/net v0.38.0
-	golang.org/x/oauth2 v0.12.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
@@ -63,7 +63,6 @@ require (
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/grpc v1.59.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
