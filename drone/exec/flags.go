@@ -64,7 +64,7 @@ func mapOldToExecCommand(input *cli.Context) *execCommand {
 				Trusted: input.Bool("trusted"),
 				Timeout: int64(input.Duration("timeout").Seconds()),
 				Branch:  input.String("branch"),
-				Name:    input.String("name"),
+				Name:    input.String("repo"),
 			},
 			Stage: &drone.Stage{
 				Name: input.String("pipeline"),
