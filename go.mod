@@ -1,6 +1,6 @@
 module github.com/drone/drone-cli
 
-go 1.23.8
+go 1.26.10
 
 replace github.com/docker/docker => github.com/docker/engine v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
 

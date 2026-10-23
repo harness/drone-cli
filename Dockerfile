@@ -1,7 +1,7 @@
-FROM amd64/alpine:3.19 as alpine
+FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 as alpine
 RUN apk add -U --no-cache ca-certificates
 
-FROM amd64/alpine:3.19
+FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1
 ENV GODEBUG netdns=go
 
 # Add security updates
