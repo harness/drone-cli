@@ -1,10 +1,12 @@
-FROM --platform=$BUILDPLATFORM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 AS hhi-arm-certificates
+FROM alpine:3.24 AS patched-arm-certificates
 RUN apk add --no-cache 'ca-certificates>=20261020-r0'
 
-FROM harness0.harness.io/oci/docker_artifacts/hhi/harnessos-alpine:1 as alpine
+FROM alpine:3.24 as alpine
 RUN apk add -U --no-cache ca-certificates
 
 FROM arm32v7/alpine:3.19
+COPY --from=patched-arm-certificates /etc/ssl/certs/ca-certificates.crt /etc/patched-ca/certs/ca-certificates.crt
+ENV SSL_CERT_FILE=/etc/patched-ca/certs/ca-certificates.crt SSL_CERT_DIR=/etc/patched-ca/certs
 
 ENV GODEBUG netdns=go
 
@@ -28,4 +30,4 @@ USER drone
 ENTRYPOINT ["/bin/drone"]
 
 # CA bundles are architecture-independent; use the patched HHI roots on legacy ARM.
-COPY --from=hhi-arm-certificates /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=patched-arm-certificates /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
