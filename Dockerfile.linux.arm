@@ -1,10 +1,10 @@
-FROM alpine:3.24 AS patched-arm-certificates
+FROM alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a AS patched-arm-certificates
 RUN apk add --no-cache 'ca-certificates>=20261020-r0'
 
-FROM alpine:3.24 as alpine
+FROM alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a as alpine
 RUN apk add -U --no-cache ca-certificates
 
-FROM arm32v7/alpine:3.19
+FROM arm32v7/alpine:3.19@sha256:2dacde1f5acb0bf45cbffcae221d8a68096594ee866142c77ee2fba54ff0d01b
 COPY --from=patched-arm-certificates /etc/ssl/certs/ca-certificates.crt /etc/patched-ca/certs/ca-certificates.crt
 ENV SSL_CERT_FILE=/etc/patched-ca/certs/ca-certificates.crt SSL_CERT_DIR=/etc/patched-ca/certs
 
